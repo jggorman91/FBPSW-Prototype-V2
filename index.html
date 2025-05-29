@@ -1514,7 +1514,70 @@
         populateAllDevelopmentalDropdowns(); 
         toggleReferralInfoVisibility(); 
         initializeFirebase(); 
+// --- Add this code at the end of your <script type="module"> ---
 
+/**
+ * Gathers the necessary user input (for demo, just a simple prompt).
+ * You can expand this to gather more detailed fields as needed.
+ */
+function createPromptFromForm() {
+    // For demo, combine student info and anecdotal notes, etc.
+    const age = studentAgeInput.value || '';
+    const grade = studentGradeSelect.value || '';
+    const reinforcers = reinforcerPreferencesInput.value || '';
+    const anecdotal = anecdotalInput.value || '';
+
+    // You may want to gather ABC data, etc., as well.
+    // For now, simple text.
+    return `Student Age: ${age}\nGrade: ${grade}\nReinforcers: ${reinforcers}\nNotes: ${anecdotal}`;
+}
+
+async function generatePlan() {
+    // UI feedback
+    generateBIPSpinner.classList.remove('hidden');
+    generateBIPButton.disabled = true;
+    sessionStatusDisplay.textContent = "Generating...";
+
+    // Construct the prompt
+    const prompt = createPromptFromForm();
+
+    try {
+        const response = await fetch('/api/ask', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt })
+        });
+        const data = await response.json();
+
+        if (data.error || !data.choices) {
+            bipFunctionHypothesis.textContent = "Failed to generate a plan. " + (data.error || "Unknown error.");
+            bipOutputDiv.classList.remove('hidden');
+        } else {
+            // Assuming OpenAI API response structure
+            const content = data.choices[0]?.message?.content || "";
+            bipFunctionHypothesis.textContent = content; // For demo, show all in one field
+
+            // Optionally, parse content and fill in more fields:
+            // bipAntecedentStrategies, bipShortTermBehaviors, etc.
+
+            bipOutputDiv.classList.remove('hidden');
+        }
+    } catch (err) {
+        bipFunctionHypothesis.textContent = "An error occurred: " + err.message;
+        bipOutputDiv.classList.remove('hidden');
+        console.error(err);
+    } finally {
+        generateBIPSpinner.classList.add('hidden');
+        generateBIPButton.disabled = false;
+        sessionStatusDisplay.textContent = "Active";
+    }
+}
+
+// Register click handler
+generateBIPButton.addEventListener('click', (e) => {
+    e.preventDefault();
+    generatePlan();
+});
     </script>
 </body>
 </html>
