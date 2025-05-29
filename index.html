@@ -1,37 +1,174 @@
-// --- Place this at the END of your <script type="module"> block ---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Function Based Problem Solving Worksheet</title>
+    <script src="https://cdn.tailwindcss.com/"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* (Insert your existing styles here, as in your previous index.html) */
+        /* ...for brevity, not repeated here, but copy all your <style> content */
+    </style>
+</head>
+<body class="bg-gray-100 p-4">
+    <div class="container">
+        <h1 class="text-4xl font-extrabold text-center text-blue-700 mb-8">
+            Function Based Problem Solving Worksheet
+        </h1>
 
-/**
- * Gather inputs from your form and assemble a prompt string for the AI.
- */
-function createPromptFromForm() {
-    // Gather basic info
-    const age = studentAgeInput.value || '';
-    const grade = studentGradeSelect.value || '';
-    const reinforcers = reinforcerPreferencesInput.value || '';
-    const anecdotal = anecdotalInput.value || '';
-    const referral = referralInput && !referralInfoContainer.classList.contains('hidden') ? referralInput.value : '';
+        <div class="card flex justify-between items-center bg-blue-50 border border-blue-200 p-4 mb-6">
+            <p class="text-blue-800 font-semibold">FBPSW: <span id="sessionStatusDisplay" class="font-normal text-blue-600">Active</span></p>
+            <button id="newPlanButton" class="btn-secondary">
+                <i class="fas fa-plus mr-2"></i> New Plan
+            </button>
+        </div>
 
-    // Gather developmental levels
-    const behavioralLevel = behavioralSkillsSelect.value || '';
-    const socialLevel = socialSkillsSelect.value || '';
-    const pragmaticLevel = pragmaticLanguageSkillsSelect.value || '';
+        <div class="card">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Teacher Input</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="studentAge" class="block text-gray-700 text-sm font-semibold mb-2">Student Age</label>
+                    <input type="number" id="studentAge" placeholder="e.g., 7" min="3" max="18">
+                </div>
+                <div>
+                    <label for="studentGrade" class="block text-gray-700 text-sm font-semibold mb-2">Student Grade Level</label>
+                    <select id="studentGrade">
+                        <option value="">Select Grade</option>
+                        <option value="K">Kindergarten</option>
+                        <option value="1st">1st Grade</option>
+                        <option value="2nd">2nd Grade</option>
+                        <option value="3rd">3rd Grade</option>
+                        <option value="4th">4th Grade</option>
+                        <option value="5th">5th Grade</option>
+                        <option value="6th">6th Grade</option>
+                        <option value="7th">7th Grade</option>
+                        <option value="8th">8th Grade</option>
+                        <option value="Higher">Higher Grades</option>
+                        <option value="Other">Other / Not Applicable</option>
+                    </select>
+                </div>
+                <!-- Behavior Blocks (copy-paste your previous HTML for behavior blocks 1, 2, 3 here) -->
+                <div id="behaviorsContainer" class="md:col-span-2">
+                    <!-- ... (Behavior Block 1, 2, 3 HTML from your previous code) ... -->
+                </div>
+                <div>
+                    <label for="anecdotal" class="block text-gray-700 text-sm font-semibold mb-2">Anecdotal Notes</label>
+                    <textarea id="anecdotal" rows="3" placeholder="e.g., Student seems tired today..."></textarea>
+                </div>
+                <div>
+                    <label for="reinforcerPreferences" class="block text-gray-700 text-sm font-semibold mb-2">Student's Preferred Reinforcers</label>
+                    <textarea id="reinforcerPreferences" rows="2" placeholder="e.g., Loves computer time, enjoys drawing..."></textarea>
+                </div>
+                <div class="relative">
+                    <label for="behavioralSkillsSelect" class="block text-gray-700 text-sm font-semibold mb-2">Behavioral Skills Level</label>
+                    <select id="behavioralSkillsSelect" class="w-full pr-10"></select>
+                </div>
+                <div class="relative">
+                    <label for="socialSkillsSelect" class="block text-gray-700 text-sm font-semibold mb-2">Social Skills Level</label>
+                    <select id="socialSkillsSelect" class="w-full pr-10"></select>
+                </div>
+                <div class="relative">
+                    <label for="pragmaticLanguageSkillsSelect" class="block text-gray-700 text-sm font-semibold mb-2">Pragmatic Language Skills Level</label>
+                    <select id="pragmaticLanguageSkillsSelect" class="w-full pr-10"></select>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-gray-700 text-sm font-semibold mb-2">Add pertinent referral information?</label>
+                    <div class="flex items-center space-x-4 mb-4">
+                        <label class="inline-flex items-center radio-label">
+                            <input type="radio" name="addReferralInfo" value="yes" class="form-radio" id="addReferralYes">
+                            <span class="ml-2 text-gray-700">Yes</span>
+                        </label>
+                        <label class="inline-flex items-center radio-label">
+                            <input type="radio" name="addReferralInfo" value="no" class="form-radio" id="addReferralNo" checked>
+                            <span class="ml-2 text-gray-700">No</span>
+                        </label>
+                    </div>
+                    <div id="referralInfoContainer" class="hidden">
+                        <label for="referral" class="block text-gray-700 text-sm font-semibold mb-2">Referral Information</label>
+                        <textarea id="referral" rows="4" placeholder="e.g., Student referred for disruptive behavior..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button id="generateBIPButton" class="btn-primary">
+                    <span id="generateBIPSpinner" class="loading-spinner hidden"></span>
+                    Generate Plan
+                </button>
+            </div>
+        </div>
 
-    // Gather behaviors (up to 3 behavior blocks)
-    function getBehaviorBlock(index) {
-        const type = document.getElementById(`behaviorTypeSelect_${index}`)?.value || '';
-        const antecedent = document.getElementById(`antecedentSelect_${index}`)?.value || '';
-        const behavior = document.getElementById(`behaviorSelect_${index}`)?.value || '';
-        const consequence = document.getElementById(`consequenceSelect_${index}`)?.value || '';
-        let result = '';
-        if (type || antecedent || behavior || consequence) {
-            result = `Behavior ${index+1}:\n  Type: ${type}\n  Antecedent: ${antecedent}\n  Behavior: ${behavior}\n  Consequence: ${consequence}`;
-        }
-        return result;
-    }
-    const behaviors = [0,1,2].map(getBehaviorBlock).filter(Boolean).join('\n\n');
+        <div id="bipOutput" class="card hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Generated Function Based Problem Solving Worksheet</h2>
+            <div class="mb-4">
+                <p class="text-lg font-semibold text-gray-700">Function Hypothesis Statement:</p>
+                <p id="bipFunctionHypothesis" class="text-blue-600 font-medium text-xl"></p>
+            </div>
+            <!-- Add other plan sections here if you wish -->
+            <div class="mt-6 flex justify-end space-x-4">
+                <button id="copyBIPButton" class="btn-secondary">
+                    <i class="fas fa-copy mr-2"></i> Copy Plan
+                </button>
+            </div>
+        </div>
+    </div>
 
-    // Compose the prompt
-    return `
+    <script type="module">
+        // --- DOM Elements ---
+        const studentAgeInput = document.getElementById('studentAge');
+        const studentGradeSelect = document.getElementById('studentGrade');
+        const reinforcerPreferencesInput = document.getElementById('reinforcerPreferences');
+        const behavioralSkillsSelect = document.getElementById('behavioralSkillsSelect');
+        const socialSkillsSelect = document.getElementById('socialSkillsSelect');
+        const pragmaticLanguageSkillsSelect = document.getElementById('pragmaticLanguageSkillsSelect');
+        const behaviorBlocks = document.querySelectorAll('.behavior-block');
+        const anecdotalInput = document.getElementById('anecdotal');
+        const referralInput = document.getElementById('referral');
+        const generateBIPButton = document.getElementById('generateBIPButton');
+        const generateBIPSpinner = document.getElementById('generateBIPSpinner');
+        const bipOutputDiv = document.getElementById('bipOutput');
+        const bipFunctionHypothesis = document.getElementById('bipFunctionHypothesis');
+        const copyBIPButton = document.getElementById('copyBIPButton');
+        const sessionStatusDisplay = document.getElementById('sessionStatusDisplay');
+        const referralInfoContainer = document.getElementById('referralInfoContainer');
+        const addReferralYes = document.getElementById('addReferralYes');
+        const addReferralNo = document.getElementById('addReferralNo');
+
+        // --- Referral Info show/hide ---
+        addReferralYes.addEventListener('change', () => {
+            referralInfoContainer.classList.remove('hidden');
+        });
+        addReferralNo.addEventListener('change', () => {
+            referralInfoContainer.classList.add('hidden');
+        });
+
+        // --- Helper: Gather prompt ---
+        function createPromptFromForm() {
+            // Gather basic info
+            const age = studentAgeInput.value || '';
+            const grade = studentGradeSelect.value || '';
+            const reinforcers = reinforcerPreferencesInput.value || '';
+            const anecdotal = anecdotalInput.value || '';
+            const referral = referralInput && !referralInfoContainer.classList.contains('hidden') ? referralInput.value : '';
+            // Gather developmental levels
+            const behavioralLevel = behavioralSkillsSelect.value || '';
+            const socialLevel = socialSkillsSelect.value || '';
+            const pragmaticLevel = pragmaticLanguageSkillsSelect.value || '';
+            // Gather behaviors (up to 3 behavior blocks)
+            function getBehaviorBlock(index) {
+                const type = document.getElementById(`behaviorTypeSelect_${index}`)?.value || '';
+                const antecedent = document.getElementById(`antecedentSelect_${index}`)?.value || '';
+                const behavior = document.getElementById(`behaviorSelect_${index}`)?.value || '';
+                const consequence = document.getElementById(`consequenceSelect_${index}`)?.value || '';
+                let result = '';
+                if (type || antecedent || behavior || consequence) {
+                    result = `Behavior ${index+1}:\n  Type: ${type}\n  Antecedent: ${antecedent}\n  Behavior: ${behavior}\n  Consequence: ${consequence}`;
+                }
+                return result;
+            }
+            const behaviors = [0,1,2].map(getBehaviorBlock).filter(Boolean).join('\n\n');
+            // Compose the prompt
+            return `
 Student Age: ${age}
 Grade: ${grade}
 Preferred Reinforcers: ${reinforcers}
@@ -43,69 +180,77 @@ Pragmatic Language Skills Level: ${pragmaticLevel}
 
 Behaviors:
 ${behaviors || 'None provided.'}
-    `.trim();
-}
-
-/**
- * Show or hide the generated plan output.
- */
-function showPlanOutput(content) {
-    bipFunctionHypothesis.textContent = content;
-    bipOutputDiv.classList.remove('hidden');
-}
-
-function hidePlanOutput() {
-    bipFunctionHypothesis.textContent = '';
-    bipOutputDiv.classList.add('hidden');
-}
-
-/**
- * Main plan generation function.
- */
-async function generatePlan() {
-    // UI feedback
-    generateBIPSpinner.classList.remove('hidden');
-    generateBIPButton.disabled = true;
-    sessionStatusDisplay.textContent = "Generating...";
-
-    // Hide previous output
-    hidePlanOutput();
-
-    // Construct the prompt
-    const prompt = createPromptFromForm();
-
-    try {
-        const response = await fetch('/api/ask', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt })
-        });
-        const data = await response.json();
-
-        if (data.error || !data.choices) {
-            // Show detailed error message
-            let errorMsg = typeof data.error === 'string' ? data.error : JSON.stringify(data.error, null, 2);
-            if (data.details) {
-                errorMsg += "\nDetails: " + (typeof data.details === 'string' ? data.details : JSON.stringify(data.details, null, 2));
-            }
-            showPlanOutput("Failed to generate a plan.\n" + errorMsg);
-        } else {
-            // Show the AI's generated plan (you can further parse this if you want)
-            const content = data.choices[0]?.message?.content || "No plan generated.";
-            showPlanOutput(content);
+            `.trim();
         }
-    } catch (err) {
-        showPlanOutput("An error occurred: " + err.message);
-        console.error(err);
-    } finally {
-        generateBIPSpinner.classList.add('hidden');
-        generateBIPButton.disabled = false;
-        sessionStatusDisplay.textContent = "Active";
-    }
-}
 
-// Register the click handler once DOM is loaded
-generateBIPButton.addEventListener('click', (e) => {
-    e.preventDefault();
-    generatePlan();
-});
+        // --- Show/Hide Output ---
+        function showPlanOutput(content) {
+            bipFunctionHypothesis.textContent = content;
+            bipOutputDiv.classList.remove('hidden');
+        }
+        function hidePlanOutput() {
+            bipFunctionHypothesis.textContent = '';
+            bipOutputDiv.classList.add('hidden');
+        }
+
+        // --- Main Plan Generation Logic ---
+        async function generatePlan() {
+            generateBIPSpinner.classList.remove('hidden');
+            generateBIPButton.disabled = true;
+            sessionStatusDisplay.textContent = "Generating...";
+            hidePlanOutput();
+
+            const prompt = createPromptFromForm();
+
+            try {
+                const response = await fetch('/api/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt })
+                });
+                const data = await response.json();
+
+                if (data.error || !data.choices) {
+                    let errorMsg = "";
+                    if (data.error) {
+                        if (typeof data.error === "string") {
+                            errorMsg += data.error;
+                        } else if (typeof data.error === "object") {
+                            errorMsg += JSON.stringify(data.error, null, 2);
+                        } else {
+                            errorMsg += String(data.error);
+                        }
+                    }
+                    if (data.details) {
+                        errorMsg += "\nDetails: ";
+                        if (typeof data.details === "string") {
+                            errorMsg += data.details;
+                        } else {
+                            errorMsg += JSON.stringify(data.details, null, 2);
+                        }
+                    }
+                    showPlanOutput("Failed to generate a plan.\n" + errorMsg);
+                } else {
+                    const content = data.choices[0]?.message?.content || "No plan generated.";
+                    showPlanOutput(content);
+                }
+            } catch (err) {
+                showPlanOutput("An error occurred: " + err.message);
+                console.error(err);
+            } finally {
+                generateBIPSpinner.classList.add('hidden');
+                generateBIPButton.disabled = false;
+                sessionStatusDisplay.textContent = "Active";
+            }
+        }
+
+        generateBIPButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            generatePlan();
+        });
+
+        // --- Add development level options and behavior ABC data initialization here as needed ---
+        // (Your previous JS for populating dropdowns, etc.)
+    </script>
+</body>
+</html>
