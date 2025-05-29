@@ -509,9 +509,8 @@ Response Strategies for Problem Behavior:
             const prompt = createPromptFromForm();
 
             // Gemini API endpoint and key
-            const GEMINI_API_KEY = "AIzaSyASClTzZ_gBuAR2Vn3NkRFK0J0zAFsMbC0";
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
-
+const GEMINI_API_KEY = "...";
+const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`;
             const body = {
                 contents: [{
                     parts: [{ text: prompt }]
