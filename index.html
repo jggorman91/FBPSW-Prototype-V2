@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script>
+        // Firebase config and initial token (should be defined by the environment)
+        // This IIFE (Immediately Invoked Function Expression) sets up global variables
+        // for Firebase configuration, initial authentication token, and app ID.
+        // These values are expected to be injected by the hosting environment.
+        (function(firebaseConfigString, initialAuthToken, appIdString) {
+            window.__firebase_config = firebaseConfigString;
+            window.__initial_auth_token = initialAuthToken; // Will be unused in this version
+            window.__app_id = appIdString; // Will be unused by Firebase in this version
+        })(
+            JSON.stringify({ // Firebase Config (same as user provided)
+                apiKey: "AIzaSyBOG0PsyRMIoYaw9VrxbjskM4PsHr_xxhU",
+                authDomain: "daring-codex-461313-d2.firebaseapp.com",
+                projectId: "daring-codex-461313-d2",
+                storageBucket: "daring-codex-461313-d2.firebasestorage.app",
+                messagingSenderId: "704829546241",
+                appId: "1:704829546241:web:ff1a4f3c4c00a04d120500",
+                measurementId: "G-7EF1NPVF49"
+            }),
+            "eyJhbGciOiJSUzI1NiIsImtpZCI6ImY2ZTAxMDEwMWQ1NmE1NmIyZDY4Y2U3NDZkNmI5YzJlMmFlYzU5ZGQiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6XC9cL2lkZW50aXR5dG9vbGtpdC5nb29nbGVhcGlzLmNvbVwvZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIxMzUzNTY5NjQxMzY3Nzg0MTIzOCIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJleHAiOjE3NDg0NTc0NjMsImlhdCI6MTc0ODQ1Mzg2MywiYWxnIjoiUlMyNTYifQ.UuwGOwTxUTYIrxhQS3mD2huTtlqG-2Z1FFiLv7iLH_-yEz5VozbewECYcZypRhyt5J3l4jcb8ZfxsmKJBPYmxpeCr7IksbxJQz5VpgsZoF6Cc9Lu2W2QFy74hKUkA16LL5RlmHvDjhWFwsJQ90nPSmvp88Dv0u9vCgiEPyuYHHnmbOPWYxbHM3tAUzt7Td1PPvzHc3CCeeL4vGE5gGU2Q1pn6lgWW8frDfukBiU0uqSqIkCTHmW8Z9Ybl1rNKh-ytwTMstxoW3_RYDszGyiLKI6YFHeWr6s34OMO0f77OjHduJ_tggphxxiPx8gXUWnhaovxNqsU9qNUOAm8_m-VtQ", // Existing initialAuthToken
+            "1:704829546241:web:ff1a4f3c4c00a04d120500" // App ID from the firebaseConfig
+        );
+    </script>
+    <script>
+        // Firebase Auth Bridge - Remains for environment compatibility, though auth features are removed from this app's direct Firebase usage.
+        (function() {
+            if (window.firebaseAuthBridgeScriptLoaded) return; 
+            window.firebaseAuthBridgeScriptLoaded = true;
+            let nextTokenPromiseId = 0;
+            const pendingTokenPromises = {}; 
+            window.addEventListener('message', function(event) {
+                const messageData = event.data;
+                if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+                    const { success, token, error, promiseId } = messageData ?? {};
+                    if (pendingTokenPromises[promiseId]) {
+                        if (success) {
+                            pendingTokenPromises[promiseId].resolve(token);
+                        } else {
+                            pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+                        }
+                        delete pendingTokenPromises[promiseId]; 
+                    }
+                }
+            });
+            window.requestNewFirebaseToken = function() {
+                const currentPromiseId = nextTokenPromiseId++;
+                const promise = new Promise((resolve, reject) => {
+                    pendingTokenPromises[currentPromiseId] = { resolve, reject };
+                });
+                if (window.parent && window.parent !== window) { 
+                    window.parent.postMessage({ type: 'REQUEST_NEW_FIREBASE_TOKEN', promiseId: currentPromiseId }, '*');
+                } else {
+                    pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+                    delete pendingTokenPromises[currentPromiseId];
+                }
+                return promise;
+            };
+        })();
+    </script>
+    <script>
+        // getUserMedia Interceptor - v4 - Remains for environment compatibility
+        (function() {
+            if (window.getUserMediaInterceptorLoaded_v4) return; 
+            window.getUserMediaInterceptorLoaded_v4 = true;
+            let realOriginalGetUserMedia = null;
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                if (typeof navigator.mediaDevices.getUserMedia === 'function' && !navigator.mediaDevices.getUserMedia.isShimmedByThisScript_v4) {
+                    realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+                }
+            }
+            const pendingMediaResolvers = {}; 
+            let nextMediaPromiseId = 0;
+            function interceptGetUserMedia() {
+                if (navigator.mediaDevices) {
+                    const descriptor = Object.getOwnPropertyDescriptor(navigator.mediaDevices, 'getUserMedia');
+                    if (!descriptor || descriptor.configurable || (descriptor && !descriptor.configurable && !navigator.mediaDevices.getUserMedia.isShimmedByThisScript_v4) ) {
+                        const newGetUserMedia = function(constraints) {
+                            const mediaPromiseId = nextMediaPromiseId++;
+                            const promise = new Promise((resolve, reject) => {
+                                pendingMediaResolvers[mediaPromiseId] = (granted) => {
+                                    delete pendingMediaResolvers[mediaPromiseId];
+                                    if (granted) {
+                                        if (realOriginalGetUserMedia) {
+                                            realOriginalGetUserMedia(constraints).then(resolve).catch(reject);
+                                        } else {
+                                            reject(new Error("Original getUserMedia not available."));
+                                        }
+                                    } else {
+                                        reject(new DOMException('Permission denied', 'NotAllowedError'));
+                                    }
+                                };
+                            });
+                            window.parent.postMessage({ type: 'requestMediaPermission', constraints: constraints, promiseId: mediaPromiseId, }, '*');
+                            return promise;
+                        };
+                        newGetUserMedia.isShimmedByThisScript_v4 = true; 
+                        try {
+                            Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+                                value: newGetUserMedia,
+                                writable: false, 
+                                configurable: false 
+                            });
+                        } catch (e) {
+                            // console.warn("Failed to redefine getUserMedia, it might be non-configurable by another script.", e);
+                        }
+                    }
+                }
+            }
+            interceptGetUserMedia(); 
+            window.addEventListener('message', function(event) {
+                if (event.data && event.data.type === 'resolveMediaPermission') {
+                    const { promiseId, granted } = event.data;
+                    if (pendingMediaResolvers[promiseId]) {
+                        pendingMediaResolvers[promiseId](granted);
+                    }
+                }
+            });
+        })();
+    </script>
+    <script>
+        // Fetch Interceptor - Remains for environment compatibility (especially for Gemini API calls)
+        (function() {
+            if (window.fetchInterceptorLoaded) return; 
+            window.fetchInterceptorLoaded = true;
+            const originalFetch = window.fetch;
+            const googleLlmBaseApiUrls = [
+                'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent',
+                'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
+                'https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict',
+                'https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predictLongRunning',
+                'https://generativelanguage.googleapis.com/v1beta/models/veo-2.0-generate-001:predict',
+                'https://generativelanguage.googleapis.com/v1beta/models/veo-2.0-generate-001:predictLongRunning',
+            ];
+            const pendingFetchResolvers = {}; 
+            let nextPromiseId = 0;
+            function handleStringInput(input, optionsArgument) {
+                const actualUrl = input;
+                const fetchCallArgs = [actualUrl, optionsArgument];
+                const effectiveOptions = optionsArgument || {};
+                const bodyForApiKeyCheck = effectiveOptions.body;
+                const bodyForPostMessage = effectiveOptions.body;
+                return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+            }
+            function handleRequestInput(input, optionsArgument) {
+                const actualUrl = input.url;
+                const fetchCallArgs = [input, optionsArgument];
+                const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+                let bodyForApiKeyCheck;
+                let bodyForPostMessage;
+                if (optionsArgument) {
+                    if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+                    if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+                    if ('body' in optionsArgument) {
+                        bodyForApiKeyCheck = optionsArgument.body;
+                        bodyForPostMessage = optionsArgument.body;
+                    } else {
+                        bodyForApiKeyCheck = undefined;
+                        bodyForPostMessage = input.body;
+                    }
+                } else {
+                    bodyForApiKeyCheck = undefined;
+                    bodyForPostMessage = input.body;
+                }
+                return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+            }
+            window.fetch = function(input, optionsArgument) {
+                let actualUrl;
+                let fetchCallArgs;
+                let effectiveOptions = {};
+                let bodyForApiKeyCheck;
+                let bodyForPostMessage;
+                if (typeof input === 'string') {
+                    ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+                } else if (input instanceof Request) {
+                    ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+                } else {
+                    return originalFetch.apply(window, [input, optionsArgument]);
+                }
+                effectiveOptions.method = effectiveOptions.method || 'GET';
+                if (!effectiveOptions.headers) {
+                    effectiveOptions.headers = new Headers();
+                }
+                if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+                    let apiKeyIsNull = true;
+                    const regex = new RegExp("models/([^:]+)");
+                    const modelNameMatch = actualUrl.match(regex);
+                    const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+                    try {
+                        const urlObject = new URL(actualUrl);
+                        const apiKeyParam = urlObject.searchParams.get('key');
+                        if (apiKeyParam) {
+                            apiKeyIsNull = false;
+                        }
+                    } catch (e) { /* Ignore URL parsing errors */ }
+                    if (apiKeyIsNull && effectiveOptions.headers) {
+                        const h = new Headers(effectiveOptions.headers);
+                        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+                        if (apiKeyHeaderValue) {
+                            apiKeyIsNull = false;
+                            return originalFetch.apply(window, fetchCallArgs); 
+                        }
+                    }
+                    if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+                        try {
+                            const bodyData = JSON.parse(bodyForApiKeyCheck);
+                            if (bodyData && bodyData.apiKey) {
+                                apiKeyIsNull = false;
+                                return originalFetch.apply(window, fetchCallArgs); 
+                            }
+                        } catch (e) { /* Ignore JSON parsing errors */ }
+                    }
+                    if(apiKeyIsNull) {
+                        const promiseId = nextPromiseId++;
+                        const promise = new Promise((resolve) => {
+                            pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+                                delete pendingFetchResolvers[promiseId];
+                                resolve(resolvedResponse);
+                            };
+                        });
+                        let serializedBodyForPostMessage;
+                        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+                            serializedBodyForPostMessage = bodyForPostMessage;
+                        } else if (bodyForPostMessage instanceof ReadableStream) {
+                            serializedBodyForPostMessage = null; 
+                        } else {
+                            try {
+                                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+                            } catch (e) {
+                                serializedBodyForPostMessage = null; 
+                            }
+                        }
+                        const messageOptions = {
+                            method: effectiveOptions.method,
+                            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+                            body: serializedBodyForPostMessage
+                        };
+                        window.parent.postMessage({
+                            type: 'requestFetch',
+                            url: actualUrl,
+                            modelName: 'models/' + modelName,
+                            options: messageOptions,
+                            promiseId: promiseId,
+                        }, '*');
+                        return promise;
+                    }
+                    return originalFetch.apply(window, fetchCallArgs); 
+                }
+                return originalFetch.apply(window, fetchCallArgs); 
+            };
+            window.addEventListener('message', function(event) {
+                if (event.data && event.data.type === 'resolveFetch') {
+                    const { promiseId, response } = event.data;
+                    if (pendingFetchResolvers[promiseId]) {
+                        try {
+                            const reconstructedResponse = new Response(response.body, {
+                                status: response.status,
+                                statusText: response.statusText,
+                                headers: new Headers(response.headers),
+                            });
+                            pendingFetchResolvers[promiseId](reconstructedResponse);
+                        } catch (error) {
+                            pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+                        }
+                    }
+                }
+            });
+        })();
+    </script>
+    <script>
+        // Console Interceptor - Remains for environment compatibility
+        (function() {
+            if (window.consoleInterceptorLoaded) return; 
+            window.consoleInterceptorLoaded = true;
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            function getErrorObject(errorEventOrReason) {
+                if (errorEventOrReason instanceof Error) {
+                    return {
+                        message: errorEventOrReason.message,
+                        name: errorEventOrReason.name,
+                        stack: errorEventOrReason.stack,
+                    };
+                }
+                try {
+                    return { message: JSON.stringify(errorEventOrReason), name: 'UnknownErrorType', stack: null, };
+                } catch (e) {
+                    return { message: String(errorEventOrReason), name: 'UnknownErrorTypeNonStringifiable', stack: null, };
+                }
+            }
+            function stringifyArgs(args) {
+                return args
+                    .map((arg) => {
+                        if (arg instanceof Error) {
+                            const {message, stack} = arg;
+                            return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+                        }
+                        if (typeof arg === 'object' && arg !== null) {
+                            try { return JSON.stringify(arg); }
+                            catch (error) { return '[Circular Object]'; }
+                        } else {
+                            return String(arg);
+                        }
+                    })
+                    .join(' ');
+            }
+            console.log = function(...args) {
+                const logString = stringifyArgs(args);
+                window.parent.postMessage({ type: 'log', message: logString }, '*');
+                originalConsoleLog.apply(console, args);
+            };
+            console.error = function(...args) {
+                let errorData;
+                if (args.length > 0 && args[0] instanceof Error) {
+                    const err = args[0];
+                    errorData = { type: 'error', source: 'CONSOLE_ERROR', ...getErrorObject(err), rawArgsString: stringifyArgs(args.slice(1)), timestamp: new Date().toISOString(), };
+                } else {
+                    errorData = { type: 'error', source: 'CONSOLE_ERROR', message: stringifyArgs(args), name: 'ConsoleLoggedError', stack: null, timestamp: new Date().toISOString(), };
+                }
+                window.parent.postMessage(errorData, '*');
+                originalConsoleError.apply(console, args);
+            };
+            window.addEventListener('error', function(event) {
+                const errorDetails = event.error ? getErrorObject(event.error) : {
+                    message: event.message, name: 'GlobalError', stack: null,
+                    filename: event.filename, lineno: event.lineno, colno: event.colno,
+                };
+                window.parent.postMessage({ type: 'error', source: 'global', ...errorDetails, message: errorDetails.message || event.message, timestamp: new Date().toISOString(), }, '*');
+            });
+            window.addEventListener('unhandledrejection', function(event) {
+                const errorDetails = getErrorObject(event.reason);
+                window.parent.postMessage({ type: 'error', source: 'unhandledrejection', ...errorDetails, message: errorDetails.message || 'Unhandled Promise Rejection', timestamp: new Date().toISOString(), }, '*');
+            });
+        })();
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Function Based Problem Solving Worksheet</title> <script src="https://cdn.tailwindcss.com/"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Custom styles for the application */
+        body {
+            font-family: 'Inter', sans-serif; 
+            background-color: #e3f2fd; 
+            color: #334155; 
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px; 
+            margin: 1.5rem auto; 
+            padding: 2rem;
+            background-color: #ffffff; 
+            border-radius: 1.25rem; 
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15); 
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+            padding: 1.75rem;
+            margin-bottom: 1.75rem;
+            border: 1px solid #d0eaff; 
+        }
+        textarea, input[type="text"], input[type="number"], input[type="date"], select {
+            border: 2px solid #90caf9; 
+            border-radius: 0.625rem;
+            padding: 0.875rem;
+            width: 100%;
+            font-size: 1rem;
+            line-height: 1.5;
+            transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        textarea:focus, input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, select:focus {
+            outline: none;
+            border-color: #2196f3; 
+            box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.3); 
+        }
+        button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.875rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out, transform 0.15s ease-in-out, box-shadow 0.3s ease-in-out;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+        }
+        button:hover {
+            transform: translateY(-3px); 
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+        .btn-primary {
+            background-color: #2196f3;
+            color: #ffffff;
+            border: none;
+            background-image: linear-gradient(to right, #2196f3, #1976d2); 
+        }
+        .btn-primary:hover {
+            background-color: #1976d2;
+            background-image: linear-gradient(to right, #1976d2, #1565c0);
+        }
+        .btn-secondary {
+            background-color: #e0e0e0;
+            color: #424242;
+            border: 1px solid #bdbdbd;
+            background-image: linear-gradient(to right, #e0e0e0, #cccccc); 
+        }
+        .btn-secondary:hover {
+            background-color: #cccccc;
+            border-color: #9e9e9e;
+            background-image: linear-gradient(to right, #cccccc, #9e9e9e);
+        }
+        .btn-danger {
+            background-color: #f44336;
+            color: #ffffff;
+            border: none;
+            background-image: linear-gradient(to right, #f44336, #d32f2f); 
+        }
+        .btn-danger:hover {
+            background-color: #d32f2f;
+            background-image: linear-gradient(to right, #d32f2f, #c62828);
+        }
+        .btn-info { 
+            background-color: #03a9f4; 
+            color: #ffffff;
+            border: none;
+            background-image: linear-gradient(to right, #03a9f4, #0288d1);
+        }
+        .btn-info:hover {
+            background-color: #0288d1;
+            background-image: linear-gradient(to right, #0288d1, #0277bd);
+        }
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #ffffff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin-right: 0.5rem;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .modal {
+            display: none; 
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5); 
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 30px;
+            border-radius: 1rem;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 650px; 
+            text-align: center;
+        }
+        .close-button {
+            color: #757575;
+            float: right;
+            font-size: 32px;
+            font-weight: bold;
+            transition: color 0.2s ease-in-out;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: #424242;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .plan-section {
+            margin-bottom: 1.5rem;
+        }
+        .plan-section h3 {
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: #1976d2; 
+            font-size: 1.375rem;
+        }
+        .behavior-block {
+            border: 2px solid #90caf9;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            background-color: #e3f2fd; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+        }
+        .behavior-block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #64b5f6; 
+        }
+        .behavior-block-header h3 {
+            margin-bottom: 0;
+            color: #0d47a1; 
+            font-size: 1.25rem;
+        }
+        .radio-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            color: #475569;
+            font-weight: 500;
+            margin-right: 1rem; 
+        }
+        .form-radio {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            display: inline-block;
+            width: 1.375rem;
+            height: 1.375rem;
+            border-radius: 50%;
+            border: 2px solid #64b5f6;
+            background-color: #fff;
+            transition: all 0.2s ease-in-out;
+            margin-right: 0.625rem;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .form-radio:checked {
+            background-color: #2196f3;
+            border-color: #2196f3;
+        }
+        .form-radio:checked::before {
+            content: '';
+            display: block;
+            width: 0.625rem;
+            height: 0.625rem;
+            background-color: #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .form-radio:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.3);
+        }
+        
+        @media print {
+            body > *:not(#bipOutput) { display: none !important; } /* Hide everything except bipOutput for printing */
+            body { margin: 0; padding: 0; background-color: #fff; color: #000; }
+            #bipOutput { display: block !important; width: 100%; box-shadow: none !important; border: none !important; padding: 1rem; margin: 0; }
+            #bipOutput h1, #bipOutput h2, #bipOutput h3, #bipOutput p, #bipOutput li { color: #000 !important; }
+            .card { background-color: transparent !important; }
+            .btn-primary, .btn-secondary, .btn-danger, .btn-info { display: none !important; } 
+            .modal, .modal-content { display: none !important; } 
+            textarea, input[type="text"], input[type="number"], input[type="date"], select { border: 1px solid #ccc !important; background-color: #f9f9f9 !important; }
+            .form-radio { border: 1px solid #ccc !important; }
+            .form-radio:checked { background-color: #ccc !important; border-color: #ccc !important; }
+            .form-radio:checked::before { background-color: #333 !important; }
+        }
+        .modal-chart-content-wrapper { text-align: left; }
+        .modal-chart-content-wrapper .tab-button { padding: 0.6rem 1.2rem; border-radius: 0.4rem; font-weight: 500; cursor: pointer; transition: background-color 0.3s, color 0.3s; color: #475569; border: 2px solid transparent; font-size: 0.875rem; }
+        .modal-chart-content-wrapper .tab-button.active { background-color: #2563eb; color: white; font-weight: 600; border-color: #2563eb; }
+        .modal-chart-content-wrapper .tab-button:not(.active):hover { background-color: #e2e8f0; color: #1e293b; }
+        .modal-chart-content-wrapper .grade-button { padding: 0.4rem 0.8rem; border-radius: 0.3rem; font-weight: 500; cursor: pointer; transition: background-color 0.3s, color 0.3s, border-color 0.3s; color: #3b82f6; border: 2px solid #93c5fd; font-size: 0.75rem; }
+        .modal-chart-content-wrapper .grade-button.active { background-color: #3b82f6; color: white; border-color: #3b82f6; }
+        .modal-chart-content-wrapper .grade-button:not(.active):hover { background-color: #bfdbfe; border-color: #60a5fa; }
+        .modal-chart-content-wrapper .level-card { background-color: white; border-radius: 0.6rem; padding: 0.8rem 1.2rem; box-shadow: 0 2px 4px -1px rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.06); transition: transform 0.2s, box-shadow 0.2s; border: 1px solid #e2e8f0; margin-bottom: 0.75rem; }
+        .modal-chart-content-wrapper .level-card:hover { transform: translateY(-1px); box-shadow: 0 5px 10px -2px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06); }
+        .modal-chart-content-wrapper .level-name { color: #1d4ed8; font-weight: 600; font-size: 0.95rem; }
+        .modal-chart-content-wrapper .level-name:hover { text-decoration: underline; color: #1e3a8a; }
+        .modal-chart-content-wrapper .highlight { background-color: #dbeafe !important; border-left: 4px solid #2563eb; }
+        .modal-chart-content-wrapper .text-xs { font-size: 0.7rem; }
+        .modal-chart-content-wrapper .text-sm { font-size: 0.8rem; }
+        .modal-chart-content-wrapper .text-slate-600 { color: #475569; }
+        .modal-chart-content-wrapper .text-slate-800 { color: #1e293b; }
+        .modal-chart-content-wrapper .text-blue-500 { color: #3b82f6; }
+        .modal-chart-content-wrapper .bg-blue-100 { background-color: #dbeafe; }
+        .modal-chart-content-wrapper .max-h-96 { max-height: 24rem; } 
+        .modal-chart-content-wrapper .overflow-y-auto { overflow-y: auto; }
+        .modal-chart-content-wrapper .pr-2 { padding-right: 0.5rem; } 
+    </style>
+    </head>
+<body class="bg-gray-100 p-4">
+    <div class="container">
+        <h1 class="text-4xl font-extrabold text-center text-blue-700 mb-8">
+            Function Based Problem Solving Worksheet
+        </h1>
+
+        <div class="card flex justify-between items-center bg-blue-50 border border-blue-200 p-4 mb-6">
+            <p class="text-blue-800 font-semibold">FBPSW: <span id="sessionStatusDisplay" class="font-normal text-blue-600">Active</span></p>
+            <button id="newPlanButton" class="btn-secondary">
+                <i class="fas fa-plus mr-2"></i> New Plan
+            </button>
+        </div>
+
+        <div class="card">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Teacher Input</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="studentAge" class="block text-gray-700 text-sm font-semibold mb-2">Student Age</label>
+                    <input type="number" id="studentAge" placeholder="e.g., 7" min="3" max="18">
+                </div>
+                <div>
+                    <label for="studentGrade" class="block text-gray-700 text-sm font-semibold mb-2">Student Grade Level</label>
+                    <select id="studentGrade">
+                        <option value="">Select Grade</option>
+                        <option value="K">Kindergarten</option>
+                        <option value="1st">1st Grade</option>
+                        <option value="2nd">2nd Grade</option>
+                        <option value="3rd">3rd Grade</option>
+                        <option value="4th">4th Grade</option>
+                        <option value="5th">5th Grade</option>
+                        <option value="6th">6th Grade</option>
+                        <option value="7th">7th Grade</option>
+                        <option value="8th">8th Grade</option>
+                        <option value="Higher">Higher Grades</option>
+                        <option value="Other">Other / Not Applicable</option>
+                    </select>
+                </div>
+
+                <div id="behaviorsContainer" class="md:col-span-2">
+                    <div class="behavior-block" data-behavior-index="0">
+                        <div class="behavior-block-header">
+                            <h3 class="text-lg font-semibold text-gray-700">Behavior 1</h3>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="behaviorTypeSelect_0" class="block text-gray-700 text-sm font-semibold mb-2">Behavior Type</label>
+                                <select id="behaviorTypeSelect_0" class="mb-2">
+                                    <option value="">Select Behavior Type</option>
+                                </select>
+                                <textarea id="otherBehaviorTypeInput_0" rows="2" placeholder="Enter custom behavior type..." class="hidden mt-2"></textarea>
+                            </div>
+                            <div></div> 
+                            <div>
+                                <label for="antecedentSelect_0" class="block text-gray-700 text-sm font-semibold mb-2">Antecedent</label>
+                                <select id="antecedentSelect_0" class="mb-2" disabled>
+                                    <option value="">Select Behavior Type First</option>
+                                </select>
+                                <textarea id="otherAntecedentInput_0" rows="2" placeholder="e.g., Teacher gave a math worksheet..." class="hidden"></textarea>
+                            </div>
+                            <div>
+                                <label for="behaviorSelect_0" class="block text-gray-700 text-sm font-semibold mb-2">Behavior</label>
+                                <select id="behaviorSelect_0" class="mb-2" disabled>
+                                    <option value="">Select Behavior Type First</option>
+                                </select>
+                                <textarea id="otherBehaviorInput_0" rows="2" placeholder="e.g., Yelled loudly..." class="hidden"></textarea>
+                            </div>
+                            <div>
+                                <label for="consequenceSelect_0" class="block text-gray-700 text-sm font-semibold mb-2">Consequence</label>
+                                <select id="consequenceSelect_0" class="mb-2" disabled>
+                                    <option value="">Select Behavior Type First</option>
+                                </select>
+                                <textarea id="otherConsequenceInput_0" rows="2" placeholder="e.g., Student was sent to office..." class="hidden"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="behavior-block" data-behavior-index="1">
+                        <div class="behavior-block-header">
+                            <h3 class="text-lg font-semibold text-gray-700">Behavior 2 (Optional)</h3>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="behaviorTypeSelect_1" class="block text-gray-700 text-sm font-semibold mb-2">Behavior Type</label>
+                                <select id="behaviorTypeSelect_1" class="mb-2">
+                                    <option value="">Select Behavior Type</option>
+                                </select>
+                                <textarea id="otherBehaviorTypeInput_1" rows="2" placeholder="Enter custom behavior type..." class="hidden mt-2"></textarea>
+                            </div>
+                            <div></div> 
+                            <div>
+                                <label for="antecedentSelect_1" class="block text-gray-700 text-sm font-semibold mb-2">Antecedent</label>
+                                <select id="antecedentSelect_1" class="mb-2" disabled>
+                                    <option value="">Select Behavior Type First</option>
+                                </select>
+                                <textarea id="otherAntecedentInput_1" rows="2" placeholder="e.g., Peer took a toy..." class="hidden"></textarea>
+                            </div>
+                            <div>
+                                <label for="behaviorSelect_1" class="block text-gray-700 text-sm font-semibold mb-2">Behavior</label>
+                                <select id="behaviorSelect_1" class="mb-2" disabled>
+                                    <option value="">Select Behavior Type First</option>
+                                </select>
+                                <textarea id="otherBehaviorInput_1" rows="2" placeholder="e.g., Threw pencil..." class="hidden"></textarea>
+                            </div>
+                            <div>
+                                <label for="consequenceSelect_1" class="block text-gray-700 text-sm font-semibold mb-2">Consequence</label>
+                                <select id="consequenceSelect_1" class="mb-2" disabled>
+                                    <option value="">Select Behavior Type First</option>
+                                </select>
+                                <textarea id="otherConsequenceInput_1" rows="2" placeholder="e.g., Teacher gave attention..." class="hidden"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="behavior-block" data-behavior-index="2">
+                        <div class="behavior-block-header">
+                            <h3 class="text-lg font-semibold text-gray-700">Behavior 3 (Optional)</h3>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="behaviorTypeSelect_2" class="block text-gray-700 text-sm font-semibold mb-2">Behavior Type</label>
+                                <select id="behaviorTypeSelect_2" class="mb-2">
+                                    <option value="">Select Behavior Type</option>
+                                </select>
+                                <textarea id="otherBehaviorTypeInput_2" rows="2" placeholder="Enter custom behavior type..." class="hidden mt-2"></textarea>
+                            </div>
+                             <div></div> 
+                            <div>
+                                <label for="antecedentSelect_2" class="block text-gray-700 text-sm font-semibold mb-2">Antecedent</label>
+                                <select id="antecedentSelect_2" class="mb-2" disabled>
+                                    <option value="">Select Behavior Type First</option>
+                                </select>
+                                <textarea id="otherAntecedentInput_2" rows="2" placeholder="e.g., Asked to transition..." class="hidden"></textarea>
+                            </div>
+                            <div>
+                                <label for="behaviorSelect_2" class="block text-gray-700 text-sm font-semibold mb-2">Behavior</label>
+                                <select id="behaviorSelect_2" class="mb-2" disabled>
+                                    <option value="">Select Behavior Type First</option>
+                                </select>
+                                <textarea id="otherBehaviorInput_2" rows="2" placeholder="e.g., Refused to work..." class="hidden"></textarea>
+                            </div>
+                            <div>
+                                <label for="consequenceSelect_2" class="block text-gray-700 text-sm font-semibold mb-2">Consequence</label>
+                                <select id="consequenceSelect_2" class="mb-2" disabled>
+                                    <option value="">Select Behavior Type First</option>
+                                </select>
+                                <textarea id="otherConsequenceInput_2" rows="2" placeholder="e.g., Lost free time..." class="hidden"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="anecdotal" class="block text-gray-700 text-sm font-semibold mb-2">Anecdotal Notes</label>
+                    <textarea id="anecdotal" rows="3" placeholder="e.g., Student seems tired today..."></textarea>
+                </div>
+                <div>
+                    <label for="reinforcerPreferences" class="block text-gray-700 text-sm font-semibold mb-2">Student's Preferred Reinforcers</label>
+                    <textarea id="reinforcerPreferences" rows="2" placeholder="e.g., Loves computer time, enjoys drawing..."></textarea>
+                </div>
+
+                <div class="relative">
+                    <label for="behavioralSkillsSelect" class="block text-gray-700 text-sm font-semibold mb-2">Behavioral Skills Level</label>
+                    <select id="behavioralSkillsSelect" class="w-full pr-10"></select>
+                    <button type="button" id="infoBehavioral" class="absolute inset-y-0 right-0 flex items-center pr-3 text-blue-500 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" style="top: 2.25rem;">ⓘ</button>
+                </div>
+                <div class="relative">
+                    <label for="socialSkillsSelect" class="block text-gray-700 text-sm font-semibold mb-2">Social Skills Level</label>
+                    <select id="socialSkillsSelect" class="w-full pr-10"></select>
+                    <button type="button" id="infoSocial" class="absolute inset-y-0 right-0 flex items-center pr-3 text-blue-500 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" style="top: 2.25rem;">ⓘ</button>
+                </div>
+                <div class="relative">
+                    <label for="pragmaticLanguageSkillsSelect" class="block text-gray-700 text-sm font-semibold mb-2">Pragmatic Language Skills Level</label>
+                    <select id="pragmaticLanguageSkillsSelect" class="w-full pr-10"></select>
+                    <button type="button" id="infoPragmaticLanguage" class="absolute inset-y-0 right-0 flex items-center pr-3 text-blue-500 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" style="top: 2.25rem;">ⓘ</button>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-gray-700 text-sm font-semibold mb-2">Add pertinent referral information?</label>
+                    <div class="flex items-center space-x-4 mb-4">
+                        <label class="inline-flex items-center radio-label">
+                            <input type="radio" name="addReferralInfo" value="yes" class="form-radio" id="addReferralYes">
+                            <span class="ml-2 text-gray-700">Yes</span>
+                        </label>
+                        <label class="inline-flex items-center radio-label">
+                            <input type="radio" name="addReferralInfo" value="no" class="form-radio" id="addReferralNo" checked>
+                            <span class="ml-2 text-gray-700">No</span>
+                        </label>
+                    </div>
+                    <div id="referralInfoContainer" class="hidden">
+                        <label for="referral" class="block text-gray-700 text-sm font-semibold mb-2">Referral Information</label>
+                        <textarea id="referral" rows="4" placeholder="e.g., Student referred for disruptive behavior..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button id="generateBIPButton" class="btn-primary">
+                    <span id="generateBIPSpinner" class="loading-spinner hidden"></span>
+                    Generate Plan
+                </button>
+            </div>
+        </div>
+
+        <div id="bipOutput" class="card hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Generated Function Based Problem Solving Worksheet</h2>
+            <div class="mb-4">
+                <p class="text-lg font-semibold text-gray-700">Function Hypothesis Statement:</p>
+                <p id="bipFunctionHypothesis" class="text-blue-600 font-medium text-xl"></p>
+            </div>
+            <div class="plan-section">
+                <h3>Antecedent Strategies:</h3>
+                <div id="bipAntecedentStrategies" class="prose max-w-none text-gray-800"></div>
+            </div>
+            <div class="plan-section">
+                <h3>Short-term Replacement Behaviors:</h3>
+                <div id="bipShortTermBehaviors" class="prose max-w-none text-gray-800"></div>
+            </div>
+            <div class="plan-section">
+                <h3>Teaching Strategies for Short-Term Replacement Behaviors:</h3>
+                <div id="bipTeachingStrategies" class="prose max-w-none text-gray-800"></div>
+            </div>
+            <div class="plan-section">
+                <h3>Reinforcement Strategies for Short-Term Replacement Behaviors:</h3>
+                <div id="bipReinforcementShortTerm" class="prose max-w-none text-gray-800"></div>
+            </div>
+            <div class="plan-section">
+                <h3>Long-term Replacement Behaviors:</h3>
+                <div id="bipLongTermBehaviors" class="prose max-w-none text-gray-800"></div>
+            </div>
+            <div class="plan-section">
+                <h3>Response Strategies for Problem Behavior:</h3>
+                <div id="bipResponseStrategies" class="prose max-w-none text-gray-800"></div>
+            </div>
+            <div class="mt-6 flex justify-end space-x-4">
+                <button id="copyBIPButton" class="btn-secondary">
+                    <i class="fas fa-copy mr-2"></i> Copy Plan
+                </button>
+                </div>
+        </div>
+
+        </div>
+
+    <div id="customModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">×</span>
+            <div id="modalDisplayContent" class="text-lg font-semibold text-gray-800 mb-4 modal-chart-content-wrapper"></div>
+            <div id="modalInputContainer" class="mb-4 hidden">
+                <label for="modalInput" class="block text-gray-700 text-sm font-semibold mb-2 text-left">Input:</label>
+                <input type="text" id="modalInput" class="w-full p-2 border rounded-md">
+            </div>
+            <div id="modalButtons" class="flex justify-center space-x-4"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+
+        // Firebase configuration is now primarily managed by the IIFE at the top of the HTML
+        const firebaseConfigFromIIFE = typeof __firebase_config !== 'undefined' ? JSON.parse(window.__firebase_config) : {};
+        
+        let app;
+        let analytics; // Firebase Analytics instance
+        
+        // DOM Elements
+        const studentAgeInput = document.getElementById('studentAge');
+        const studentGradeSelect = document.getElementById('studentGrade');
+        const reinforcerPreferencesInput = document.getElementById('reinforcerPreferences');
+        const behavioralSkillsSelect = document.getElementById('behavioralSkillsSelect');
+        const socialSkillsSelect = document.getElementById('socialSkillsSelect');
+        const pragmaticLanguageSkillsSelect = document.getElementById('pragmaticLanguageSkillsSelect');
+        const infoBehavioralButton = document.getElementById('infoBehavioral');
+        const infoSocialButton = document.getElementById('infoSocial');
+        const infoPragmaticLanguageButton = document.getElementById('infoPragmaticLanguage');
+        const behaviorBlocks = document.querySelectorAll('.behavior-block'); 
+        const anecdotalInput = document.getElementById('anecdotal');
+        const referralInput = document.getElementById('referral');
+        const generateBIPButton = document.getElementById('generateBIPButton');
+        const generateBIPSpinner = document.getElementById('generateBIPSpinner');
+        const bipOutputDiv = document.getElementById('bipOutput'); 
+        const bipFunctionHypothesis = document.getElementById('bipFunctionHypothesis');
+        const bipAntecedentStrategies = document.getElementById('bipAntecedentStrategies');
+        const bipShortTermBehaviors = document.getElementById('bipShortTermBehaviors');
+        const bipTeachingStrategies = document.getElementById('bipTeachingStrategies');
+        const bipReinforcementShortTerm = document.getElementById('bipReinforcementShortTerm');
+        const bipLongTermBehaviors = document.getElementById('bipLongTermBehaviors');
+        const bipResponseStrategies = document.getElementById('bipResponseStrategies');
+        const copyBIPButton = document.getElementById('copyBIPButton');
+        const sessionStatusDisplay = document.getElementById('sessionStatusDisplay'); 
+        const newPlanButton = document.getElementById('newPlanButton');
+        const addReferralYes = document.getElementById('addReferralYes');
+        const addReferralNo = document.getElementById('addReferralNo');
+        const referralInfoContainer = document.getElementById('referralInfoContainer');
+        
+        const customModal = document.getElementById('customModal'); 
+        const modalDisplayContent = document.getElementById('modalDisplayContent');
+        const modalButtons = document.getElementById('modalButtons');
+        const closeModalButton = customModal.querySelector('.close-button');
+        const modalInputContainer = document.getElementById('modalInputContainer');
+        const modalInput = document.getElementById('modalInput');
+        
+        // Fidelity Check related DOM elements removed
+
+        let currentChartTab = 'Behavioral'; 
+        let currentChartGradeFilter = 'All'; 
+
+        const developmentalLevels = {
+            "Behavioral": [
+                { grade: "General", name: "Emerging Regulator", description: "Beginning to follow directions and respond to adult guidance." },
+                { grade: "General", name: "Developing Follower", description: "Learning classroom routines and beginning to manage impulses." },
+                { grade: "General", name: "Routine Participant", description: "Following multi-step routines with reduced prompting and beginning to self-regulate." },
+                { grade: "General", name: "Adaptive Monitor", description: "Monitoring own behavior, showing flexibility, and taking responsibility." },
+                { grade: "General", name: "Intentional Regulator", description: "Using strategies to manage frustration and persist through tasks." },
+                { grade: "General", name: "Reflective Manager", description: "Reflecting on behavior and adapting responses to social and academic settings." },
+                { grade: "General", name: "Independent Self-Regulator", description: "Demonstrates mature coping, goal-setting, and behavior ownership." },
+                { grade: "General", name: "Strategic Self-Manager", description: "Applies internalized strategies to manage emotions and behaviors across complex settings." },
+                { grade: "General", name: "Autonomous Problem-Solver", description: "Independently evaluates consequences, adjusts behavior, and mentors peers when appropriate." }
+            ],
+            "Social": [
+                { grade: "General", name: "Social Explorer", description: "Beginning to engage in play and initiate basic interactions." },
+                { grade: "General", name: "Emerging Friend", description: "Following simple social rules and participating in group play." },
+                { grade: "General", name: "Cooperative Peer", description: "Solving conflicts with support and working collaboratively." },
+                { grade: "General", name: "Connected Contributor", description: "Respects peer perspectives and engages appropriately in group work." },
+                { grade: "General", name: "Social Navigator", description: "Builds friendships, practices inclusion, and shows group awareness." },
+                { grade: "General", name: "Empathetic Collaborator", description: "Leads with empathy, resolves social conflicts, supports peers." },
+                { grade: "General", name: "Interpersonal Strategist", description: "Navigates complex peer interactions and demonstrates social leadership." },
+                { grade: "General", name: "Relational Thinker", description: "Manages peer dynamics, navigates group identity, and balances independence with belonging." },
+                { grade: "General", name: "Social Leader", description: "Models inclusive behavior, mentors younger peers, and demonstrates conflict resolution leadership." }
+            ],
+            "Pragmatic Language": [
+                { grade: "General", name: "Beginning Communicator", description: "Uses basic language to express needs and respond to simple social cues." },
+                { grade: "General", name: "Emerging Conversationalist", description: "Participates in short conversations and uses polite language." },
+                { grade: "General", name: "Functional Talker", description: "Maintains basic conversations and uses language to clarify." },
+                { grade: "General", name: "Social Interpreter", description: "Uses negotiation, humor, and topic maintenance." },
+                { grade: "General", name: "Contextual Communicator", description: "Adjusts tone, provides relevant details, and reads social cues." },
+                { grade: "General", name: "Purposeful Speaker", description: "Repairs misunderstandings, persuades, and contributes in discussions." },
+                { grade: "General", name: "Strategic Conversationalist", description: "Understands nuance, sarcasm, and participates in advanced dialogue." },
+                { grade: "General", name: "Flexible Communicator", description: "Adapts language for academic, social, and emotional contexts with increased nuance." },
+                { grade: "General", name: "Advanced Discourse User", description: "Engages in abstract discussions, understands subtext, and uses language for leadership, advocacy, and persuasion." }
+            ]
+        };
+        const behaviorABCData = { 
+            "Physical Aggression": { antecedents: ["Task or work demand", "Being told 'no'", "Transition events", "Negative peer interactions", "Sensory triggers", "Long waits"], behaviors: ["Biting, hitting, kicking", "Throwing objects", "Pushing, shoving", "Spitting"], consequences: ["Adult intervention (time-out)", "Removal of task (escape)", "Verbal reprimand", "Loss of privileges", "Peers move away"] },
+            "Verbal Aggression": { antecedents: ["Being told 'no,' corrected", "Frustration with tasks", "Peer provocation", "Sudden changes"], behaviors: ["Shouting, screaming", "Name-calling, insults", "Verbal threats", "Arguing with adult"], consequences: ["Teacher redirection (attention)", "Sent to time-out", "Loss of privileges", "Peers react"] },
+            "Self-Injurious Behavior": { antecedents: ["High task demands (escape)", "Sensory overload", "Emotional distress", "Physical discomfort"], behaviors: ["Head hitting/banging", "Hand or arm biting", "Slapping/scratching self", "Hair pulling", "Repetitive motions (self-stim)"], consequences: ["Staff physically blocks/holds", "Task removed/break given", "Staff provide comfort/attention", "Time-out/medical check"] },
+            "Task Refusal / Noncompliance": { antecedents: ["Non-preferred/difficult task", "Transition to non-preferred task", "Being told 'no'", "Large/lengthy assignments", "Unclear instructions"], behaviors: ["Verbal refusal ('no,' arguing)", "Ignoring instruction", "Leaving area/pushing materials", "Crying, tantruming"], consequences: ["Task removed/postponed (escape)", "Given break/preferred activity", "Teacher re-delivers task/prompts", "Adult attention (if tantrum)"] },
+            "Elopement (Running Away)": { antecedents: ["Non-preferred/overstimulating setting", "Transitions (before disliked class)", "Unstructured times"], behaviors: ["Leaving supervised area", "Climbing fences/running through doors", "Moving rapidly to exit/away from demands"], consequences: ["Staff chase/physically redirect", "Returned to supervised area", "Loss of privileges/extra supervision", "Accidental reinforcement (escape)"] },
+            "Disruptive Behavior (Non-Aggressive)": { antecedents: ["Boring/demanding tasks (seeks stimulation)", "Long instructional periods", "Lack of engagement", "Unsupervised/unstructured periods", "Need for attention"], behaviors: ["Talking out/calling out", "Making noises", "Whining/complaining", "Out-of-seat behavior", "Mild defiance"], consequences: ["Teacher attention (redirection/scolding)", "Loss of privileges/rewards", "Brief time-out", "Classmates react (peer attention)", "Delay task (escape if ignored)"] },
+            "Off-Task Behavior": { antecedents: ["Task too difficult/easy", "Lack of clear instructions", "Slow-paced/repetitive tasks", "Insufficient structure/distractions"], behaviors: ["Daydreaming", "Fiddling with materials/doodling", "Starting task slowly/wrong assignment", "Pretending to work", "Asking off-topic questions"], consequences: ["Teacher prompts/reminders (attention)", "Task simplified/re-taught", "Loss of participation/breaks", "Removed from task (escape if continues)"] },
+            "Property Destruction": { antecedents: ["Denied access to desired item/activity", "Unstructured moments with access to items", "High emotional arousal"], behaviors: ["Tearing paper/books/clothing", "Bending/breaking/smashing objects", "Drawing on/carving into property", "Kicking/punching walls/furniture", "Throwing objects forcefully"], consequences: ["Required to clean up/repair", "Loss of access to items/privileges", "Time-out/removal from class", "Teacher reprimand/referral"] }
+        };
+
+        function populateSkillDropdown(selectElement, skillType, selectedValue = '') {
+            if (!selectElement) { console.error(`Select element for ${skillType} not found.`); return; }
+            selectElement.innerHTML = `<option value="">Select ${skillType} Level</option>`; 
+            const levelsForType = developmentalLevels[skillType];
+            if (levelsForType) {
+                levelsForType.forEach(level => {
+                    const option = document.createElement('option');
+                    option.value = level.name; 
+                    option.textContent = level.name;
+                    selectElement.appendChild(option);
+                });
+            }
+            selectElement.value = selectedValue; 
+            selectElement.disabled = false; 
+        }
+        function populateAllDevelopmentalDropdowns(selectedBehavioral = '', selectedSocial = '', selectedPragmatic = '') {
+            populateSkillDropdown(behavioralSkillsSelect, "Behavioral", selectedBehavioral);
+            populateSkillDropdown(socialSkillsSelect, "Social", selectedSocial);
+            populateSkillDropdown(pragmaticLanguageSkillsSelect, "Pragmatic Language", selectedPragmatic);
+        }
+        function populateBehaviorTypeDropdown(selectElement, selectedType = '') {
+            if (!selectElement) { console.error("Behavior type select element not found."); return; }
+            selectElement.innerHTML = '<option value="">Select Behavior Type</option>'; 
+            for (const type in behaviorABCData) { 
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = type;
+                selectElement.appendChild(option);
+            }
+            const otherOption = document.createElement('option');
+            otherOption.value = "Other (manual input)";
+            otherOption.textContent = "Other (manual input)";
+            selectElement.appendChild(otherOption);
+            selectElement.value = selectedType; 
+        }
+        function populateABCDropdowns(index, behaviorType, selectedAntecedent = '', selectedBehavior = '', selectedConsequence = '') {
+            const data = behaviorABCData[behaviorType]; 
+            const antecedentSelect = document.getElementById(`antecedentSelect_${index}`);
+            const behaviorSelect = document.getElementById(`behaviorSelect_${index}`);
+            const consequenceSelect = document.getElementById(`consequenceSelect_${index}`);
+
+            if (!antecedentSelect || !behaviorSelect || !consequenceSelect) {
+                console.error(`ABC select elements for index ${index} not found.`);
+                return;
+            }
+            const populateSingleABCDropdown = (selectElement, options, currentValue) => {
+                selectElement.innerHTML = '<option value="">Select an option</option>'; 
+                if (options && Array.isArray(options)) {
+                    options.forEach(optionText => {
+                        const option = document.createElement('option');
+                        option.value = optionText;
+                        option.textContent = optionText;
+                        selectElement.appendChild(option);
+                    });
+                }
+                const otherOption = document.createElement('option');
+                otherOption.value = "Other (manual input)";
+                otherOption.textContent = "Other (manual input)";
+                selectElement.appendChild(otherOption);
+                selectElement.value = currentValue; 
+                selectElement.disabled = !behaviorType && !currentValue; 
+            };
+
+            if (data) { 
+                populateSingleABCDropdown(antecedentSelect, data.antecedents, selectedAntecedent);
+                populateSingleABCDropdown(behaviorSelect, data.behaviors, selectedBehavior);
+                populateSingleABCDropdown(consequenceSelect, data.consequences, selectedConsequence);
+            } else { 
+                populateSingleABCDropdown(antecedentSelect, [], selectedAntecedent);
+                populateSingleABCDropdown(behaviorSelect, [], selectedBehavior);
+                populateSingleABCDropdown(consequenceSelect, [], selectedConsequence);
+            }
+        }
+        function handleOtherSelection(selectElement, otherInputElement, storedValue = '') {
+            if (!selectElement || !otherInputElement) return;
+            if (selectElement.value === "Other (manual input)") {
+                otherInputElement.classList.remove('hidden'); 
+                selectElement.classList.add('hidden'); 
+                otherInputElement.value = storedValue === "Other (manual input)" ? '' : storedValue; 
+                otherInputElement.focus(); 
+            } else {
+                otherInputElement.classList.add('hidden'); 
+                selectElement.classList.remove('hidden'); 
+            }
+        }
+
+        function setupBehaviorBlockListeners(index) {
+            const behaviorTypeSelect = document.getElementById(`behaviorTypeSelect_${index}`);
+            const otherBehaviorTypeInput = document.getElementById(`otherBehaviorTypeInput_${index}`);
+            const antecedentSelect = document.getElementById(`antecedentSelect_${index}`);
+            const otherAntecedentInput = document.getElementById(`otherAntecedentInput_${index}`);
+            const behaviorSelect = document.getElementById(`behaviorSelect_${index}`);
+            const otherBehaviorInput = document.getElementById(`otherBehaviorInput_${index}`);
+            const consequenceSelect = document.getElementById(`consequenceSelect_${index}`);
+            const otherConsequenceInput = document.getElementById(`otherConsequenceInput_${index}`);
+
+            if (!behaviorTypeSelect || !antecedentSelect || !behaviorSelect || !consequenceSelect) {
+                console.warn(`Could not find all elements for behavior block ${index}. Listeners not fully attached.`);
+                return;
+            }
+
+            behaviorTypeSelect.addEventListener('change', () => {
+                const selectedBehaviorType = behaviorTypeSelect.value;
+                const isOtherType = selectedBehaviorType === "Other (manual input)";
+                
+                handleOtherSelection(behaviorTypeSelect, otherBehaviorTypeInput, isOtherType ? '' : selectedBehaviorType);
+                populateABCDropdowns(index, isOtherType ? '' : selectedBehaviorType); 
+
+                antecedentSelect.disabled = isOtherType;
+                behaviorSelect.disabled = isOtherType;
+                consequenceSelect.disabled = isOtherType;
+
+                if (isOtherType) {
+                    antecedentSelect.value = "Other (manual input)";
+                    behaviorSelect.value = "Other (manual input)";
+                    consequenceSelect.value = "Other (manual input)";
+                }
+                handleOtherSelection(antecedentSelect, otherAntecedentInput, '');
+                handleOtherSelection(behaviorSelect, otherBehaviorInput, '');
+                handleOtherSelection(consequenceSelect, otherConsequenceInput, '');
+            });
+
+            antecedentSelect.addEventListener('change', () => handleOtherSelection(antecedentSelect, otherAntecedentInput));
+            behaviorSelect.addEventListener('change', () => handleOtherSelection(behaviorSelect, otherBehaviorInput));
+            consequenceSelect.addEventListener('change', () => handleOtherSelection(consequenceSelect, otherConsequenceInput));
+        }
+
+        function showCustomModal(message, type = 'alert', onConfirm = null, showInput = false, inputValue = '', isHtmlContent = false) {
+            if (isHtmlContent) { 
+                modalDisplayContent.innerHTML = message;
+            } else { 
+                modalDisplayContent.textContent = message;
+            }
+            modalButtons.innerHTML = ''; 
+            modalInputContainer.classList.add('hidden'); 
+            modalInput.value = '';
+
+            if (showInput) { 
+                modalInputContainer.classList.remove('hidden');
+                modalInput.value = inputValue;
+            }
+
+            if (type === 'alert') {
+                const okButton = document.createElement('button');
+                okButton.textContent = 'OK';
+                okButton.className = 'btn-primary';
+                okButton.onclick = () => customModal.style.display = 'none';
+                modalButtons.appendChild(okButton);
+            } else if (type === 'confirm') {
+                const confirmButton = document.createElement('button');
+                confirmButton.textContent = 'Confirm';
+                confirmButton.className = 'btn-danger'; 
+                confirmButton.onclick = () => { customModal.style.display = 'none'; if (onConfirm) onConfirm(); };
+                const cancelButton = document.createElement('button');
+                cancelButton.textContent = 'Cancel';
+                cancelButton.className = 'btn-secondary ml-4';
+                cancelButton.onclick = () => customModal.style.display = 'none';
+                modalButtons.appendChild(confirmButton);
+                modalButtons.appendChild(cancelButton);
+            } else if (type === 'prompt') {
+                const saveButton = document.createElement('button');
+                saveButton.textContent = 'Save';
+                saveButton.className = 'btn-primary';
+                saveButton.onclick = () => { customModal.style.display = 'none'; if (onConfirm) onConfirm(modalInput.value); };
+                const cancelButton = document.createElement('button');
+                cancelButton.textContent = 'Cancel';
+                cancelButton.className = 'btn-secondary ml-4';
+                cancelButton.onclick = () => customModal.style.display = 'none';
+                modalButtons.appendChild(saveButton);
+                modalButtons.appendChild(cancelButton);
+            }
+            customModal.style.display = 'flex'; 
+        }
+
+        if(closeModalButton) closeModalButton.onclick = () => customModal.style.display = 'none';
+        window.addEventListener('click', (event) => { if (event.target == customModal) { customModal.style.display = 'none'; } });
+        
+        // Fidelity Modal event listeners removed
+
+       function initializeFirebase() { // Simplified Firebase initialization
+            try {
+                if (!firebaseConfigFromIIFE || Object.keys(firebaseConfigFromIIFE).length === 0 || !firebaseConfigFromIIFE.apiKey) {
+                    console.error("Firebase config is missing or incomplete. Analytics may not function.");
+                    showCustomModal("Firebase configuration is missing. Analytics may not be captured.");
+                    sessionStatusDisplay.textContent = "Local Session (Firebase not configured)";
+                    return; 
+                }
+                app = initializeApp(firebaseConfigFromIIFE); 
+                analytics = getAnalytics(app); // Initialize Analytics
+                console.log("Firebase initialized with Analytics.");
+                sessionStatusDisplay.textContent = "Active (Analytics Enabled)"; 
+
+            } catch (error) { 
+                console.error("Error initializing Firebase application:", error);
+                showCustomModal("Failed to initialize Firebase application. Error: " + error.message);
+                sessionStatusDisplay.textContent = "Local Session (Firebase init error)";
+            }
+        }
+        
+        function parseHtmlListToStringArray(htmlString) {
+            if (!htmlString || typeof htmlString !== 'string') return [];
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlString; 
+            const items = [];
+            tempDiv.querySelectorAll('li').forEach(li => items.push(li.textContent.trim()));
+            if (items.length === 0 && htmlString.trim() !== '' && !htmlString.toLowerCase().includes("<ul") && !htmlString.toLowerCase().includes("<p>no specific strategies") && !htmlString.toLowerCase().includes("n/a")) {
+                const plainText = htmlString.replace(/<[^>]+>/g, '').trim(); 
+                if (plainText) { 
+                    items.push(plainText);
+                }
+            }
+            return items;
+        }
+
+        // --- Fidelity Check Functions Removed ---
+
+        function collectPlanData() { 
+            const behaviorsData = []; 
+            behaviorBlocks.forEach((block, index) => {
+                const behaviorTypeSelect = document.getElementById(`behaviorTypeSelect_${index}`);
+                const otherBehaviorTypeInput = document.getElementById(`otherBehaviorTypeInput_${index}`);
+                const antecedentSelect = document.getElementById(`antecedentSelect_${index}`);
+                const otherAntecedentInput = document.getElementById(`otherAntecedentInput_${index}`);
+                const behaviorSelect = document.getElementById(`behaviorSelect_${index}`);
+                const otherBehaviorInput = document.getElementById(`otherBehaviorInput_${index}`);
+                const consequenceSelect = document.getElementById(`consequenceSelect_${index}`);
+                const otherConsequenceInput = document.getElementById(`otherConsequenceInput_${index}`);
+                const actualBehaviorType = behaviorTypeSelect.value === "Other (manual input)" ? otherBehaviorTypeInput.value.trim() : behaviorTypeSelect.value;
+                const actualAntecedent = antecedentSelect.value === "Other (manual input)" ? otherAntecedentInput.value.trim() : antecedentSelect.value;
+                const actualBehavior = behaviorSelect.value === "Other (manual input)" ? otherBehaviorInput.value.trim() : behaviorSelect.value;
+                const actualConsequence = consequenceSelect.value === "Other (manual input)" ? otherConsequenceInput.value.trim() : consequenceSelect.value;
+                if (actualBehaviorType || actualAntecedent || actualBehavior || actualConsequence) {
+                    behaviorsData.push({
+                        behaviorType: actualBehaviorType,
+                        antecedent: actualAntecedent,
+                        behavior: actualBehavior,
+                        consequence: actualConsequence
+                    });
+                }
+            });
+            return {
+                behaviors: behaviorsData,
+                anecdotal: anecdotalInput.value.trim(),
+                referral: addReferralYes.checked ? referralInput.value.trim() : '',
+                reinforcerPreferences: reinforcerPreferencesInput.value.trim(),
+                studentAge: studentAgeInput.value,
+                studentGrade: studentGradeSelect.value,
+                behavioralSkills: behavioralSkillsSelect.value,
+                socialSkills: socialSkillsSelect.value,
+                pragmaticLanguageSkills: pragmaticLanguageSkillsSelect.value,
+                functionHypothesisStatement: bipFunctionHypothesis.textContent,
+                antecedentStrategies: bipAntecedentStrategies.innerHTML,
+                shortTermReplacementBehaviors: bipShortTermBehaviors.innerHTML,
+                teachingStrategies: bipTeachingStrategies.innerHTML,
+                reinforcementShortTerm: bipReinforcementShortTerm.innerHTML,
+                longTermReplacementBehaviors: bipLongTermBehaviors.innerHTML,
+                responseStrategies: bipResponseStrategies.innerHTML,
+                timestamp: Date.now() 
+            };
+        }
+        
+        async function copyBIP() {
+            try {
+                const bipContentClone = bipOutputDiv.cloneNode(true);
+                const buttonContainer = bipContentClone.querySelector('.mt-6.flex.justify-end.space-x-4');
+                if (buttonContainer) buttonContainer.remove();
+                let plainText = `Function Based Problem Solving Worksheet\n\n`; 
+                plainText += `Function Hypothesis Statement:\n${bipFunctionHypothesis.textContent}\n\n`;
+                const sections = [
+                    {title: "Antecedent Strategies", element: bipAntecedentStrategies},
+                    {title: "Short-term Replacement Behaviors", element: bipShortTermBehaviors},
+                    {title: "Teaching Strategies for Short-Term Replacement Behaviors", element: bipTeachingStrategies},
+                    {title: "Reinforcement Strategies for Short-Term Replacement Behaviors", element: bipReinforcementShortTerm},
+                    {title: "Long-term Replacement Behaviors", element: bipLongTermBehaviors},
+                    {title: "Response Strategies for Problem Behavior", element: bipResponseStrategies}
+                ];
+                sections.forEach(section => {
+                    plainText += `${section.title}:\n`;
+                    const listItems = section.element.querySelectorAll('li');
+                    if (listItems.length > 0) { 
+                        listItems.forEach(li => {
+                            plainText += `- ${li.textContent}\n`;
+                        });
+                    } else { 
+                        plainText += `${section.element.textContent || 'N/A'}\n`;
+                    }
+                    plainText += `\n`;
+                });
+                const textarea = document.createElement('textarea');
+                textarea.value = plainText;
+                textarea.style.position = 'fixed'; 
+                textarea.style.left = '-9999px';
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy'); 
+                document.body.removeChild(textarea); 
+                showCustomModal("Plan copied to clipboard!");
+            } catch (err) {
+                console.error('Failed to copy Plan: ', err);
+                showCustomModal("Failed to copy plan. Please try manually.");
+            }
+        }
+        function generateDevelopmentalLevelsHtml(skillType) {
+            const levels = developmentalLevels[skillType];
+            if (!levels) return `<p class="text-center text-slate-500">No data for ${skillType}.</p>`;
+            let html = `<h3 class="text-xl font-bold text-slate-800 mb-4">${skillType} Levels</h3>
+                <nav class="mb-4 flex flex-wrap justify-center space-x-2 sm:space-x-3 border-b border-slate-300 pb-2">
+                    <button class="modal-tab-button tab-button ${skillType === 'Behavioral' ? 'active' : ''}" data-tab="Behavioral">Behavioral</button>
+                    <button class="modal-tab-button tab-button ${skillType === 'Social' ? 'active' : ''}" data-tab="Social">Social</button>
+                    <button class="modal-tab-button tab-button ${skillType === 'Pragmatic Language' ? 'active' : ''}" data-tab="Pragmatic Language">Pragmatic Language</button>
+                </nav>
+                <div class="mb-4 flex flex-wrap justify-center gap-1 sm:gap-2 items-center">
+                    <span class="text-slate-700 font-medium mr-1 text-sm">Filter:</span>
+                    <button class="modal-grade-button grade-button active" data-grade="All">All Levels</button>
+                    </div>
+                <div id="modal-levels-content" class="space-y-3 max-h-96 overflow-y-auto pr-2"></div>`;
+            return html;
+        }
+        function renderModalLevels(domain, filterGrade) { 
+            const contentDiv = document.getElementById('modal-levels-content');
+            if (!contentDiv) return;
+            contentDiv.innerHTML = ''; 
+            const dataToRender = developmentalLevels[domain];
+            if (!dataToRender) { contentDiv.innerHTML = `<p>No data available for this domain.</p>`; return; }
+            const filteredData = dataToRender.filter(level => 
+                filterGrade === 'All' || level.grade === filterGrade 
+            );
+            if (filteredData.length === 0) {
+                contentDiv.innerHTML += `<p class="text-center text-slate-500">No developmental levels found.</p>`;
+                return;
+            }
+            filteredData.forEach(level => {
+                const card = document.createElement('div');
+                card.className = 'level-card';
+                if (filterGrade !== 'All' && level.grade === filterGrade) { 
+                    card.classList.add('highlight'); 
+                }
+                const gradeEl = document.createElement('span');
+                gradeEl.className = 'text-xs font-semibold uppercase text-blue-500 bg-blue-100 px-2 py-1 rounded-full mr-2';
+                gradeEl.textContent = `Level`; 
+                const nameEl = document.createElement('span');
+                nameEl.className = 'level-name text-blue-700 font-semibold';
+                nameEl.textContent = level.name;
+                const descriptionEl = document.createElement('p');
+                descriptionEl.className = 'text-sm text-slate-600 mt-1';
+                descriptionEl.textContent = level.description;
+                const contentWrapper = document.createElement('div');
+                contentWrapper.className = 'flex items-center mb-1';
+                contentWrapper.appendChild(gradeEl); 
+                contentWrapper.appendChild(nameEl);
+                card.appendChild(contentWrapper);
+                card.appendChild(descriptionEl);
+                contentDiv.appendChild(card);
+            });
+        }
+        function setupModalChartListeners() {
+            const modalTabs = modalDisplayContent.querySelectorAll('.modal-tab-button');
+            const modalGrades = modalDisplayContent.querySelectorAll('.modal-grade-button'); 
+            modalTabs.forEach(b => b.onclick = () => {
+                modalTabs.forEach(btn => btn.classList.remove('active')); 
+                b.classList.add('active'); 
+                currentChartTab = b.dataset.tab; 
+                renderModalLevels(currentChartTab, currentChartGradeFilter); 
+            });
+            modalGrades.forEach(b => b.onclick = () => { 
+                modalGrades.forEach(btn => btn.classList.remove('active'));
+                b.classList.add('active');
+                currentChartGradeFilter = b.dataset.grade; 
+                renderModalLevels(currentChartTab, currentChartGradeFilter);
+            });
+            const activeTab = modalDisplayContent.querySelector(`.modal-tab-button[data-tab="${currentChartTab}"]`);
+            if(activeTab) activeTab.classList.add('active');
+            const activeGradeFilter = modalDisplayContent.querySelector(`.modal-grade-button[data-grade="${currentChartGradeFilter}"]`);
+            if(activeGradeFilter) activeGradeFilter.classList.add('active');
+        }
+        infoBehavioralButton.addEventListener('click', () => { currentChartTab = 'Behavioral'; currentChartGradeFilter = 'All'; showCustomModal(generateDevelopmentalLevelsHtml("Behavioral"), 'alert', null, false, '', true); setupModalChartListeners(); renderModalLevels(currentChartTab, currentChartGradeFilter); });
+        infoSocialButton.addEventListener('click', () => { currentChartTab = 'Social'; currentChartGradeFilter = 'All'; showCustomModal(generateDevelopmentalLevelsHtml("Social"), 'alert', null, false, '', true); setupModalChartListeners(); renderModalLevels(currentChartTab, currentChartGradeFilter); });
+        infoPragmaticLanguageButton.addEventListener('click', () => { currentChartTab = 'Pragmatic Language'; currentChartGradeFilter = 'All'; showCustomModal(generateDevelopmentalLevelsHtml("Pragmatic Language"), 'alert', null, false, '', true); setupModalChartListeners(); renderModalLevels(currentChartTab, currentChartGradeFilter); });
+        
+        function resetFormAndOutput() {
+            studentAgeInput.value = '';
+            studentGradeSelect.value = '';
+            reinforcerPreferencesInput.value = '';
+            anecdotalInput.value = '';
+            addReferralNo.checked = true; 
+            toggleReferralInfoVisibility();
+            behaviorBlocks.forEach((block, index) => {
+                const behaviorTypeSelect = document.getElementById(`behaviorTypeSelect_${index}`);
+                const otherBehaviorTypeInput = document.getElementById(`otherBehaviorTypeInput_${index}`);
+                const antecedentSelect = document.getElementById(`antecedentSelect_${index}`);
+                const otherAntecedentInput = document.getElementById(`otherAntecedentInput_${index}`);
+                const behaviorSelect = document.getElementById(`behaviorSelect_${index}`);
+                const otherBehaviorInput = document.getElementById(`otherBehaviorInput_${index}`);
+                const consequenceSelect = document.getElementById(`consequenceSelect_${index}`);
+                const otherConsequenceInput = document.getElementById(`otherConsequenceInput_${index}`);
+                populateBehaviorTypeDropdown(behaviorTypeSelect); 
+                otherBehaviorTypeInput.value = ''; otherBehaviorTypeInput.classList.add('hidden'); behaviorTypeSelect.classList.remove('hidden');
+                populateABCDropdowns(index, ''); 
+                otherAntecedentInput.value = ''; otherAntecedentInput.classList.add('hidden'); antecedentSelect.classList.remove('hidden'); antecedentSelect.disabled = true;
+                otherBehaviorInput.value = ''; otherBehaviorInput.classList.add('hidden'); behaviorSelect.classList.remove('hidden'); behaviorSelect.disabled = true;
+                otherConsequenceInput.value = ''; otherConsequenceInput.classList.add('hidden'); consequenceSelect.classList.remove('hidden'); consequenceSelect.disabled = true;
+            });
+            populateAllDevelopmentalDropdowns(); 
+            bipOutputDiv.classList.add('hidden'); 
+            ['bipFunctionHypothesis', 'bipAntecedentStrategies', 'bipShortTermBehaviors', 'bipTeachingStrategies', 'bipReinforcementShortTerm', 'bipLongTermBehaviors', 'bipResponseStrategies']
+                .forEach(id => { const el = document.getElementById(id); if(el) el.innerHTML = ''; });
+            
+            // Fidelity check elements reset removed
+        }
+        
+        newPlanButton.addEventListener('click', resetFormAndOutput);
+        function toggleReferralInfoVisibility() {
+            if (addReferralYes.checked) {
+                referralInfoContainer.classList.remove('hidden');
+            } else {
+                referralInfoContainer.classList.add('hidden');
+                referralInput.value = ''; 
+            }
+        }
+        const formatStrategiesToHtmlList = (strategiesArray) => {
+            if (Array.isArray(strategiesArray) && strategiesArray.length > 0) {
+                return '<ul>' + strategiesArray.map(item => {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.textContent = item; 
+                    return `<li>${tempDiv.innerHTML}</li>`; 
+                }).join('') + '</ul>';
+            }
+            return '<p>No specific strategies provided.</p>'; 
+        };
+        generateBIPButton.addEventListener('click', async () => {
+            const collectedData = collectPlanData(); 
+            if (collectedData.behaviors.length === 0 || collectedData.behaviors.every(b => !b.behaviorType && !b.antecedent && !b.behavior && !b.consequence)) {
+                showCustomModal("Please fill in at least one complete Behavior, Antecedent, and Consequence set for Behavior 1.");
+                return;
+            }
+            generateBIPButton.disabled = true;
+            generateBIPSpinner.classList.remove('hidden');
+            bipOutputDiv.classList.add('hidden'); 
+            // inlineFidelityOutputContainer.classList.add('hidden'); // This line can be removed as the container is removed
+
+            let behaviorsPromptString = collectedData.behaviors.filter(b => b.behaviorType || b.antecedent || b.behavior || b.consequence).map((b, idx) => `
+                Behavior ${idx + 1}:
+                Behavior Type: ${b.behaviorType || 'Not specified'}
+                Antecedent: ${b.antecedent || 'Not specified'}
+                Behavior: ${b.behavior || 'Not specified'}
+                Consequence: ${b.consequence || 'Not specified'}
+            `).join('\n---\n');
+            
+            if (!behaviorsPromptString && collectedData.behaviors.length > 0 && (collectedData.behaviors[0].behaviorType || collectedData.behaviors[0].antecedent || collectedData.behaviors[0].behavior || collectedData.behaviors[0].consequence)) {
+            } else if (!behaviorsPromptString) {
+                 showCustomModal("Please ensure at least one behavior block has some information filled in.");
+                 generateBIPButton.disabled = false;
+                 generateBIPSpinner.classList.add('hidden');
+                 return;
+            }
+            let developmentalLevelDescription = '';
+            const getLevelDesc = (name, type) => developmentalLevels[type]?.find(l => l.name === name)?.description || '';
+            if (collectedData.behavioralSkills) developmentalLevelDescription += `Behavioral: ${collectedData.behavioralSkills} (${getLevelDesc(collectedData.behavioralSkills, "Behavioral")}). `;
+            if (collectedData.socialSkills) developmentalLevelDescription += `Social: ${collectedData.socialSkills} (${getLevelDesc(collectedData.socialSkills, "Social")}). `;
+            if (collectedData.pragmaticLanguageSkills) developmentalLevelDescription += `Pragmatic Language: ${collectedData.pragmaticLanguageSkills} (${getLevelDesc(collectedData.pragmaticLanguageSkills, "Pragmatic Language")}).`;
+            if (!developmentalLevelDescription) developmentalLevelDescription = 'Not specified.';
+            const prompt = `
+                You are an expert Board Certified Behavior Analyst (BCBA). Analyze the student's behavior(s) and:
+                1. Provide a **Function Hypothesis Statement**: "Summary Statement: [When... the student will... because...; therefore, the function appears to be...]." This should be a single string.
+                2. Propose a Plan with the following sections. For each section that involves a list of strategies (antecedent, replacement behaviors, teaching, reinforcement, response), provide an ARRAY of STRINGS, where each string is a single strategy point. Do not include HTML tags like <ul> or <li> in these array values themselves.
+                    a. **Antecedent Strategies** (ARRAY of STRINGS)
+                    b. **Short-term Replacement Behaviors** (ARRAY of STRINGS)
+                    c. **Teaching Strategies for Short-Term Replacement Behaviors** (evidence-based: FCT, DRA, Visual Supports, etc.) (ARRAY of STRINGS)
+                    d. **Reinforcement Strategies for Short-term Replacement Behaviors** (ARRAY of STRINGS) - IMPORTANT: These strategies MUST integrate and be directly tied to the "Student's Preferred Reinforcers" (which will be listed under "Reinforcers" in the "Student Info" section below, using the value: "${collectedData.reinforcerPreferences || 'None specified'}"). If specific reinforcers are listed by the user, detail how to use them for the replacement behaviors. If none are listed, suggest a variety of commonly effective, age/grade-appropriate reinforcers.
+                    e. **Long-term Replacement Behaviors** (ARRAY of STRINGS)
+                    f. **Response Strategies for Problem Behavior** (ARRAY of STRINGS)
+
+                Incorporate student's age, grade, and developmental levels. Tailor strategies to be developmentally appropriate.
+                Output a single, complete, and valid JSON object with keys: "functionHypothesisStatement" (STRING), "antecedentStrategies" (ARRAY of STRINGS), "shortTermReplacementBehaviors" (ARRAY of STRINGS), "teachingStrategies" (ARRAY of STRINGS), "reinforcementShortTerm" (ARRAY of STRINGS), "longTermReplacementBehaviors" (ARRAY of STRINGS), "responseStrategies" (ARRAY of STRINGS).
+                Ensure all strings within the JSON are properly terminated and escaped. No extraneous text before or after the JSON.
+
+                Student Info:
+                Age: ${collectedData.studentAge || 'N/A'}
+                Grade: ${collectedData.studentGrade || 'N/A'}
+                Developmental Levels: ${developmentalLevelDescription}
+                Anecdotal: ${collectedData.anecdotal || 'N/A'}
+                Referral: ${collectedData.referral || 'N/A'}
+                Reinforcers: ${collectedData.reinforcerPreferences || 'N/A'}
+                ${behaviorsPromptString}
+            `;
+            try {
+                let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+                const payload = {
+                    contents: chatHistory,
+                    generationConfig: {
+                        responseMimeType: "application/json", 
+                        responseSchema: { 
+                            type: "OBJECT",
+                            properties: {
+                                "functionHypothesisStatement": { "type": "STRING" },
+                                "antecedentStrategies": { "type": "ARRAY", "items": { "type": "STRING" } },
+                                "shortTermReplacementBehaviors": { "type": "ARRAY", "items": { "type": "STRING" } },
+                                "teachingStrategies": { "type": "ARRAY", "items": { "type": "STRING" } },
+                                "reinforcementShortTerm": { "type": "ARRAY", "items": { "type": "STRING" } },
+                                "longTermReplacementBehaviors": { "type": "ARRAY", "items": { "type": "STRING" } },
+                                "responseStrategies": { "type": "ARRAY", "items": { "type": "STRING" } }
+                            },
+                            required: ["functionHypothesisStatement", "antecedentStrategies", "shortTermReplacementBehaviors", "teachingStrategies", "reinforcementShortTerm", "longTermReplacementBehaviors", "responseStrategies"]
+                        }
+                    }
+                };
+                const geminiApiKey = ""; 
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                if (result.candidates && result.candidates[0]?.content?.parts[0]?.text) {
+                    const jsonString = result.candidates[0].content.parts[0].text;
+                    try {
+                        const parsedResult = JSON.parse(jsonString); 
+                        bipFunctionHypothesis.textContent = parsedResult.functionHypothesisStatement || 'N/A';
+                        bipAntecedentStrategies.innerHTML = formatStrategiesToHtmlList(parsedResult.antecedentStrategies);
+                        bipShortTermBehaviors.innerHTML = formatStrategiesToHtmlList(parsedResult.shortTermReplacementBehaviors);
+                        bipTeachingStrategies.innerHTML = formatStrategiesToHtmlList(parsedResult.teachingStrategies);
+                        bipReinforcementShortTerm.innerHTML = formatStrategiesToHtmlList(parsedResult.reinforcementShortTerm);
+                        bipLongTermBehaviors.innerHTML = formatStrategiesToHtmlList(parsedResult.longTermReplacementBehaviors);
+                        bipResponseStrategies.innerHTML = formatStrategiesToHtmlList(parsedResult.responseStrategies);
+                        bipOutputDiv.classList.remove('hidden'); 
+                        
+                        // Fidelity check display calls removed
+                        
+                    } catch (parseError) { 
+                        console.error("Error parsing JSON from AI:", parseError);
+                        console.error("Problematic JSON string from AI:", jsonString);
+                        showCustomModal(`Failed to generate plan: AI response was not valid JSON. Error: ${parseError.message}. Check console for the raw AI response.`);
+                    }
+                } else { 
+                    console.error("Unexpected API response structure:", result);
+                    let errorMessage = "Failed to generate plan: Unexpected AI response structure.";
+                    if (result.promptFeedback && result.promptFeedback.blockReason) {
+                        errorMessage += ` (Block Reason: ${result.promptFeedback.blockReason})`;
+                    }
+                     if (result.candidates && result.candidates[0] && result.candidates[0].finishReason) {
+                         errorMessage += ` (Finish Reason: ${result.candidates[0].finishReason})`;
+                    }
+                    showCustomModal(errorMessage);
+                }
+            } catch (error) { 
+                console.error("Error generating Plan:", error); 
+                showCustomModal("Error generating plan: " + error.message);
+            } finally { 
+                generateBIPButton.disabled = false;
+                generateBIPSpinner.classList.add('hidden');
+            }
+        });
+
+        addReferralYes.addEventListener('change', toggleReferralInfoVisibility);
+        addReferralNo.addEventListener('change', toggleReferralInfoVisibility);
+        copyBIPButton.addEventListener('click', copyBIP);
+        
+        behaviorBlocks.forEach((block, index) => {
+            const behaviorTypeSelect = document.getElementById(`behaviorTypeSelect_${index}`);
+            if (behaviorTypeSelect) { 
+                 populateBehaviorTypeDropdown(behaviorTypeSelect); 
+                 populateABCDropdowns(index, ''); 
+                 setupBehaviorBlockListeners(index); 
+            } else {
+                console.error(`Behavior type select for index ${index} not found during initial setup.`);
+            }
+        });
+        
+        populateAllDevelopmentalDropdowns(); 
+        toggleReferralInfoVisibility(); 
+        initializeFirebase(); 
+
+    </script>
+</body>
+</html>
