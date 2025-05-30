@@ -390,7 +390,7 @@
             referralInfoContainer.classList.add('hidden');
         });
 
-        function createPromptFromForm() {
+function createPromptFromForm() {
             const age = studentAgeInput.value || '';
             const grade = studentGradeSelect.value || '';
             const reinforcers = reinforcerPreferencesInput.value || '';
@@ -407,27 +407,31 @@
                 const consequence = document.getElementById(`consequenceSelect_${index}`)?.value || '';
                 let result = '';
                 if (type || antecedent || behavior || consequence) {
-                    result = `Behavior ${index+1}:\n  Type: ${type}\n  Antecedent: ${antecedent}\n  Behavior: ${behavior}\n  Consequence: ${consequence}`;
+                    // You might want to format this more explicitly as ABC data if the AI is a BCBA
+                    result = `Behavior Instance ${index+1}:\n  Antecedent: ${antecedent || 'Not specified'}\n  Behavior (${type || 'Type not specified'}): ${behavior || 'Not specified'}\n  Consequence: ${consequence || 'Not specified'}`;
                 }
                 return result;
             }
             const behaviors = [0,1,2].map(getBehaviorBlock).filter(Boolean).join('\n\n');
 
+            // --- START OF REVISED PROMPT ---
             return `
+Act as a Board Certified Behavior Analyst (BCBA) in a school setting. Your task is to develop a comprehensive Behavior Intervention Plan (BIP) based on the student information provided below. Ensure all suggested strategies and interventions are research-based and appropriate for a school environment.
+
+Student Information:
 Student Age: ${age}
 Grade: ${grade}
 Preferred Reinforcers: ${reinforcers}
 Anecdotal Notes: ${anecdotal}
-${referral ? "Referral: " + referral : ""}
+${referral ? "Referral Information: " + referral : ""}
 Behavioral Skills Level: ${behavioralLevel}
 Social Skills Level: ${socialLevel}
 Pragmatic Language Skills Level: ${pragmaticLevel}
 
-Behaviors:
-${behaviors || 'None provided.'}
+Observed Behaviors (Antecedent-Behavior-Consequence):
+${behaviors || 'No specific behaviors provided.'}
 
-Please generate a function-based behavior intervention plan using the information above.
-Format your response using these section headings (exactly as written, even if you have no recommendation for a section):
+Please generate the Behavior Intervention Plan. Format your response using these section headings (exactly as written. If you have no recommendation for a particular section, please still include the heading and state "No specific recommendation at this time based on the information provided" or similar):
 
 Function Hypothesis Statement:
 Antecedent Strategies:
