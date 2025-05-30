@@ -1,298 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Function Based Problem Solving Worksheet</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.tailwindcss.com/"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #e3f2fd; color: #334155; line-height: 1.6; }
-        .container { max-width: 1200px; margin: 1.5rem auto; padding: 2rem; background-color: #fff; border-radius: 1.25rem; box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15); }
-        .card { background-color: #fff; border-radius: 1rem; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08); padding: 1.75rem; margin-bottom: 1.75rem; border: 1px solid #d0eaff; }
-        textarea, input[type="text"], input[type="number"], input[type="date"], select {
-            border: 2px solid #90caf9; border-radius: 0.625rem; padding: 0.875rem; width: 100%; font-size: 1rem; line-height: 1.5;
-        }
-        textarea:focus, input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, select:focus {
-            outline: none; border-color: #2196f3; box-shadow: 0 0 0 4px rgba(33,150,243,0.3);
-        }
-        button { display: inline-flex; align-items: center; justify-content: center; padding: 0.875rem 1.5rem; border-radius: 0.75rem; font-weight: 600; cursor: pointer; transition: background-color 0.3s, transform 0.15s, box-shadow 0.3s; box-shadow: 0 3px 6px rgba(0,0,0,0.15); }
-        button:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.2); }
-        .btn-primary { background-color: #2196f3; color: #fff; border: none; background-image: linear-gradient(to right,#2196f3,#1976d2);}
-        .btn-primary:hover { background-color: #1976d2; background-image: linear-gradient(to right,#1976d2,#1565c0);}
-        .btn-secondary { background-color: #e0e0e0; color: #424242; border: 1px solid #bdbdbd; background-image: linear-gradient(to right,#e0e0e0,#cccccc);}
-        .btn-secondary:hover { background-color: #cccccc; border-color: #9e9e9e; background-image: linear-gradient(to right,#cccccc,#9e9e9e);}
-        .loading-spinner { border: 4px solid rgba(255,255,255,0.3); border-top: 4px solid #fff; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin-right: 0.5rem;}
-        @keyframes spin { 0% { transform: rotate(0deg);} 100% { transform: rotate(360deg);} }
-        .plan-section { margin-bottom: 1.5rem; }
-        .plan-section h3 { font-weight: 700; margin-bottom: 0.75rem; color: #1976d2; font-size: 1.375rem;}
-        .behavior-block { border: 2px solid #90caf9; border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; background-color: #e3f2fd; box-shadow: 0 4px 8px rgba(0,0,0,0.08);}
-        .behavior-block-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 2px solid #64b5f6;}
-    </style>
-</head>
-<body class="bg-gray-100 p-4">
-    <div class="container">
-        <h1 class="text-4xl font-extrabold text-center text-blue-700 mb-8">
-            Function Based Problem Solving Worksheet
-        </h1>
-
-        <div class="card flex justify-between items-center bg-blue-50 border border-blue-200 p-4 mb-6">
-            <p class="text-blue-800 font-semibold">FBPSW: <span id="sessionStatusDisplay" class="font-normal text-blue-600">Active</span></p>
-            <button id="newPlanButton" class="btn-secondary">
-                <i class="fas fa-plus mr-2"></i> New Plan
-            </button>
-        </div>
-
-        <div class="card">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Teacher Input</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label for="studentAge" class="block text-gray-700 text-sm font-semibold mb-2">Student Age</label>
-                    <input type="number" id="studentAge" placeholder="e.g., 7" min="3" max="18">
-                </div>
-                <div>
-                    <label for="studentGrade" class="block text-gray-700 text-sm font-semibold mb-2">Student Grade Level</label>
-                    <select id="studentGrade">
-                        <option value="">Select Grade</option>
-                        <option value="K">Kindergarten</option>
-                        <option value="1st">1st Grade</option>
-                        <option value="2nd">2nd Grade</option>
-                        <option value="3rd">3rd Grade</option>
-                        <option value="4th">4th Grade</option>
-                        <option value="5th">5th Grade</option>
-                        <option value="6th">6th Grade</option>
-                        <option value="7th">7th Grade</option>
-                        <option value="8th">8th Grade</option>
-                        <option value="Higher">Higher Grades</option>
-                        <option value="Other">Other / Not Applicable</option>
-                    </select>
-                </div>
-                <div id="behaviorsContainer" class="md:col-span-2">
-                    <div class="behavior-block" data-behavior-index="0">
-                        <div class="behavior-block-header">
-                            <h3 class="text-lg font-semibold text-gray-700">Behavior Pattern 1</h3>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label for="behaviorTypeSelect_0" class="block text-gray-700 text-sm font-semibold mb-2">Behavior Type</label>
-                                <select id="behaviorTypeSelect_0">
-                                    <option value="">Select Behavior Type</option>
-                                    <option value="Other">Other (Specify in Notes)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="antecedentSelect_0" class="block text-gray-700 text-sm font-semibold mb-2">Antecedent</label>
-                                <select id="antecedentSelect_0">
-                                    <option value="">Select Antecedent</option>
-                                    <option value="Other">Other (Specify in Notes)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="behaviorSelect_0" class="block text-gray-700 text-sm font-semibold mb-2">Specific Behavior</label>
-                                <select id="behaviorSelect_0">
-                                    <option value="">Select Specific Behavior</option>
-                                    <option value="Other">Other (Specify in Notes)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="consequenceSelect_0" class="block text-gray-700 text-sm font-semibold mb-2">Typical Consequence</label>
-                                <select id="consequenceSelect_0">
-                                    <option value="">Select Consequence</option>
-                                    <option value="Other">Other (Specify in Notes)</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="behavior-block" data-behavior-index="1">
-                        <div class="behavior-block-header">
-                                <h3 class="text-lg font-semibold text-gray-700">Behavior Pattern 2 (Optional)</h3>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                           <div>
-                                <label for="behaviorTypeSelect_1" class="block text-gray-700 text-sm font-semibold mb-2">Behavior Type</label>
-                                <select id="behaviorTypeSelect_1">
-                                    <option value="">Select Behavior Type</option>
-                                    <option value="Other">Other (Specify in Notes)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="antecedentSelect_1" class="block text-gray-700 text-sm font-semibold mb-2">Antecedent</label>
-                                <select id="antecedentSelect_1">
-                                    <option value="">Select Antecedent</option>
-                                    <option value="Other">Other (Specify in Notes)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="behaviorSelect_1" class="block text-gray-700 text-sm font-semibold mb-2">Specific Behavior</label>
-                                <select id="behaviorSelect_1">
-                                    <option value="">Select Specific Behavior</option>
-                                    <option value="Other">Other (Specify in Notes)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="consequenceSelect_1" class="block text-gray-700 text-sm font-semibold mb-2">Typical Consequence</label>
-                                <select id="consequenceSelect_1">
-                                    <option value="">Select Consequence</option>
-                                    <option value="Other">Other (Specify in Notes)</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="behavior-block" data-behavior-index="2">
-                        <div class="behavior-block-header">
-                                <h3 class="text-lg font-semibold text-gray-700">Behavior Pattern 3 (Optional)</h3>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label for="behaviorTypeSelect_2" class="block text-gray-700 text-sm font-semibold mb-2">Behavior Type</label>
-                                <select id="behaviorTypeSelect_2">
-                                    <option value="">Select Behavior Type</option>
-                                    <option value="Other">Other (Specify in Notes)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="antecedentSelect_2" class="block text-gray-700 text-sm font-semibold mb-2">Antecedent</label>
-                                <select id="antecedentSelect_2">
-                                    <option value="">Select Antecedent</option>
-                                    <option value="Other">Other (Specify in Notes)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="behaviorSelect_2" class="block text-gray-700 text-sm font-semibold mb-2">Specific Behavior</label>
-                                <select id="behaviorSelect_2">
-                                    <option value="">Select Specific Behavior</option>
-                                    <option value="Other">Other (Specify in Notes)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="consequenceSelect_2" class="block text-gray-700 text-sm font-semibold mb-2">Typical Consequence</label>
-                                <select id="consequenceSelect_2">
-                                    <option value="">Select Consequence</option>
-                                    <option value="Other">Other (Specify in Notes)</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div>
-                    <label for="anecdotal" class="block text-gray-700 text-sm font-semibold mb-2">Anecdotal Notes (include information about frequency, intensity, duration of behaviors if known)</label>
-                    <textarea id="anecdotal" rows="3" placeholder="e.g., Student exhibits task refusal daily during math, lasting 5-10 minutes..."></textarea>
-                </div>
-                <div>
-                    <label for="reinforcerPreferences" class="block text-gray-700 text-sm font-semibold mb-2">Student's Preferred Reinforcers</label>
-                    <textarea id="reinforcerPreferences" rows="2" placeholder="e.g., Loves computer time, enjoys drawing..."></textarea>
-                </div>
-                <div>
-                    <label for="behavioralSkillsSelect" class="block text-gray-700 text-sm font-semibold mb-2">Behavioral Skills Level</label>
-                    <select id="behavioralSkillsSelect">
-                        <option value="">Select Level</option>
-                        <option value="Emerging Regulator">Emerging Regulator</option>
-                        <option value="Developing Follower">Developing Follower</option>
-                        <option value="Routine Participant">Routine Participant</option>
-                        <option value="Adaptive Monitor">Adaptive Monitor</option>
-                        <option value="Intentional Regulator">Intentional Regulator</option>
-                        <option value="Reflective Manager">Reflective Manager</option>
-                        <option value="Independent Self-Regulator">Independent Self-Regulator</option>
-                        <option value="Strategic Self-Manager">Strategic Self-Manager</option>
-                        <option value="Autonomous Problem-Solver">Autonomous Problem-Solver</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="socialSkillsSelect" class="block text-gray-700 text-sm font-semibold mb-2">Social Skills Level</label>
-                    <select id="socialSkillsSelect">
-                        <option value="">Select Level</option>
-                        <option value="Social Explorer">Social Explorer</option>
-                        <option value="Emerging Friend">Emerging Friend</option>
-                        <option value="Cooperative Peer">Cooperative Peer</option>
-                        <option value="Connected Contributor">Connected Contributor</option>
-                        <option value="Social Navigator">Social Navigator</option>
-                        <option value="Empathetic Collaborator">Empathetic Collaborator</option>
-                        <option value="Interpersonal Strategist">Interpersonal Strategist</option>
-                        <option value="Relational Thinker">Relational Thinker</option>
-                        <option value="Social Leader">Social Leader</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="pragmaticLanguageSkillsSelect" class="block text-gray-700 text-sm font-semibold mb-2">Pragmatic Language Skills Level</label>
-                    <select id="pragmaticLanguageSkillsSelect">
-                        <option value="">Select Level</option>
-                        <option value="Beginning Communicator">Beginning Communicator</option>
-                        <option value="Emerging Conversationalist">Emerging Conversationalist</option>
-                        <option value="Functional Talker">Functional Talker</option>
-                        <option value="Social Interpreter">Social Interpreter</option>
-                        <option value="Contextual Communicator">Contextual Communicator</option>
-                        <option value="Purposeful Speaker">Purposeful Speaker</option>
-                        <option value="Strategic Conversationalist">Strategic Conversationalist</option>
-                        <option value="Flexible Communicator">Flexible Communicator</option>
-                        <option value="Advanced Discourse User">Advanced Discourse User</option>
-                    </select>
-                </div>
-                <div class="md:col-span-2">
-                    <label class="block text-gray-700 text-sm font-semibold mb-2">Add pertinent referral information?</label>
-                    <div class="flex items-center space-x-4 mb-4">
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="addReferralInfo" value="yes" class="form-radio" id="addReferralYes">
-                            <span class="ml-2 text-gray-700">Yes</span>
-                        </label>
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="addReferralInfo" value="no" class="form-radio" id="addReferralNo" checked>
-                            <span class="ml-2 text-gray-700">No</span>
-                        </label>
-                    </div>
-                    <div id="referralInfoContainer" class="hidden">
-                        <label for="referral" class="block text-gray-700 text-sm font-semibold mb-2">Referral Information</label>
-                        <textarea id="referral" rows="4" placeholder="e.g., Student referred for disruptive behavior..."></textarea>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-6 flex justify-end">
-                <button id="generateBIPButton" class="btn-primary">
-                    <span id="generateBIPSpinner" class="loading-spinner hidden"></span>
-                    Generate Plan
-                </button>
-            </div>
-        </div>
-
-        <div id="bipOutput" class="card hidden">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Generated Function Based Problem Solving Worksheet</h2>
-            <div class="mb-4">
-                <p class="text-lg font-semibold text-gray-700">Function Hypothesis Statement:</p>
-                <p id="bipFunctionHypothesis" class="text-blue-600 font-medium text-xl"></p>
-            </div>
-            <div class="plan-section">
-                <h3>Antecedent Strategies:</h3>
-                <div id="bipAntecedentStrategies" class="prose max-w-none text-gray-800"></div>
-            </div>
-            <div class="plan-section">
-                <h3>Short-term Replacement Behaviors:</h3>
-                <div id="bipShortTermBehaviors" class="prose max-w-none text-gray-800"></div>
-            </div>
-            <div class="plan-section">
-                <h3>Teaching Strategies for Short-Term Replacement Behaviors:</h3>
-                <div id="bipTeachingStrategies" class="prose max-w-none text-gray-800"></div>
-            </div>
-            <div class="plan-section">
-                <h3>Reinforcement Strategies for Short-Term Replacement Behaviors:</h3>
-                <div id="bipReinforcementShortTerm" class="prose max-w-none text-gray-800"></div>
-            </div>
-            <div class="plan-section">
-                <h3>Long-term Replacement Behaviors:</h3>
-                <div id="bipLongTermBehaviors" class="prose max-w-none text-gray-800"></div>
-            </div>
-            <div class="plan-section">
-                <h3>Response Strategies for Problem Behavior:</h3>
-                <div id="bipResponseStrategies" class="prose max-w-none text-gray-800"></div>
-            </div>
-            <div class="mt-6 flex justify-end space-x-4">
-                <button id="copyBIPButton" class="btn-secondary">
-                    <i class="fas fa-copy mr-2"></i> Copy Plan
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <script type="module">
-        // --- Data from PDF for dropdowns ---
+<script type="module">
+        // --- Data from PDF for ABC dropdowns (from previous request) ---
         const bipData = {
             "Physical Aggression": {
                 antecedents: ["Task or work demand (difficult or nonpreferred task)", "Being told \"no\" or denied a request", "Transition events (e.g. end of a preferred activity, start of a non-preferred activity)", "Negative peer interactions (teasing, play fights)", "Sensory or environmental triggers (e.g. loud noise, bright lights)", "Long waits or unclear routines"],
@@ -339,7 +46,6 @@
         // DOM elements
         const studentAgeInput = document.getElementById('studentAge');
         const studentGradeSelect = document.getElementById('studentGrade');
-        // ... (all your other existing DOM element consts)
         const reinforcerPreferencesInput = document.getElementById('reinforcerPreferences');
         const behavioralSkillsSelect = document.getElementById('behavioralSkillsSelect');
         const socialSkillsSelect = document.getElementById('socialSkillsSelect');
@@ -372,7 +78,7 @@
 
         function populateSelectWithOptions(selectElement, optionsArray, defaultOptionText, keepOther = true) {
             const existingOtherOption = selectElement.querySelector('option[value="Other"]');
-            selectElement.innerHTML = `<option value="">${defaultOptionText}</option>`; // Clear existing options and add default
+            selectElement.innerHTML = `<option value="">${defaultOptionText}</option>`; 
 
             optionsArray.forEach(optionText => {
                 const option = document.createElement('option');
@@ -383,7 +89,7 @@
 
             if (keepOther && existingOtherOption) {
                  selectElement.appendChild(existingOtherOption.cloneNode(true));
-            } else if (keepOther && !existingOtherOption) { // Add "Other" if it wasn't there but should be
+            } else if (keepOther && !existingOtherOption) { 
                 const otherOption = document.createElement('option');
                 otherOption.value = "Other";
                 otherOption.textContent = "Other (Specify in Notes)";
@@ -393,16 +99,12 @@
 
         function initializeBehaviorDropdowns() {
             const behaviorTypeKeys = Object.keys(bipData);
-
             for (let i = 0; i < 3; i++) {
                 const behaviorTypeSelect = document.getElementById(`behaviorTypeSelect_${i}`);
                 const antecedentSelect = document.getElementById(`antecedentSelect_${i}`);
                 const behaviorSelect = document.getElementById(`behaviorSelect_${i}`);
                 const consequenceSelect = document.getElementById(`consequenceSelect_${i}`);
-
-                // Populate Behavior Type
                 populateSelectWithOptions(behaviorTypeSelect, behaviorTypeKeys, "Select Behavior Type");
-
                 behaviorTypeSelect.addEventListener('change', function() {
                     const selectedBehaviorType = this.value;
                     if (selectedBehaviorType && bipData[selectedBehaviorType]) {
@@ -410,23 +112,20 @@
                         populateSelectWithOptions(behaviorSelect, bipData[selectedBehaviorType].behaviors, "Select Specific Behavior");
                         populateSelectWithOptions(consequenceSelect, bipData[selectedBehaviorType].consequences, "Select Consequence");
                     } else {
-                        // Reset dependent dropdowns if "Select Behavior Type" or "Other" is chosen initially
                         populateSelectWithOptions(antecedentSelect, [], "Select Antecedent (after choosing type)");
                         populateSelectWithOptions(behaviorSelect, [], "Select Specific Behavior (after choosing type)");
                         populateSelectWithOptions(consequenceSelect, [], "Select Consequence (after choosing type)");
                     }
                 });
-                // Initial state for dependent dropdowns
                 populateSelectWithOptions(antecedentSelect, [], "Select Antecedent (after choosing type)");
                 populateSelectWithOptions(behaviorSelect, [], "Select Specific Behavior (after choosing type)");
                 populateSelectWithOptions(consequenceSelect, [], "Select Consequence (after choosing type)");
             }
         }
         
-        // Call initialization on script load
         initializeBehaviorDropdowns();
 
-        // --- MODIFIED createPromptFromForm FUNCTION (from your previous version) ---
+        // --- UPDATED createPromptFromForm FUNCTION ---
         function createPromptFromForm() {
             const age = studentAgeInput.value || 'Not specified';
             const grade = studentGradeSelect.value || 'Not specified';
@@ -455,6 +154,38 @@
             }
             const behaviors = [0,1,2].map(getBehaviorBlock).filter(Boolean).join('\n\n');
 
+            const evidenceBasedStrategies = `
+ADDITIONAL GUIDANCE FOR REPLACEMENT BEHAVIORS:
+When developing the 'Short-term Replacement Behaviors', 'Teaching Strategies for Short-Term Replacement Behaviors', 'Reinforcement Strategies for Short-Term Replacement Behaviors', and 'Long-term Replacement Behaviors' sections, please consider the following evidence-based approaches, categorized by common behavioral functions. First, hypothesize the function based on the provided ABC data and student information. Then, select and adapt strategies relevant to that hypothesized function.
+
+1. For ATTENTION-SEEKING BEHAVIORS:
+   - Functional Communication Training (FCT): Teach appropriate ways to gain attention (e.g., raising hand, using a "help" card, polite verbal requests like "Excuse me" or "Am I doing good work?"). Immediately reinforce these appropriate requests with praise or desired interaction.
+   - Scheduled Attention/Check-ins (Noncontingent Reinforcement - NCR): Provide brief, positive interactions on a regular schedule (e.g., every 10-15 minutes) regardless of the student's current behavior. This predictability can reduce anxiety about getting attention. Always use these check-ins to reinforce expected behaviors.
+   - Differential Reinforcement of Alternative Behavior (DRA): Provide attention and rewards exclusively for the appropriate replacement behavior for seeking attention. Withhold attention/rewards when the problem attention-seeking behavior occurs.
+   - Visual Supports & Social Stories: Use visual cues (e.g., picture of hand-raising) and social narratives to clearly illustrate expected methods for seeking attention and waiting for a turn.
+   - Planned Ignoring & Redirecting: Consistently ignore minor, safe attention-seeking actions. When the student attempts the appropriate replacement behavior, immediately provide attention or praise. (Not for aggressive or self-injurious behaviors).
+
+2. For ESCAPE/AVOIDANCE BEHAVIORS:
+   - FCT for Breaks/Help: Teach the student to request breaks or assistance using cards, pictures, or specific phrases (e.g., "I need a break," "Help please," "I don't understand") when tasks are difficult. Reinforce these requests.
+   - Choice-Making: Offer limited, appropriate choices related to tasks to increase the student's sense of control (e.g., "Worksheet with pencil or marker?", "Work at desk or on the rug?"). The core task requirement remains.
+   - Task Modification & Support: Break down difficult tasks into smaller, manageable steps; simplify instructions; or shorten work sessions. Provide visual aids or one-on-one help. Consider high-probability request sequences.
+   - Scheduled Breaks (NCR for Escape): Implement brief, routine breaks independent of the student's behavior (e.g., a short walk every 10 minutes of work).
+   - Visual Timers & Priming: Use timers, countdowns, or visual schedules to show remaining task time. Provide advance warnings for transitions or changes in activity.
+
+3. For ACCESS-TO-TANGIBLES BEHAVIORS:
+   - FCT for Requests: Teach clear and appropriate ways to request desired items or activities (e.g., "Can I have X, please?", picture exchange). Immediately honor successful, appropriate requests.
+   - Differential Reinforcement (DRA): Reinforce only appropriate requesting behaviors. Withhold the desired tangible item/activity when the student uses problem behaviors (e.g., grabbing, tantrums) to try to obtain it.
+   - Scheduled Access & Token Systems: Plan regular, predictable opportunities for the student to access preferred items or activities. Use visual systems like "first/then" boards or token economies to link task completion with access to tangibles.
+   - Sharing and Turn-Taking Skills: Explicitly teach, model, and practice skills for sharing and taking turns, using role-play, timers, and scripts. Reinforce cooperative behaviors.
+
+4. For SENSORY-STIMULATION BEHAVIORS:
+   - Sensory Breaks & Movement: Schedule regular opportunities for appropriate sensory or motor activities (e.g., jumping jacks, wall push-ups, short walks, stretch breaks, trampoline time) to provide needed input in a planned way.
+   - Sensory Tools & Alternatives: Provide a selection of acceptable sensory items (e.g., stress balls, fidget toys, chewable jewelry) and teach the student when and how to use them as an alternative to inappropriate sensory-seeking behaviors. Praise appropriate use.
+   - Environmental Modifications: Adapt the learning environment to reduce sensory overload (e.g., allow noise-canceling headphones, dim lights, provide a quieter workspace). Prepare the student for known sensory events using schedules or priming.
+   - Calming & Self-Regulation Techniques: Teach simple coping strategies like deep breathing, counting, or using a designated "calm-down corner." Practice these techniques when the student is calm.
+Remember that all strategies should be consistently implemented across settings and by all relevant staff.
+`;
+
             return `
 Act as an expert Board Certified Behavior Analyst (BCBA) in a school setting. Your primary task is to develop a comprehensive and actionable Behavior Intervention Plan (BIP) based on the student information provided below.
 
@@ -473,7 +204,9 @@ Current Pragmatic Language Skills Level: ${pragmaticLevel}
 Observed Recurring Behavior Patterns (ABC Data - based on dropdown selections):
 ${behaviors || 'No specific recurring behavior patterns selected. If none are detailed, use the anecdotal notes to infer patterns.'}
 
-Please generate the Behavior Intervention Plan. Format your response using these section headings (exactly as written). Ensure ALL sections are thoroughly addressed with specific, actionable, and research-based strategies appropriate for a school environment.
+${evidenceBasedStrategies}
+
+Please generate the Behavior Intervention Plan. Format your response using these section headings (exactly as written). Ensure ALL sections are thoroughly addressed with specific, actionable, and research-based strategies appropriate for a school environment, drawing from the evidence-based strategies provided above where relevant to the hypothesized function. **You should act as if you have all necessary information to complete every section of the plan comprehensively and should attempt to provide recommendations for all listed sections. Do not state that more information is needed for any section; instead, provide the best possible strategies based on the information at hand.**
 
 **Critically, the 'Response Strategies for Problem Behavior' section must be detailed and robust.** This section should clearly outline:
 1.  Immediate actions to take when the problem behavior pattern occurs to ensure the safety of the student and others.
@@ -481,8 +214,6 @@ Please generate the Behavior Intervention Plan. Format your response using these
 3.  Clear, brief, and consistent verbal and non-verbal responses from staff.
 4.  Procedures for follow-up after an incident, including re-teaching, and how to return the student to the learning environment.
 5.  Avoid strategies that could inadvertently reinforce the problem behavior based on its hypothesized function.
-
-If you have no specific recommendation for a particular section despite the information provided, please explicitly state "Based on the current information, no specific strategies are recommended for this section at this time, but further observation or data collection is advised to develop this area." Do not leave any section blank or with a generic placeholder.
 
 Required BIP Sections:
 Function Hypothesis Statement:
@@ -497,6 +228,7 @@ Response Strategies for Problem Behavior:
 
         // --- REVISED parsePlanSections FUNCTION ---
         function parsePlanSections(planText) {
+            // ... (rest of the function remains the same as your last version)
             console.log("[FRONTEND] parsePlanSections received planText (length):", planText.length);
             const sectionKeys = [ 
                 "Function Hypothesis Statement", "Antecedent Strategies", "Short-term Replacement Behaviors",
@@ -540,8 +272,9 @@ Response Strategies for Problem Behavior:
         }
 
         function showPlanSections(sections) {
+            // ... (rest of the function remains the same as your last version)
             console.log("[FRONTEND] showPlanSections received sections:", JSON.parse(JSON.stringify(sections)));
-            const fallbackMsg = "Information not found in plan or section is empty. The AI may not have had enough information or may have missed this section. Consider revising the input or trying again.";
+            const fallbackMsg = "The AI attempted to generate this section but may require more specific input for optimal results. Review and refine as needed."; // Changed fallback message
             bipFunctionHypothesis.textContent = sections["Function Hypothesis Statement"] || fallbackMsg;
             bipAntecedentStrategies.textContent = sections["Antecedent Strategies"] || fallbackMsg;
             bipShortTermBehaviors.textContent = sections["Short-term Replacement Behaviors"] || fallbackMsg;
@@ -554,6 +287,7 @@ Response Strategies for Problem Behavior:
         }
 
         function showErrorOutput(msg) {
+            // ... (rest of the function remains the same as your last version)
             console.log("[FRONTEND] showErrorOutput called with msg:", msg);
             bipFunctionHypothesis.textContent = msg;
             bipAntecedentStrategies.textContent = ""; 
@@ -566,6 +300,7 @@ Response Strategies for Problem Behavior:
         }
 
         function hidePlanOutput() {
+            // ... (rest of the function remains the same as your last version)
             bipFunctionHypothesis.textContent = "";
             bipAntecedentStrategies.textContent = "";
             bipShortTermBehaviors.textContent = "";
@@ -577,13 +312,14 @@ Response Strategies for Problem Behavior:
         }
 
         async function generatePlanWithGemini() {
+            // ... (rest of the function remains the same as your last version, including enhanced error handling)
             console.log("[FRONTEND] generatePlanWithGemini called");
             generateBIPSpinner.classList.remove('hidden');
             generateBIPButton.disabled = true;
             sessionStatusDisplay.textContent = "Generating...";
             hidePlanOutput();
             const userGeneratedPrompt = createPromptFromForm();
-            console.log("[FRONTEND] Generated prompt for backend:", userGeneratedPrompt); 
+            console.log("[FRONTEND] Generated prompt for backend (first 500 chars):", userGeneratedPrompt.substring(0,500) + "..."); 
             const backendApiUrl = '/api/ask'; 
             const requestBody = { prompt: userGeneratedPrompt };
             try {
@@ -594,7 +330,7 @@ Response Strategies for Problem Behavior:
                 });
                 console.log("[FRONTEND] Received response from backend. Status:", response.status, "Ok:", response.ok); 
                 const data = await response.json();
-                console.log("[FRONTEND] Parsed data from backend response:", JSON.parse(JSON.stringify(data)));
+                console.log("[FRONTEND] Parsed data from backend response (structure check):", data ? "Data received" : "No data received");
                 if (!response.ok) {
                     let errorMsg = data.error || `Request failed with status ${response.status}`;
                     if (data.details) errorMsg += `\nDetails: ${typeof data.details === 'object' ? JSON.stringify(data.details) : data.details}`;
@@ -612,13 +348,20 @@ Response Strategies for Problem Behavior:
                     showPlanSections(sections);
                 } else {
                     let specificError = "Received an unexpected response from the server or no plan was generated.";
-                    if (data.candidates && data.candidates.length > 0 && data.candidates[0].finishReason === "SAFETY") {
-                        specificError = "The response was blocked due to safety settings. Please review your input or adjust safety configurations if possible.";
-                        console.warn("[FRONTEND] Response blocked due to SAFETY finishReason", data.candidates[0].safetyRatings);
+                    if (data.candidates && data.candidates.length > 0 && data.candidates[0].finishReason) {
+                         specificError = `The response generation finished with reason: ${data.candidates[0].finishReason}. `;
+                         if (data.candidates[0].finishReason === "SAFETY") {
+                           specificError += "This often means the content was blocked by safety filters. Review input and safety settings. ";
+                           console.warn("[FRONTEND] Response blocked due to SAFETY finishReason", data.candidates[0].safetyRatings);
+                         } else if (data.candidates[0].finishReason === "MAX_TOKENS") {
+                            specificError += "The maximum number of tokens for the response was reached. The plan may be incomplete. ";
+                         } else if (data.candidates[0].finishReason === "RECITATION") {
+                            specificError += "The response was blocked due to detected recitation from a source. ";
+                         }
                     } else if (data.promptFeedback && data.promptFeedback.blockReason) {
-                        specificError = `The prompt was blocked. Reason: ${data.promptFeedback.blockReason}.`;
-                        if (data.promptFeedback.safetyRatings) specificError += ` Details: ${JSON.stringify(data.promptFeedback.safetyRatings)}`;
-                        console.warn("[FRONTEND] Prompt blocked by API", data.promptFeedback);
+                         specificError = `The prompt was blocked by the API. Reason: ${data.promptFeedback.blockReason}.`;
+                         if (data.promptFeedback.safetyRatings) specificError += ` Details: ${JSON.stringify(data.promptFeedback.safetyRatings)}`;
+                         console.warn("[FRONTEND] Prompt blocked by API", data.promptFeedback);
                     } else {
                         console.log("[FRONTEND] Response OK, but no valid candidates or text found in data, or unexpected structure."); 
                         console.error("[FRONTEND] Unexpected successful response structure:", data);
@@ -642,6 +385,7 @@ Response Strategies for Problem Behavior:
         });
 
         copyBIPButton.addEventListener('click', () => {
+            // ... (rest of the function remains the same as your last version)
             let textToCopy = 
 `Function Hypothesis Statement:
 ${bipFunctionHypothesis.textContent}
@@ -665,6 +409,7 @@ ${bipResponseStrategies.textContent}
         });
 
         document.getElementById('newPlanButton').addEventListener('click', () => {
+            // ... (rest of the function remains the same as your last version)
             studentAgeInput.value = '';
             studentGradeSelect.value = '';
             reinforcerPreferencesInput.value = '';
@@ -674,9 +419,13 @@ ${bipResponseStrategies.textContent}
             socialSkillsSelect.value = '';
             pragmaticLanguageSkillsSelect.value = '';
             for (let i = 0; i < 3; i++) {
-                document.getElementById(`behaviorTypeSelect_${i}`).value = '';
-                // Trigger change to reset dependent dropdowns
-                document.getElementById(`behaviorTypeSelect_${i}`).dispatchEvent(new Event('change'));
+                const behaviorTypeSelect = document.getElementById(`behaviorTypeSelect_${i}`);
+                behaviorTypeSelect.value = '';
+                behaviorTypeSelect.dispatchEvent(new Event('change'));
+
+                document.getElementById(`antecedentSelect_${i}`).innerHTML = '<option value="">Select Antecedent (after choosing type)</option><option value="Other">Other (Specify in Notes)</option>';
+                document.getElementById(`behaviorSelect_${i}`).innerHTML = '<option value="">Select Specific Behavior (after choosing type)</option><option value="Other">Other (Specify in Notes)</option>';
+                document.getElementById(`consequenceSelect_${i}`).innerHTML = '<option value="">Select Consequence (after choosing type)</option><option value="Other">Other (Specify in Notes)</option>';
             }
             addReferralNo.checked = true;
             referralInfoContainer.classList.add('hidden');
