@@ -441,43 +441,85 @@ Response Strategies for Problem Behavior:
             `.trim();
         }
 
+        // --- REVISED parsePlanSections FUNCTION ---
         function parsePlanSections(planText) {
-            console.log("[FRONTEND] parsePlanSections received planText:", planText); // ADDED CONSOLE LOG
-            const sections = {
-                "Function Hypothesis Statement": "",
-                "Antecedent Strategies": "",
-                "Short-term Replacement Behaviors": "",
-                "Teaching Strategies for Short-Term Replacement Behaviors": "",
-                "Reinforcement Strategies for Short-Term Replacement Behaviors": "",
-                "Long-term Replacement Behaviors": "",
-                "Response Strategies for Problem Behavior": ""
-            };
-            let currentSection = null;
-            const lines = planText.split('\n');
-            for (let line of lines) {
-                // Trim the line to handle potential leading/trailing spaces robustly
-                const trimmedLine = line.trim();
-                // Find if the trimmed line exactly matches one of the section keys
-                const heading = Object.keys(sections).find(h => trimmedLine.startsWith(h + ":")); // More robust: check for heading + colon
+            console.log("[FRONTEND] parsePlanSections received planText (length):", planText.length);
+            // For easier debugging of planText content if needed:
+            // console.log("Full planText for parsing:\n", planText);
 
-                if (heading) {
-                    currentSection = heading;
-                    // Extract content after the heading and colon, then trim
-                    const content = line.slice(heading.length + 1).trim(); // +1 for the colon
-                    if (content) sections[currentSection] += content + '\n'; // Add content if it's not just an empty string after trim
-                } else if (currentSection && trimmedLine) { // Only add non-empty lines to the current section
-                    sections[currentSection] += line + '\n'; // Keep original line for multi-line content formatting
+            const sectionKeys = [ // Define the order for reliable processing
+                "Function Hypothesis Statement",
+                "Antecedent Strategies",
+                "Short-term Replacement Behaviors",
+                "Teaching Strategies for Short-Term Replacement Behaviors",
+                "Reinforcement Strategies for Short-Term Replacement Behaviors",
+                "Long-term Replacement Behaviors",
+                "Response Strategies for Problem Behavior"
+            ];
+
+            const sections = {};
+            sectionKeys.forEach(key => sections[key] = ""); // Initialize all sections to empty
+
+            const lines = planText.split('\n');
+            let currentSectionKey = null;
+            let contentForCurrentSection = [];
+
+            for (const line of lines) {
+                let matchedNewSection = false;
+                for (const key of sectionKeys) {
+                    // Check if the line starts with the heading (e.g., "**Heading:**" or "Heading:")
+                    // Making it case-insensitive and trimming helps. Also check for markdown bold.
+                    const trimmedLine = line.trim();
+                    // Regex to match "Key:" or "**Key:**" at the beginning of a line, case insensitive
+                    const pattern = new RegExp(`^(?:\\*\\*)?${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?:\\*\\*)?:`, "i");
+
+
+                    if (pattern.test(trimmedLine)) {
+                        // If we were accumulating content for a previous section, save it.
+                        if (currentSectionKey && contentForCurrentSection.length > 0) {
+                            sections[currentSectionKey] = contentForCurrentSection.join('\n').trim();
+                        }
+                        // Start new section
+                        currentSectionKey = key;
+                        contentForCurrentSection = []; // Reset content buffer
+
+                        // Check if there's any content on the same line as the heading, after the colon
+                        const contentOnHeadingLine = trimmedLine.replace(pattern, "").trim();
+                        if (contentOnHeadingLine) {
+                            contentForCurrentSection.push(contentOnHeadingLine);
+                        }
+                        matchedNewSection = true;
+                        break; // Found the heading for this line
+                    }
+                }
+
+                // If the line is not a new heading but we are inside a section, add the line
+                if (!matchedNewSection && currentSectionKey) {
+                    // Don't add just empty lines unless the section already has content (to preserve paragraphs)
+                    // or if the line itself has content after trimming
+                    if (line.trim() !== "" || contentForCurrentSection.length > 0) {
+                         contentForCurrentSection.push(line); // Keep original line for formatting
+                    }
                 }
             }
-            for (let key in sections) {
-                sections[key] = sections[key].trim(); // Final trim for each section
+
+            // After the loop, save any remaining content for the last section
+            if (currentSectionKey && contentForCurrentSection.length > 0) {
+                sections[currentSectionKey] = contentForCurrentSection.join('\n').trim();
             }
-            console.log("[FRONTEND] parsePlanSections generated sections:", JSON.parse(JSON.stringify(sections))); // ADDED CONSOLE LOG (cloned for better inspection)
+            
+            // Final trim for all sections
+            for (let key in sections) {
+                sections[key] = sections[key].trim();
+            }
+
+            console.log("[FRONTEND] parsePlanSections generated sections:", JSON.parse(JSON.stringify(sections)));
             return sections;
         }
+        // --- END OF REVISED parsePlanSections FUNCTION ---
 
         function showPlanSections(sections) {
-            console.log("[FRONTEND] showPlanSections received sections:", JSON.parse(JSON.stringify(sections))); // ADDED CONSOLE LOG (cloned)
+            console.log("[FRONTEND] showPlanSections received sections:", JSON.parse(JSON.stringify(sections)));
             
             const fallbackMsg = "Information not found in plan or section is empty.";
 
@@ -494,9 +536,9 @@ Response Strategies for Problem Behavior:
         }
 
         function showErrorOutput(msg) {
-            console.log("[FRONTEND] showErrorOutput called with msg:", msg); // ADDED CONSOLE LOG
+            console.log("[FRONTEND] showErrorOutput called with msg:", msg);
             bipFunctionHypothesis.textContent = msg;
-            bipAntecedentStrategies.textContent = ""; // Clear other fields
+            bipAntecedentStrategies.textContent = ""; 
             bipShortTermBehaviors.textContent = "";
             bipTeachingStrategies.textContent = "";
             bipReinforcementShortTerm.textContent = "";
@@ -517,14 +559,14 @@ Response Strategies for Problem Behavior:
         }
 
         async function generatePlanWithGemini() {
-            console.log("[FRONTEND] generatePlanWithGemini called"); // ADDED CONSOLE LOG
+            console.log("[FRONTEND] generatePlanWithGemini called");
             generateBIPSpinner.classList.remove('hidden');
             generateBIPButton.disabled = true;
             sessionStatusDisplay.textContent = "Generating...";
             hidePlanOutput();
 
             const userGeneratedPrompt = createPromptFromForm();
-            console.log("[FRONTEND] Generated prompt for backend:", userGeneratedPrompt); // ADDED CONSOLE LOG
+            console.log("[FRONTEND] Generated prompt for backend:", userGeneratedPrompt); 
 
             const backendApiUrl = '/api/ask'; 
 
@@ -541,10 +583,10 @@ Response Strategies for Problem Behavior:
                     body: JSON.stringify(requestBody)
                 });
                 
-                console.log("[FRONTEND] Received response from backend. Status:", response.status, "Ok:", response.ok); // ADDED CONSOLE LOG
+                console.log("[FRONTEND] Received response from backend. Status:", response.status, "Ok:", response.ok); 
 
                 const data = await response.json();
-                console.log("[FRONTEND] Parsed data from backend response:", JSON.parse(JSON.stringify(data))); // ADDED CONSOLE LOG (cloned)
+                console.log("[FRONTEND] Parsed data from backend response:", JSON.parse(JSON.stringify(data)));
 
 
                 if (!response.ok) {
@@ -560,24 +602,24 @@ Response Strategies for Problem Behavior:
                     console.error("[FRONTEND] Gemini API Error (via backend, data.error is present):", data.error);
                 }
                  else if (data.candidates && data.candidates.length > 0 && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts.length > 0 && data.candidates[0].content.parts[0].text) {
-                    console.log("[FRONTEND] Valid candidates found in data. Processing plan."); // ADDED CONSOLE LOG
+                    console.log("[FRONTEND] Valid candidates found in data. Processing plan.");
                     const planText = data.candidates[0].content.parts[0].text;
                     const sections = parsePlanSections(planText);
                     showPlanSections(sections);
                 }
                  else {
-                    console.log("[FRONTEND] Response OK, but no valid candidates or text found in data."); // ADDED CONSOLE LOG
+                    console.log("[FRONTEND] Response OK, but no valid candidates or text found in data."); 
                     showErrorOutput("Received an unexpected response from the server or no plan was generated (data did not contain expected plan structure).");
                     console.error("[FRONTEND] Unexpected successful response structure:", data);
                 }
             } catch (err) {
-                console.error("[FRONTEND] Error in fetch try-catch block (e.g., network error, or response.json() failed):", err); // ADDED CONSOLE LOG
+                console.error("[FRONTEND] Error in fetch try-catch block (e.g., network error, or response.json() failed):", err); 
                 showErrorOutput("An error occurred while communicating with the server: " + err.message);
             } finally {
                 generateBIPSpinner.classList.add('hidden');
                 generateBIPButton.disabled = false;
                 sessionStatusDisplay.textContent = "Active";
-                console.log("[FRONTEND] generatePlanWithGemini finished."); // ADDED CONSOLE LOG
+                console.log("[FRONTEND] generatePlanWithGemini finished.");
             }
         }
 
