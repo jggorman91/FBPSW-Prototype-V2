@@ -29,13 +29,13 @@
         .behavior-block { border: 2px solid #90caf9; border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; background-color: #e3f2fd; box-shadow: 0 4px 8px rgba(0,0,0,0.08);}
         .behavior-block-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 2px solid #64b5f6;}
         .info-modal-parent {
-            position: relative; /* For positioning the modal absolutely within this parent */
+            position: relative; 
         }
         .info-modal {
-            left: 0; /* Align to the left of the parent */
-            top: 100%; /* Position below the element it's related to (e.g., the select dropdown) */
-            min-width: 320px; /* Minimum width for readability */
-            max-width: 500px; /* Maximum width */
+            left: 0; 
+            top: 100%; 
+            min-width: 320px; 
+            max-width: 500px; 
         }
     </style>
 </head>
@@ -193,7 +193,7 @@
                 </div>
 
                 <div class="info-modal-parent">
-                    <div class="flex items-center mb-1"> 
+                    <div class="flex items-center mb-1">
                         <label for="behavioralSkillsSelect" class="block text-gray-700 text-sm font-semibold">Behavioral Skills Level</label>
                         <i id="behavioralInfoIcon" class="fas fa-info-circle text-blue-500 ml-2 cursor-pointer hover:text-blue-700" title="Show behavioral levels"></i>
                     </div>
@@ -235,6 +235,7 @@
                         </table>
                     </div>
                 </div>
+
                 <div class="info-modal-parent">
                     <div class="flex items-center mb-1">
                         <label for="socialSkillsSelect" class="block text-gray-700 text-sm font-semibold">Social Skills Level</label>
@@ -278,6 +279,7 @@
                         </table>
                     </div>
                 </div>
+
                 <div class="info-modal-parent">
                     <div class="flex items-center mb-1">
                         <label for="pragmaticLanguageSkillsSelect" class="block text-gray-700 text-sm font-semibold">Pragmatic Language Skills Level</label>
@@ -321,6 +323,7 @@
                         </table>
                     </div>
                 </div>
+
                 <div class="md:col-span-2">
                     <label class="block text-gray-700 text-sm font-semibold mb-2">Add pertinent referral information?</label>
                     <div class="flex items-center space-x-4 mb-4">
@@ -512,7 +515,6 @@
                     console.error(`ERROR: Element with ID 'behaviorTypeSelect_${i}' not found.`);
                     continue; 
                 }
-                // Add null checks for dependent selects before trying to populate or add listeners
                 if (!antecedentSelect) console.warn(`Warning: Element with ID 'antecedentSelect_${i}' not found. Dependent dropdown will not work for block ${i}.`);
                 if (!behaviorSelect) console.warn(`Warning: Element with ID 'behaviorSelect_${i}' not found. Dependent dropdown will not work for block ${i}.`);
                 if (!consequenceSelect) console.warn(`Warning: Element with ID 'consequenceSelect_${i}' not found. Dependent dropdown will not work for block ${i}.`);
@@ -537,7 +539,6 @@
             }
         }
         
-        // Helper function to set up info modals
         function setupInfoModal(iconId, modalId, closeButtonId) {
             const icon = document.getElementById(iconId);
             const modal = document.getElementById(modalId);
@@ -546,7 +547,6 @@
             if (icon && modal) {
                 icon.addEventListener('click', (event) => {
                     event.stopPropagation();
-                    // Hide other modals before showing this one
                     [behavioralInfoModal, socialInfoModal, pragmaticInfoModal].forEach(m => {
                         if (m && m !== modal) m.classList.add('hidden');
                     });
@@ -567,7 +567,6 @@
             setupInfoModal('pragmaticInfoIcon', 'pragmaticInfoModal', 'closePragmaticModal');
         });
 
-        // Close modals if clicking outside
         document.addEventListener('click', (event) => {
             const modals = [behavioralInfoModal, socialInfoModal, pragmaticInfoModal];
             const icons = [behavioralInfoIcon, socialInfoIcon, pragmaticInfoIcon];
