@@ -193,7 +193,7 @@
                 </div>
 
                 <div class="info-modal-parent">
-                    <div class="flex items-center mb-1">
+                    <div class="flex items-center mb-1"> 
                         <label for="behavioralSkillsSelect" class="block text-gray-700 text-sm font-semibold">Behavioral Skills Level</label>
                         <i id="behavioralInfoIcon" class="fas fa-info-circle text-blue-500 ml-2 cursor-pointer hover:text-blue-700" title="Show behavioral levels"></i>
                     </div>
@@ -426,9 +426,9 @@
                 behaviors: ["Daydreaming, staring into space", "Fiddling with materials, doodling, or handling unrelated objects", "Beginning a task very slowly or on wrong assignment", "Pretending to work while doing something else (e.g. playing on a device)", "Asking off-topic questions to stall"],
                 consequences: ["Teacher prompts or reminders to focus (teacher attention)", "Task may be simplified or re-taught", "Student may lose participation privileges or breaks", "If behavior continues, student may be removed from task (escape from demand)"]
             },
-            "Property Destruction": {
-                antecedents: ["Denied access to desired object or activity (frustration)", "Unstructured moments with access to items", "High emotional arousal (e.g. after reprimand)"],
-                behaviors: ["Tearing or ripping paper, books, or clothing", "Bending, breaking, or smashing objects (toys, furniture, pencil)", "Drawing on or carving into walls, desks or personal property", "Kicking or punching walls or furniture", "Throwing objects forcefully to break them"],
+            "Property Destruction": { // MODIFIED HERE
+                antecedents: ["Denied access to desired object or activity (frustration)", "Unstructured moments with access to items", "High emotional arousal (e.g. after reprimand)", "Task demand"],
+                behaviors: ["Tearing or ripping paper, books, or clothing", "Bending, breaking, or smashing objects (toys, furniture, pencil)", "Drawing on or carving into walls, desks or personal property", "Kicking or punching walls or furniture", "Throwing objects forcefully to break them", "Clearing materials off of desk"],
                 consequences: ["Student required to clean up or repair damage", "Loss of access to items (item taken away) or privileges", "Time-out or removal from class", "Teacher reprimand or referral"]
             }
         };
@@ -573,7 +573,14 @@
 
             modals.forEach((modal, index) => {
                 if (modal && !modal.classList.contains('hidden')) {
-                    if (!modal.contains(event.target) && event.target !== icons[index]) {
+                    // Check if the click target or its parent is the icon for *this* modal
+                    let currentIcon = icons[index];
+                    let targetIsIconOrChild = false;
+                    if (currentIcon) {
+                        targetIsIconOrChild = currentIcon.contains(event.target) || currentIcon === event.target;
+                    }
+
+                    if (!modal.contains(event.target) && !targetIsIconOrChild) {
                         modal.classList.add('hidden');
                     }
                 }
