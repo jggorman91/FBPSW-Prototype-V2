@@ -28,9 +28,14 @@
         .plan-section h3 { font-weight: 700; margin-bottom: 0.75rem; color: #1976d2; font-size: 1.375rem;}
         .behavior-block { border: 2px solid #90caf9; border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; background-color: #e3f2fd; box-shadow: 0 4px 8px rgba(0,0,0,0.08);}
         .behavior-block-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 2px solid #64b5f6;}
-        /* Added for modal positioning context */
         .info-modal-parent {
-            position: relative;
+            position: relative; /* For positioning the modal absolutely within this parent */
+        }
+        .info-modal {
+            left: 0; /* Align to the left of the parent */
+            top: 100%; /* Position below the element it's related to (e.g., the select dropdown) */
+            min-width: 320px; /* Minimum width for readability */
+            max-width: 500px; /* Maximum width */
         }
     </style>
 </head>
@@ -186,10 +191,11 @@
                     <label for="reinforcerPreferences" class="block text-gray-700 text-sm font-semibold mb-2">Student's Preferred Reinforcers</label>
                     <textarea id="reinforcerPreferences" rows="2" placeholder="e.g., Loves computer time, enjoys drawing..."></textarea>
                 </div>
+
                 <div class="info-modal-parent">
-                    <div class="flex items-center mb-2">
+                    <div class="flex items-center mb-1"> {/* Reduced mb here */}
                         <label for="behavioralSkillsSelect" class="block text-gray-700 text-sm font-semibold">Behavioral Skills Level</label>
-                        <i id="behavioralInfoIcon" class="fas fa-info-circle text-blue-500 ml-2 cursor-pointer" title="Show behavioral levels"></i>
+                        <i id="behavioralInfoIcon" class="fas fa-info-circle text-blue-500 ml-2 cursor-pointer hover:text-blue-700" title="Show behavioral levels"></i>
                     </div>
                     <select id="behavioralSkillsSelect">
                         <option value="">Select Level</option>
@@ -203,7 +209,7 @@
                         <option value="Strategic Manager">Strategic Manager</option>
                         <option value="Autonomous Problem-Solver">Autonomous Problem-Solver</option>
                     </select>
-                    <div id="behavioralInfoModal" class="hidden absolute z-50 mt-1 w-auto max-w-md p-4 bg-white border-2 border-blue-300 rounded-lg shadow-xl" style="left: 0; top: 100%;"> 
+                    <div id="behavioralInfoModal" class="info-modal hidden absolute z-50 mt-1 p-4 bg-white border-2 border-blue-300 rounded-lg shadow-xl"> 
                         <div class="flex justify-between items-center mb-2">
                             <h4 class="text-md font-semibold text-blue-700">Behavioral Developmental Levels</h4>
                             <button id="closeBehavioralModal" class="text-gray-500 hover:text-gray-800 text-2xl leading-none">&times;</button>
@@ -229,8 +235,11 @@
                         </table>
                     </div>
                 </div>
-                <div>
-                    <label for="socialSkillsSelect" class="block text-gray-700 text-sm font-semibold mb-2">Social Skills Level</label>
+                <div class="info-modal-parent">
+                    <div class="flex items-center mb-1">
+                        <label for="socialSkillsSelect" class="block text-gray-700 text-sm font-semibold">Social Skills Level</label>
+                        <i id="socialInfoIcon" class="fas fa-info-circle text-blue-500 ml-2 cursor-pointer hover:text-blue-700" title="Show social levels"></i>
+                    </div>
                     <select id="socialSkillsSelect">
                         <option value="">Select Level</option>
                         <option value="Social Initiator">Social Initiator</option>
@@ -243,9 +252,37 @@
                         <option value="Social Integrator">Social Integrator</option>
                         <option value="Leadership Model">Leadership Model</option>
                     </select>
+                    <div id="socialInfoModal" class="info-modal hidden absolute z-50 mt-1 p-4 bg-white border-2 border-blue-300 rounded-lg shadow-xl">
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="text-md font-semibold text-blue-700">Social Developmental Levels</h4>
+                            <button id="closeSocialModal" class="text-gray-500 hover:text-gray-800 text-2xl leading-none">&times;</button>
+                        </div>
+                        <table class="w-full text-xs table-fixed">
+                            <thead class="sticky top-0 bg-blue-100">
+                                <tr>
+                                    <th class="p-1 text-left font-semibold text-blue-800 w-1/3">Level</th>
+                                    <th class="p-1 text-left font-semibold text-blue-800 w-2/3">Description</th>
+                                </tr>
+                            </thead>
+                             <tbody class="text-gray-700">
+                                <tr><td class="p-1 border-t align-top">Social Initiator</td><td class="p-1 border-t align-top">Begins play and initiates basic interactions.</td></tr>
+                                <tr><td class="p-1 border-t align-top">Emerging Peer</td><td class="p-1 border-t align-top">Follows simple social rules and joins group activities.</td></tr>
+                                <tr><td class="p-1 border-t align-top">Collaborative Partner</td><td class="p-1 border-t align-top">Solves conflicts with help and works in teams.</td></tr>
+                                <tr><td class="p-1 border-t align-top">Connected Participant</td><td class="p-1 border-t align-top">Respects others' perspectives and works collaboratively.</td></tr>
+                                <tr><td class="p-1 border-t align-top">Social Navigator</td><td class="p-1 border-t align-top">Forms friendships, practices inclusion, and builds group awareness.</td></tr>
+                                <tr><td class="p-1 border-t align-top">Empathetic Ally</td><td class="p-1 border-t align-top">Leads with empathy and supports peer conflict resolution.</td></tr>
+                                <tr><td class="p-1 border-t align-top">Relational Strategist</td><td class="p-1 border-t align-top">Manages peer dynamics and balances identity with belonging.</td></tr>
+                                <tr><td class="p-1 border-t align-top">Social Integrator</td><td class="p-1 border-t align-top">Navigates complex relationships and group roles.</td></tr>
+                                <tr><td class="p-1 border-t align-top">Leadership Model</td><td class="p-1 border-t align-top">Models inclusive behavior and mentors peers in social settings.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div>
-                    <label for="pragmaticLanguageSkillsSelect" class="block text-gray-700 text-sm font-semibold mb-2">Pragmatic Language Skills Level</label>
+                <div class="info-modal-parent">
+                    <div class="flex items-center mb-1">
+                        <label for="pragmaticLanguageSkillsSelect" class="block text-gray-700 text-sm font-semibold">Pragmatic Language Skills Level</label>
+                        <i id="pragmaticInfoIcon" class="fas fa-info-circle text-blue-500 ml-2 cursor-pointer hover:text-blue-700" title="Show pragmatic language levels"></i>
+                    </div>
                     <select id="pragmaticLanguageSkillsSelect">
                         <option value="">Select Level</option>
                         <option value="Foundational Communicator">Foundational Communicator</option>
@@ -258,6 +295,31 @@
                         <option value="Adaptive Communicator">Adaptive Communicator</option>
                         <option value="Discourse Leader">Discourse Leader</option>
                     </select>
+                     <div id="pragmaticInfoModal" class="info-modal hidden absolute z-50 mt-1 p-4 bg-white border-2 border-blue-300 rounded-lg shadow-xl">
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="text-md font-semibold text-blue-700">Pragmatic Language Developmental Levels</h4>
+                            <button id="closePragmaticModal" class="text-gray-500 hover:text-gray-800 text-2xl leading-none">&times;</button>
+                        </div>
+                        <table class="w-full text-xs table-fixed">
+                            <thead class="sticky top-0 bg-blue-100">
+                                <tr>
+                                    <th class="p-1 text-left font-semibold text-blue-800 w-1/3">Level</th>
+                                    <th class="p-1 text-left font-semibold text-blue-800 w-2/3">Description</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-700">
+                                <tr><td class="p-1 border-t align-top">Foundational Communicator</td><td class="p-1 border-t align-top">Uses basic language to meet needs and respond socially.</td></tr>
+                                <tr><td class="p-1 border-t align-top">Emerging Conversationalist</td><td class="p-1 border-t align-top">Engages in brief conversations using polite language.</td></tr>
+                                <tr><td class="p-1 border-t align-top">Functional Speaker</td><td class="p-1 border-t align-top">Maintains conversations and clarifies messages.</td></tr>
+                                <tr><td class="p-1 border-t align-top">Social Interpreter</td><td class="p-1 border-t align-top">Uses humor, negotiation, and topic maintenance.</td></tr>
+                                <tr><td class="p-1 border-t align-top">Contextual Communicator</td><td class="p-1 border-t align-top">Adjusts tone and provides contextually relevant language.</td></tr>
+                                <tr><td class="p-1 border-t align-top">Purposeful Speaker</td><td class="p-1 border-t align-top">Persuades, repairs misunderstandings, and discusses purposefully.</td></tr>
+                                <tr><td class="p-1 border-t align-top">Strategic Conversationalist</td><td class="p-1 border-t align-top">Uses nuance and engages in advanced dialogue.</td></tr>
+                                <tr><td class="p-1 border-t align-top">Adaptive Communicator</td><td class="p-1 border-t align-top">Adjusts language across academic, social, and emotional situations.</td></tr>
+                                <tr><td class="p-1 border-t align-top">Discourse Leader</td><td class="p-1 border-t align-top">Engages in abstract, persuasive, and advocacy-oriented dialogue.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 <div class="md:col-span-2">
                     <label class="block text-gray-700 text-sm font-semibold mb-2">Add pertinent referral information?</label>
@@ -368,7 +430,7 @@
             }
         };
 
-        // DOM elements (ensure all are correct and present in your HTML)
+        // DOM elements
         const studentAgeInput = document.getElementById('studentAge');
         const studentGradeSelect = document.getElementById('studentGrade');
         const reinforcerPreferencesInput = document.getElementById('reinforcerPreferences');
@@ -393,10 +455,18 @@
         const addReferralNo = document.getElementById('addReferralNo');
         const referralInfoContainer = document.getElementById('referralInfoContainer');
 
-        // --- NEW --- Info Modal Elements for Behavioral Skills
+        // Info Modal Elements
         const behavioralInfoIcon = document.getElementById('behavioralInfoIcon');
         const behavioralInfoModal = document.getElementById('behavioralInfoModal');
         const closeBehavioralModalButton = document.getElementById('closeBehavioralModal');
+
+        const socialInfoIcon = document.getElementById('socialInfoIcon');
+        const socialInfoModal = document.getElementById('socialInfoModal');
+        const closeSocialModalButton = document.getElementById('closeSocialModal');
+
+        const pragmaticInfoIcon = document.getElementById('pragmaticInfoIcon');
+        const pragmaticInfoModal = document.getElementById('pragmaticInfoModal');
+        const closePragmaticModalButton = document.getElementById('closePragmaticModal');
 
 
         addReferralYes.addEventListener('change', () => {
@@ -409,18 +479,14 @@
         function populateSelectWithOptions(selectElement, optionsArray, defaultOptionText, keepOther = true) {
             let otherOptionHTML = '';
             if (keepOther) {
-                // Try to get "Other" option from the select element directly IF it's one of the pre-defined ones.
-                // Otherwise, construct it.
-                const existingOtherInSelect = selectElement.querySelector('option[value="Other"]');
-                if (existingOtherInSelect) {
-                    otherOptionHTML = existingOtherInSelect.outerHTML;
+                const existingOther = selectElement.querySelector('option[value="Other"]');
+                if (existingOther) {
+                    otherOptionHTML = existingOther.outerHTML; 
                 } else {
                     otherOptionHTML = '<option value="Other">Other (Specify in Notes)</option>';
                 }
             }
-
             selectElement.innerHTML = `<option value="">${defaultOptionText}</option>`; 
-
             if (optionsArray && Array.isArray(optionsArray)) { 
                 optionsArray.forEach(optionText => {
                     const option = document.createElement('option');
@@ -429,7 +495,6 @@
                     selectElement.appendChild(option);
                 });
             }
-
             if (keepOther && otherOptionHTML) { 
                 selectElement.insertAdjacentHTML('beforeend', otherOptionHTML);
             }
@@ -447,58 +512,73 @@
                     console.error(`ERROR: Element with ID 'behaviorTypeSelect_${i}' not found.`);
                     continue; 
                 }
+                // Add null checks for dependent selects before trying to populate or add listeners
                 if (!antecedentSelect) console.warn(`Warning: Element with ID 'antecedentSelect_${i}' not found. Dependent dropdown will not work for block ${i}.`);
                 if (!behaviorSelect) console.warn(`Warning: Element with ID 'behaviorSelect_${i}' not found. Dependent dropdown will not work for block ${i}.`);
                 if (!consequenceSelect) console.warn(`Warning: Element with ID 'consequenceSelect_${i}' not found. Dependent dropdown will not work for block ${i}.`);
+                
+                populateSelectWithOptions(behaviorTypeSelect, behaviorTypeKeys, "Select Behavior Type");
 
-                // Ensure elements exist before proceeding with them
-                if (behaviorTypeSelect) {
-                    populateSelectWithOptions(behaviorTypeSelect, behaviorTypeKeys, "Select Behavior Type");
-                    behaviorTypeSelect.addEventListener('change', function() {
-                        const selectedBehaviorType = this.value;
-                        if (selectedBehaviorType && bipData[selectedBehaviorType]) {
-                            if (antecedentSelect) populateSelectWithOptions(antecedentSelect, bipData[selectedBehaviorType].antecedents, "Select Antecedent");
-                            if (behaviorSelect) populateSelectWithOptions(behaviorSelect, bipData[selectedBehaviorType].behaviors, "Select Specific Behavior");
-                            if (consequenceSelect) populateSelectWithOptions(consequenceSelect, bipData[selectedBehaviorType].consequences, "Select Consequence");
-                        } else {
-                            if (antecedentSelect) populateSelectWithOptions(antecedentSelect, [], "Select Antecedent (after choosing type)");
-                            if (behaviorSelect) populateSelectWithOptions(behaviorSelect, [], "Select Specific Behavior (after choosing type)");
-                            if (consequenceSelect) populateSelectWithOptions(consequenceSelect, [], "Select Consequence (after choosing type)");
-                        }
-                    });
-                }
+                behaviorTypeSelect.addEventListener('change', function() {
+                    const selectedBehaviorType = this.value;
+                    if (selectedBehaviorType && bipData[selectedBehaviorType]) {
+                        if (antecedentSelect) populateSelectWithOptions(antecedentSelect, bipData[selectedBehaviorType].antecedents, "Select Antecedent");
+                        if (behaviorSelect) populateSelectWithOptions(behaviorSelect, bipData[selectedBehaviorType].behaviors, "Select Specific Behavior");
+                        if (consequenceSelect) populateSelectWithOptions(consequenceSelect, bipData[selectedBehaviorType].consequences, "Select Consequence");
+                    } else {
+                        if (antecedentSelect) populateSelectWithOptions(antecedentSelect, [], "Select Antecedent (after choosing type)");
+                        if (behaviorSelect) populateSelectWithOptions(behaviorSelect, [], "Select Specific Behavior (after choosing type)");
+                        if (consequenceSelect) populateSelectWithOptions(consequenceSelect, [], "Select Consequence (after choosing type)");
+                    }
+                });
                 if (antecedentSelect) populateSelectWithOptions(antecedentSelect, [], "Select Antecedent (after choosing type)");
                 if (behaviorSelect) populateSelectWithOptions(behaviorSelect, [], "Select Specific Behavior (after choosing type)");
                 if (consequenceSelect) populateSelectWithOptions(consequenceSelect, [], "Select Consequence (after choosing type)");
             }
         }
         
-        // --- NEW --- Event Listeners for Info Modal
-        if (behavioralInfoIcon && behavioralInfoModal) {
-            behavioralInfoIcon.addEventListener('click', (event) => {
-                event.stopPropagation(); 
-                behavioralInfoModal.classList.toggle('hidden');
-            });
-        }
+        // Helper function to set up info modals
+        function setupInfoModal(iconId, modalId, closeButtonId) {
+            const icon = document.getElementById(iconId);
+            const modal = document.getElementById(modalId);
+            const closeButton = document.getElementById(closeButtonId);
 
-        if (closeBehavioralModalButton && behavioralInfoModal) {
-            closeBehavioralModalButton.addEventListener('click', () => {
-                behavioralInfoModal.classList.add('hidden');
-            });
-        }
-
-        document.addEventListener('click', (event) => {
-            if (behavioralInfoModal && !behavioralInfoModal.classList.contains('hidden')) {
-                // Check if the click is outside the modal AND not on the icon
-                if (!behavioralInfoModal.contains(event.target) && event.target !== behavioralInfoIcon) {
-                    behavioralInfoModal.classList.add('hidden');
-                }
+            if (icon && modal) {
+                icon.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    // Hide other modals before showing this one
+                    [behavioralInfoModal, socialInfoModal, pragmaticInfoModal].forEach(m => {
+                        if (m && m !== modal) m.classList.add('hidden');
+                    });
+                    modal.classList.toggle('hidden');
+                });
             }
-        });
-        // --- END NEW ---
+            if (closeButton && modal) {
+                closeButton.addEventListener('click', () => {
+                    modal.classList.add('hidden');
+                });
+            }
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             initializeBehaviorDropdowns();
+            setupInfoModal('behavioralInfoIcon', 'behavioralInfoModal', 'closeBehavioralModal');
+            setupInfoModal('socialInfoIcon', 'socialInfoModal', 'closeSocialModal');
+            setupInfoModal('pragmaticInfoIcon', 'pragmaticInfoModal', 'closePragmaticModal');
+        });
+
+        // Close modals if clicking outside
+        document.addEventListener('click', (event) => {
+            const modals = [behavioralInfoModal, socialInfoModal, pragmaticInfoModal];
+            const icons = [behavioralInfoIcon, socialInfoIcon, pragmaticInfoIcon];
+
+            modals.forEach((modal, index) => {
+                if (modal && !modal.classList.contains('hidden')) {
+                    if (!modal.contains(event.target) && event.target !== icons[index]) {
+                        modal.classList.add('hidden');
+                    }
+                }
+            });
         });
 
 
