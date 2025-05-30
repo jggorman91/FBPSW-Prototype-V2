@@ -390,7 +390,7 @@
             referralInfoContainer.classList.add('hidden');
         });
 
-function createPromptFromForm() {
+        function createPromptFromForm() {
             const age = studentAgeInput.value || '';
             const grade = studentGradeSelect.value || '';
             const reinforcers = reinforcerPreferencesInput.value || '';
@@ -407,14 +407,12 @@ function createPromptFromForm() {
                 const consequence = document.getElementById(`consequenceSelect_${index}`)?.value || '';
                 let result = '';
                 if (type || antecedent || behavior || consequence) {
-                    // You might want to format this more explicitly as ABC data if the AI is a BCBA
                     result = `Behavior Instance ${index+1}:\n  Antecedent: ${antecedent || 'Not specified'}\n  Behavior (${type || 'Type not specified'}): ${behavior || 'Not specified'}\n  Consequence: ${consequence || 'Not specified'}`;
                 }
                 return result;
             }
             const behaviors = [0,1,2].map(getBehaviorBlock).filter(Boolean).join('\n\n');
 
-            // --- START OF REVISED PROMPT ---
             return `
 Act as a Board Certified Behavior Analyst (BCBA) in a school setting. Your task is to develop a comprehensive Behavior Intervention Plan (BIP) based on the student information provided below. Ensure all suggested strategies and interventions are research-based and appropriate for a school environment.
 
@@ -444,6 +442,7 @@ Response Strategies for Problem Behavior:
         }
 
         function parsePlanSections(planText) {
+            console.log("[FRONTEND] parsePlanSections received planText:", planText); // ADDED CONSOLE LOG
             const sections = {
                 "Function Hypothesis Statement": "",
                 "Antecedent Strategies": "",
@@ -456,34 +455,48 @@ Response Strategies for Problem Behavior:
             let currentSection = null;
             const lines = planText.split('\n');
             for (let line of lines) {
-                const heading = Object.keys(sections).find(h => line.trim().startsWith(h));
+                // Trim the line to handle potential leading/trailing spaces robustly
+                const trimmedLine = line.trim();
+                // Find if the trimmed line exactly matches one of the section keys
+                const heading = Object.keys(sections).find(h => trimmedLine.startsWith(h + ":")); // More robust: check for heading + colon
+
                 if (heading) {
                     currentSection = heading;
-                    const content = line.slice(heading.length).replace(/^[:\- ]+/, '');
-                    if (content) sections[currentSection] += content + '\n';
-                } else if (currentSection) {
-                    sections[currentSection] += line + '\n';
+                    // Extract content after the heading and colon, then trim
+                    const content = line.slice(heading.length + 1).trim(); // +1 for the colon
+                    if (content) sections[currentSection] += content + '\n'; // Add content if it's not just an empty string after trim
+                } else if (currentSection && trimmedLine) { // Only add non-empty lines to the current section
+                    sections[currentSection] += line + '\n'; // Keep original line for multi-line content formatting
                 }
             }
             for (let key in sections) {
-                sections[key] = sections[key].trim();
+                sections[key] = sections[key].trim(); // Final trim for each section
             }
+            console.log("[FRONTEND] parsePlanSections generated sections:", JSON.parse(JSON.stringify(sections))); // ADDED CONSOLE LOG (cloned for better inspection)
             return sections;
         }
 
         function showPlanSections(sections) {
-            bipFunctionHypothesis.textContent = sections["Function Hypothesis Statement"] || "";
-            bipAntecedentStrategies.textContent = sections["Antecedent Strategies"] || "";
-            bipShortTermBehaviors.textContent = sections["Short-term Replacement Behaviors"] || "";
-            bipTeachingStrategies.textContent = sections["Teaching Strategies for Short-Term Replacement Behaviors"] || "";
-            bipReinforcementShortTerm.textContent = sections["Reinforcement Strategies for Short-Term Replacement Behaviors"] || "";
-            bipLongTermBehaviors.textContent = sections["Long-term Replacement Behaviors"] || "";
-            bipResponseStrategies.textContent = sections["Response Strategies for Problem Behavior"] || "";
+            console.log("[FRONTEND] showPlanSections received sections:", JSON.parse(JSON.stringify(sections))); // ADDED CONSOLE LOG (cloned)
+            
+            const fallbackMsg = "Information not found in plan or section is empty.";
+
+            bipFunctionHypothesis.textContent = sections["Function Hypothesis Statement"] || fallbackMsg;
+            bipAntecedentStrategies.textContent = sections["Antecedent Strategies"] || fallbackMsg;
+            bipShortTermBehaviors.textContent = sections["Short-term Replacement Behaviors"] || fallbackMsg;
+            bipTeachingStrategies.textContent = sections["Teaching Strategies for Short-Term Replacement Behaviors"] || fallbackMsg;
+            bipReinforcementShortTerm.textContent = sections["Reinforcement Strategies for Short-Term Replacement Behaviors"] || fallbackMsg;
+            bipLongTermBehaviors.textContent = sections["Long-term Replacement Behaviors"] || fallbackMsg;
+            bipResponseStrategies.textContent = sections["Response Strategies for Problem Behavior"] || fallbackMsg;
+            
             bipOutputDiv.classList.remove('hidden');
+            console.log("[FRONTEND] bipOutputDiv should now be visible.");
         }
+
         function showErrorOutput(msg) {
+            console.log("[FRONTEND] showErrorOutput called with msg:", msg); // ADDED CONSOLE LOG
             bipFunctionHypothesis.textContent = msg;
-            bipAntecedentStrategies.textContent = "";
+            bipAntecedentStrategies.textContent = ""; // Clear other fields
             bipShortTermBehaviors.textContent = "";
             bipTeachingStrategies.textContent = "";
             bipReinforcementShortTerm.textContent = "";
@@ -491,6 +504,7 @@ Response Strategies for Problem Behavior:
             bipResponseStrategies.textContent = "";
             bipOutputDiv.classList.remove('hidden');
         }
+
         function hidePlanOutput() {
             bipFunctionHypothesis.textContent = "";
             bipAntecedentStrategies.textContent = "";
@@ -502,17 +516,17 @@ Response Strategies for Problem Behavior:
             bipOutputDiv.classList.add('hidden');
         }
 
-        // --- MODIFIED FUNCTION ---
         async function generatePlanWithGemini() {
+            console.log("[FRONTEND] generatePlanWithGemini called"); // ADDED CONSOLE LOG
             generateBIPSpinner.classList.remove('hidden');
             generateBIPButton.disabled = true;
             sessionStatusDisplay.textContent = "Generating...";
             hidePlanOutput();
 
             const userGeneratedPrompt = createPromptFromForm();
+            console.log("[FRONTEND] Generated prompt for backend:", userGeneratedPrompt); // ADDED CONSOLE LOG
 
-            // This should be the path to your Vercel serverless function
-            const backendApiUrl = '/api/ask'; // CORRECTED PATH
+            const backendApiUrl = '/api/ask'; 
 
             const requestBody = {
                 prompt: userGeneratedPrompt
@@ -526,58 +540,54 @@ Response Strategies for Problem Behavior:
                     },
                     body: JSON.stringify(requestBody)
                 });
+                
+                console.log("[FRONTEND] Received response from backend. Status:", response.status, "Ok:", response.ok); // ADDED CONSOLE LOG
 
                 const data = await response.json();
+                console.log("[FRONTEND] Parsed data from backend response:", JSON.parse(JSON.stringify(data))); // ADDED CONSOLE LOG (cloned)
+
 
                 if (!response.ok) {
-                    // Handle errors from your backend (e.g., 400, 405, 500 status codes)
-                    // Your backend returns { error: "message" }
                     let errorMsg = data.error || `Request failed with status ${response.status}`;
                     showErrorOutput("Failed to generate a plan (server error).\n" + errorMsg);
-                    console.error("Backend Error:", data);
-                } else if (data.error) {
-                    // Handle errors returned by the Gemini API but passed through by your backend
-                    // (e.g., if Gemini API key is invalid on the backend, or Gemini itself has an issue)
-                    // This 'data.error' structure comes from the Gemini API response format if your backend just forwards it.
-                    // Your backend script sends Gemini's 'data' directly.
-                    // Gemini API error format is often { error: { code: ..., message: ..., status: ... }}
+                    console.error("[FRONTEND] Backend Error (response not ok):", data);
+                } else if (data.error) { 
                     let errorMsg = data.error.message || JSON.stringify(data.error, null, 2);
-                    if (data.error.details) { // Sometimes Gemini puts more info in details
+                    if (data.error.details) { 
                         errorMsg += `\nDetails: ${JSON.stringify(data.error.details, null, 2)}`;
                     }
                     showErrorOutput("Failed to generate a plan (API error).\n" + errorMsg);
-                    console.error("Gemini API Error (via backend):", data.error);
+                    console.error("[FRONTEND] Gemini API Error (via backend, data.error is present):", data.error);
                 }
-                 else if (data.candidates && data.candidates.length > 0 && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts.length > 0) {
+                 else if (data.candidates && data.candidates.length > 0 && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts.length > 0 && data.candidates[0].content.parts[0].text) {
+                    console.log("[FRONTEND] Valid candidates found in data. Processing plan."); // ADDED CONSOLE LOG
                     const planText = data.candidates[0].content.parts[0].text;
                     const sections = parsePlanSections(planText);
                     showPlanSections(sections);
                 }
                  else {
-                    // Handle unexpected successful response structure or no content
-                    showErrorOutput("Received an unexpected response from the server or no plan was generated.");
-                    console.error("Unexpected successful response:", data);
+                    console.log("[FRONTEND] Response OK, but no valid candidates or text found in data."); // ADDED CONSOLE LOG
+                    showErrorOutput("Received an unexpected response from the server or no plan was generated (data did not contain expected plan structure).");
+                    console.error("[FRONTEND] Unexpected successful response structure:", data);
                 }
             } catch (err) {
-                // Handle network errors or other issues with the fetch call itself
+                console.error("[FRONTEND] Error in fetch try-catch block (e.g., network error, or response.json() failed):", err); // ADDED CONSOLE LOG
                 showErrorOutput("An error occurred while communicating with the server: " + err.message);
-                console.error("Network or Fetch Error:", err);
             } finally {
                 generateBIPSpinner.classList.add('hidden');
                 generateBIPButton.disabled = false;
                 sessionStatusDisplay.textContent = "Active";
+                console.log("[FRONTEND] generatePlanWithGemini finished."); // ADDED CONSOLE LOG
             }
         }
-        // --- END OF MODIFIED FUNCTION ---
 
         generateBIPButton.addEventListener('click', (e) => {
             e.preventDefault();
             generatePlanWithGemini();
         });
 
-        // Copy Plan Button
         copyBIPButton.addEventListener('click', () => {
-            let textToCopy = // Renamed variable to avoid conflict
+            let textToCopy = 
 `Function Hypothesis Statement:
 ${bipFunctionHypothesis.textContent}
 
@@ -599,18 +609,15 @@ ${bipLongTermBehaviors.textContent}
 Response Strategies for Problem Behavior:
 ${bipResponseStrategies.textContent}
 `;
-            navigator.clipboard.writeText(textToCopy); // Use the new variable name
-            // Optional: Add a visual confirmation that text was copied
-            const originalButtonText = copyBIPButton.innerHTML; // Renamed variable
+            navigator.clipboard.writeText(textToCopy);
+            const originalButtonText = copyBIPButton.innerHTML; 
             copyBIPButton.innerHTML = '<i class="fas fa-check mr-2"></i> Copied!';
             setTimeout(() => {
-                copyBIPButton.innerHTML = originalButtonText; // Use the new variable name
+                copyBIPButton.innerHTML = originalButtonText; 
             }, 2000);
         });
 
-        // New Plan Button Functionality (Example: Clear fields and hide output)
         document.getElementById('newPlanButton').addEventListener('click', () => {
-            // Clear input fields
             studentAgeInput.value = '';
             studentGradeSelect.value = '';
             reinforcerPreferencesInput.value = '';
@@ -629,11 +636,9 @@ ${bipResponseStrategies.textContent}
             
             addReferralNo.checked = true;
             referralInfoContainer.classList.add('hidden');
-
-            // Hide the output section
             hidePlanOutput();
             sessionStatusDisplay.textContent = "Active";
-            console.log("New plan started, fields cleared.");
+            console.log("[FRONTEND] New plan started, fields cleared.");
         });
 
     </script>
