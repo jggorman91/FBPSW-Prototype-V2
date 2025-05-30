@@ -70,7 +70,7 @@
                 <div id="behaviorsContainer" class="md:col-span-2">
                     <div class="behavior-block" data-behavior-index="0">
                         <div class="behavior-block-header">
-                            <h3 class="text-lg font-semibold text-gray-700">Behavior 1</h3>
+                            <h3 class="text-lg font-semibold text-gray-700">Behavior Pattern 1</h3>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -127,7 +127,7 @@
                     </div>
                     <div class="behavior-block" data-behavior-index="1">
                         <div class="behavior-block-header">
-                             <h3 class="text-lg font-semibold text-gray-700">Behavior 2 (Optional)</h3>
+                                <h3 class="text-lg font-semibold text-gray-700">Behavior Pattern 2 (Optional)</h3>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                            <div>
@@ -184,7 +184,7 @@
                     </div>
                     <div class="behavior-block" data-behavior-index="2">
                         <div class="behavior-block-header">
-                             <h3 class="text-lg font-semibold text-gray-700">Behavior 3 (Optional)</h3>
+                                <h3 class="text-lg font-semibold text-gray-700">Behavior Pattern 3 (Optional)</h3>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -241,8 +241,8 @@
                     </div>
                 </div>
                 <div>
-                    <label for="anecdotal" class="block text-gray-700 text-sm font-semibold mb-2">Anecdotal Notes</label>
-                    <textarea id="anecdotal" rows="3" placeholder="e.g., Student seems tired today..."></textarea>
+                    <label for="anecdotal" class="block text-gray-700 text-sm font-semibold mb-2">Anecdotal Notes (include information about frequency, intensity, duration of behaviors if known)</label>
+                    <textarea id="anecdotal" rows="3" placeholder="e.g., Student exhibits task refusal daily during math, lasting 5-10 minutes..."></textarea>
                 </div>
                 <div>
                     <label for="reinforcerPreferences" class="block text-gray-700 text-sm font-semibold mb-2">Student's Preferred Reinforcers</label>
@@ -390,15 +390,24 @@
             referralInfoContainer.classList.add('hidden');
         });
 
+        // --- MODIFIED createPromptFromForm FUNCTION ---
         function createPromptFromForm() {
-            const age = studentAgeInput.value || '';
-            const grade = studentGradeSelect.value || '';
-            const reinforcers = reinforcerPreferencesInput.value || '';
-            const anecdotal = anecdotalInput.value || '';
+            const age = studentAgeInput.value || 'Not specified';
+            const grade = studentGradeSelect.value || 'Not specified';
+            const reinforcers = reinforcerPreferencesInput.value || 'Not specified';
+            
+            // Encourage input about frequency/intensity/duration in Anecdotal Notes for recurring context
+            let anecdotal = anecdotalInput.value || 'No specific anecdotal notes provided.';
+            if (anecdotalInput.value && !anecdotalInput.value.toLowerCase().includes("daily") && !anecdotalInput.value.toLowerCase().includes("weekly") && !anecdotalInput.value.toLowerCase().includes("often") && !anecdotalInput.value.toLowerCase().includes("frequently")) {
+                // Add a note to ensure the AI understands recurrence if not obvious from notes
+                anecdotal += " (Note: Assume these behavioral observations represent recurring patterns over time unless otherwise specified in the patterns below.)";
+            }
+
+
             const referral = referralInput && !referralInfoContainer.classList.contains('hidden') ? referralInput.value : '';
-            const behavioralLevel = behavioralSkillsSelect.value || '';
-            const socialLevel = socialSkillsSelect.value || '';
-            const pragmaticLevel = pragmaticLanguageSkillsSelect.value || '';
+            const behavioralLevel = behavioralSkillsSelect.value || 'Not specified';
+            const socialLevel = socialSkillsSelect.value || 'Not specified';
+            const pragmaticLevel = pragmaticLanguageSkillsSelect.value || 'Not specified';
 
             function getBehaviorBlock(index) {
                 const type = document.getElementById(`behaviorTypeSelect_${index}`)?.value || '';
@@ -407,30 +416,43 @@
                 const consequence = document.getElementById(`consequenceSelect_${index}`)?.value || '';
                 let result = '';
                 if (type || antecedent || behavior || consequence) {
-                    result = `Behavior Instance ${index+1}:\n  Antecedent: ${antecedent || 'Not specified'}\n  Behavior (${type || 'Type not specified'}): ${behavior || 'Not specified'}\n  Consequence: ${consequence || 'Not specified'}`;
+                    // Emphasize pattern for the AI
+                    result = `Observed Recurring Behavior Pattern ${index + 1} (ABC Data):\n  Antecedent: ${antecedent || 'Not specified'}\n  Specific Behavior (as part of ${type || 'this pattern type'}): ${behavior || 'Not specified'}\n  Typical Consequence Following This Pattern: ${consequence || 'Not specified'}`;
                 }
                 return result;
             }
             const behaviors = [0,1,2].map(getBehaviorBlock).filter(Boolean).join('\n\n');
 
             return `
-Act as a Board Certified Behavior Analyst (BCBA) in a school setting. Your task is to develop a comprehensive Behavior Intervention Plan (BIP) based on the student information provided below. Ensure all suggested strategies and interventions are research-based and appropriate for a school environment.
+Act as an expert Board Certified Behavior Analyst (BCBA) in a school setting. Your primary task is to develop a comprehensive and actionable Behavior Intervention Plan (BIP) based on the student information provided below.
+
+It is crucial to understand that the observed behaviors described are **recurring patterns that have been happening over time**, not isolated incidents. Therefore, the entire BIP, including all strategies, must reflect this understanding of chronicity and learned history.
 
 Student Information:
 Student Age: ${age}
 Grade: ${grade}
 Preferred Reinforcers: ${reinforcers}
-Anecdotal Notes: ${anecdotal}
+Anecdotal Notes (including context of recurrence, frequency, intensity, duration if available): ${anecdotal}
 ${referral ? "Referral Information: " + referral : ""}
-Behavioral Skills Level: ${behavioralLevel}
-Social Skills Level: ${socialLevel}
-Pragmatic Language Skills Level: ${pragmaticLevel}
+Current Behavioral Skills Level: ${behavioralLevel}
+Current Social Skills Level: ${socialLevel}
+Current Pragmatic Language Skills Level: ${pragmaticLevel}
 
-Observed Behaviors (Antecedent-Behavior-Consequence):
-${behaviors || 'No specific behaviors provided.'}
+Observed Recurring Behavior Patterns (ABC Data - describe what happens before, during, and after these repeated behavioral events):
+${behaviors || 'No specific recurring behavior patterns provided. If none are detailed, use the anecdotal notes to infer patterns.'}
 
-Please generate the Behavior Intervention Plan. Format your response using these section headings (exactly as written. If you have no recommendation for a particular section, please still include the heading and state "No specific recommendation at this time based on the information provided" or similar):
+Please generate the Behavior Intervention Plan. Format your response using these section headings (exactly as written). Ensure ALL sections are thoroughly addressed with specific, actionable, and research-based strategies appropriate for a school environment.
 
+**Critically, the 'Response Strategies for Problem Behavior' section must be detailed and robust.** This section should clearly outline:
+1.  Immediate actions to take when the problem behavior pattern occurs to ensure the safety of the student and others.
+2.  De-escalation techniques suitable for the described behavior patterns and student characteristics.
+3.  Clear, brief, and consistent verbal and non-verbal responses from staff.
+4.  Procedures for follow-up after an incident, including re-teaching, and how to return the student to the learning environment.
+5.  Avoid strategies that could inadvertently reinforce the problem behavior based on its hypothesized function.
+
+If you have no specific recommendation for a particular section despite the information provided, please explicitly state "Based on the current information, no specific strategies are recommended for this section at this time, but further observation or data collection is advised to develop this area." Do not leave any section blank or with a generic placeholder.
+
+Required BIP Sections:
 Function Hypothesis Statement:
 Antecedent Strategies:
 Short-term Replacement Behaviors:
@@ -467,48 +489,36 @@ Response Strategies for Problem Behavior:
             for (const line of lines) {
                 let matchedNewSection = false;
                 for (const key of sectionKeys) {
-                    // Check if the line starts with the heading (e.g., "**Heading:**" or "Heading:")
-                    // Making it case-insensitive and trimming helps. Also check for markdown bold.
                     const trimmedLine = line.trim();
-                    // Regex to match "Key:" or "**Key:**" at the beginning of a line, case insensitive
                     const pattern = new RegExp(`^(?:\\*\\*)?${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?:\\*\\*)?:`, "i");
 
-
                     if (pattern.test(trimmedLine)) {
-                        // If we were accumulating content for a previous section, save it.
                         if (currentSectionKey && contentForCurrentSection.length > 0) {
                             sections[currentSectionKey] = contentForCurrentSection.join('\n').trim();
                         }
-                        // Start new section
                         currentSectionKey = key;
-                        contentForCurrentSection = []; // Reset content buffer
+                        contentForCurrentSection = []; 
 
-                        // Check if there's any content on the same line as the heading, after the colon
                         const contentOnHeadingLine = trimmedLine.replace(pattern, "").trim();
                         if (contentOnHeadingLine) {
                             contentForCurrentSection.push(contentOnHeadingLine);
                         }
                         matchedNewSection = true;
-                        break; // Found the heading for this line
+                        break; 
                     }
                 }
 
-                // If the line is not a new heading but we are inside a section, add the line
                 if (!matchedNewSection && currentSectionKey) {
-                    // Don't add just empty lines unless the section already has content (to preserve paragraphs)
-                    // or if the line itself has content after trimming
                     if (line.trim() !== "" || contentForCurrentSection.length > 0) {
-                         contentForCurrentSection.push(line); // Keep original line for formatting
+                         contentForCurrentSection.push(line); 
                     }
                 }
             }
 
-            // After the loop, save any remaining content for the last section
             if (currentSectionKey && contentForCurrentSection.length > 0) {
                 sections[currentSectionKey] = contentForCurrentSection.join('\n').trim();
             }
             
-            // Final trim for all sections
             for (let key in sections) {
                 sections[key] = sections[key].trim();
             }
@@ -521,7 +531,7 @@ Response Strategies for Problem Behavior:
         function showPlanSections(sections) {
             console.log("[FRONTEND] showPlanSections received sections:", JSON.parse(JSON.stringify(sections)));
             
-            const fallbackMsg = "Information not found in plan or section is empty.";
+            const fallbackMsg = "Information not found in plan or section is empty. The AI may not have had enough information or may have missed this section. Consider revising the input or trying again.";
 
             bipFunctionHypothesis.textContent = sections["Function Hypothesis Statement"] || fallbackMsg;
             bipAntecedentStrategies.textContent = sections["Antecedent Strategies"] || fallbackMsg;
@@ -529,7 +539,7 @@ Response Strategies for Problem Behavior:
             bipTeachingStrategies.textContent = sections["Teaching Strategies for Short-Term Replacement Behaviors"] || fallbackMsg;
             bipReinforcementShortTerm.textContent = sections["Reinforcement Strategies for Short-Term Replacement Behaviors"] || fallbackMsg;
             bipLongTermBehaviors.textContent = sections["Long-term Replacement Behaviors"] || fallbackMsg;
-            bipResponseStrategies.textContent = sections["Response Strategies for Problem Behavior"] || fallbackMsg;
+            bipResponseStrategies.textContent = sections["Response Strategies for Problem Behavior"] || fallbackMsg; // This is the key one
             
             bipOutputDiv.classList.remove('hidden');
             console.log("[FRONTEND] bipOutputDiv should now be visible.");
@@ -543,7 +553,7 @@ Response Strategies for Problem Behavior:
             bipTeachingStrategies.textContent = "";
             bipReinforcementShortTerm.textContent = "";
             bipLongTermBehaviors.textContent = "";
-            bipResponseStrategies.textContent = "";
+            bipResponseStrategies.textContent = ""; // Clear this on error too
             bipOutputDiv.classList.remove('hidden');
         }
 
@@ -554,7 +564,7 @@ Response Strategies for Problem Behavior:
             bipTeachingStrategies.textContent = "";
             bipReinforcementShortTerm.textContent = "";
             bipLongTermBehaviors.textContent = "";
-            bipResponseStrategies.textContent = "";
+            bipResponseStrategies.textContent = ""; // And hide this
             bipOutputDiv.classList.add('hidden');
         }
 
@@ -591,6 +601,7 @@ Response Strategies for Problem Behavior:
 
                 if (!response.ok) {
                     let errorMsg = data.error || `Request failed with status ${response.status}`;
+                    if (data.details) errorMsg += `\nDetails: ${typeof data.details === 'object' ? JSON.stringify(data.details) : data.details}`;
                     showErrorOutput("Failed to generate a plan (server error).\n" + errorMsg);
                     console.error("[FRONTEND] Backend Error (response not ok):", data);
                 } else if (data.error) { 
@@ -608,9 +619,22 @@ Response Strategies for Problem Behavior:
                     showPlanSections(sections);
                 }
                  else {
-                    console.log("[FRONTEND] Response OK, but no valid candidates or text found in data."); 
-                    showErrorOutput("Received an unexpected response from the server or no plan was generated (data did not contain expected plan structure).");
-                    console.error("[FRONTEND] Unexpected successful response structure:", data);
+                    // Check for safety blocks or other non-standard responses
+                    let specificError = "Received an unexpected response from the server or no plan was generated.";
+                    if (data.candidates && data.candidates.length > 0 && data.candidates[0].finishReason === "SAFETY") {
+                        specificError = "The response was blocked due to safety settings. Please review your input or adjust safety configurations if possible.";
+                         console.warn("[FRONTEND] Response blocked due to SAFETY finishReason", data.candidates[0].safetyRatings);
+                    } else if (data.promptFeedback && data.promptFeedback.blockReason) {
+                         specificError = `The prompt was blocked. Reason: ${data.promptFeedback.blockReason}.`;
+                         if (data.promptFeedback.safetyRatings) {
+                            specificError += ` Details: ${JSON.stringify(data.promptFeedback.safetyRatings)}`;
+                         }
+                         console.warn("[FRONTEND] Prompt blocked by API", data.promptFeedback);
+                    } else {
+                        console.log("[FRONTEND] Response OK, but no valid candidates or text found in data, or unexpected structure."); 
+                        console.error("[FRONTEND] Unexpected successful response structure:", data);
+                    }
+                    showErrorOutput(specificError);
                 }
             } catch (err) {
                 console.error("[FRONTEND] Error in fetch try-catch block (e.g., network error, or response.json() failed):", err); 
