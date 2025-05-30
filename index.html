@@ -28,6 +28,10 @@
         .plan-section h3 { font-weight: 700; margin-bottom: 0.75rem; color: #1976d2; font-size: 1.375rem;}
         .behavior-block { border: 2px solid #90caf9; border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; background-color: #e3f2fd; box-shadow: 0 4px 8px rgba(0,0,0,0.08);}
         .behavior-block-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 2px solid #64b5f6;}
+        /* Added for modal positioning context */
+        .info-modal-parent {
+            position: relative;
+        }
     </style>
 </head>
 <body class="bg-gray-100 p-4">
@@ -182,49 +186,77 @@
                     <label for="reinforcerPreferences" class="block text-gray-700 text-sm font-semibold mb-2">Student's Preferred Reinforcers</label>
                     <textarea id="reinforcerPreferences" rows="2" placeholder="e.g., Loves computer time, enjoys drawing..."></textarea>
                 </div>
-                <div>
-                    <label for="behavioralSkillsSelect" class="block text-gray-700 text-sm font-semibold mb-2">Behavioral Skills Level</label>
+                <div class="info-modal-parent">
+                    <div class="flex items-center mb-2">
+                        <label for="behavioralSkillsSelect" class="block text-gray-700 text-sm font-semibold">Behavioral Skills Level</label>
+                        <i id="behavioralInfoIcon" class="fas fa-info-circle text-blue-500 ml-2 cursor-pointer" title="Show behavioral levels"></i>
+                    </div>
                     <select id="behavioralSkillsSelect">
                         <option value="">Select Level</option>
-                        <option value="Emerging Regulator">Emerging Regulator</option>
-                        <option value="Developing Follower">Developing Follower</option>
-                        <option value="Routine Participant">Routine Participant</option>
-                        <option value="Adaptive Monitor">Adaptive Monitor</option>
-                        <option value="Intentional Regulator">Intentional Regulator</option>
-                        <option value="Reflective Manager">Reflective Manager</option>
-                        <option value="Independent Self-Regulator">Independent Self-Regulator</option>
-                        <option value="Strategic Self-Manager">Strategic Self-Manager</option>
+                        <option value="Foundational Regulator">Foundational Regulator</option>
+                        <option value="Guided Participant">Guided Participant</option>
+                        <option value="Emerging Self-Manager">Emerging Self-Manager</option>
+                        <option value="Flexible Adapter">Flexible Adapter</option>
+                        <option value="Intentional Strategist">Intentional Strategist</option>
+                        <option value="Reflective Adapter">Reflective Adapter</option>
+                        <option value="Independent Regulator">Independent Regulator</option>
+                        <option value="Strategic Manager">Strategic Manager</option>
                         <option value="Autonomous Problem-Solver">Autonomous Problem-Solver</option>
                     </select>
+                    <div id="behavioralInfoModal" class="hidden absolute z-50 mt-1 w-auto max-w-md p-4 bg-white border-2 border-blue-300 rounded-lg shadow-xl" style="left: 0; top: 100%;"> 
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="text-md font-semibold text-blue-700">Behavioral Developmental Levels</h4>
+                            <button id="closeBehavioralModal" class="text-gray-500 hover:text-gray-800 text-2xl leading-none">&times;</button>
+                        </div>
+                        <table class="w-full text-xs table-fixed">
+                            <thead class="sticky top-0 bg-blue-100">
+                                <tr>
+                                    <th class="p-1 text-left font-semibold text-blue-800 w-1/3">Level</th>
+                                    <th class="p-1 text-left font-semibold text-blue-800 w-2/3">Description</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-700">
+                                <tr><td class="p-1 border-t align-top">Foundational Regulator</td><td class="p-1 border-t align-top">Beginning to follow directions and respond to adult guidance.</td></tr>
+                                <tr><td class="p-1 border-t align-top">Guided Participant</td><td class="p-1 border-t align-top">Learning routines and beginning to manage impulses with support.</td></tr>
+                                <tr><td class="p-1 border-t align-top">Emerging Self-Manager</td><td class="p-1 border-t align-top">Following routines with less prompting; initial self-regulation.</td></tr>
+                                <tr><td class="p-1 border-t align-top">Flexible Adapter</td><td class="p-1 border-t align-top">Monitors own behavior, shows flexibility, and assumes responsibility.</td></tr>
+                                <tr><td class="p-1 border-t align-top">Intentional Strategist</td><td class="p-1 border-t align-top">Applies coping strategies to manage frustration and persist.</td></tr>
+                                <tr><td class="p-1 border-t align-top">Reflective Adapter</td><td class="p-1 border-t align-top">Reflects on behavior and adapts to social/academic demands.</td></tr>
+                                <tr><td class="p-1 border-t align-top">Independent Regulator</td><td class="p-1 border-t align-top">Demonstrates mature coping, goal-setting, and ownership.</td></tr>
+                                <tr><td class="p-1 border-t align-top">Strategic Manager</td><td class="p-1 border-t align-top">Uses internal strategies to manage emotions across contexts.</td></tr>
+                                <tr><td class="p-1 border-t align-top">Autonomous Problem-Solver</td><td class="p-1 border-t align-top">Independently evaluates behavior, adjusts actions, and mentors others.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 <div>
                     <label for="socialSkillsSelect" class="block text-gray-700 text-sm font-semibold mb-2">Social Skills Level</label>
                     <select id="socialSkillsSelect">
                         <option value="">Select Level</option>
-                        <option value="Social Explorer">Social Explorer</option>
-                        <option value="Emerging Friend">Emerging Friend</option>
-                        <option value="Cooperative Peer">Cooperative Peer</option>
-                        <option value="Connected Contributor">Connected Contributor</option>
+                        <option value="Social Initiator">Social Initiator</option>
+                        <option value="Emerging Peer">Emerging Peer</option>
+                        <option value="Collaborative Partner">Collaborative Partner</option>
+                        <option value="Connected Participant">Connected Participant</option>
                         <option value="Social Navigator">Social Navigator</option>
-                        <option value="Empathetic Collaborator">Empathetic Collaborator</option>
-                        <option value="Interpersonal Strategist">Interpersonal Strategist</option>
-                        <option value="Relational Thinker">Relational Thinker</option>
-                        <option value="Social Leader">Social Leader</option>
+                        <option value="Empathetic Ally">Empathetic Ally</option>
+                        <option value="Relational Strategist">Relational Strategist</option>
+                        <option value="Social Integrator">Social Integrator</option>
+                        <option value="Leadership Model">Leadership Model</option>
                     </select>
                 </div>
                 <div>
                     <label for="pragmaticLanguageSkillsSelect" class="block text-gray-700 text-sm font-semibold mb-2">Pragmatic Language Skills Level</label>
                     <select id="pragmaticLanguageSkillsSelect">
                         <option value="">Select Level</option>
-                        <option value="Beginning Communicator">Beginning Communicator</option>
+                        <option value="Foundational Communicator">Foundational Communicator</option>
                         <option value="Emerging Conversationalist">Emerging Conversationalist</option>
-                        <option value="Functional Talker">Functional Talker</option>
+                        <option value="Functional Speaker">Functional Speaker</option>
                         <option value="Social Interpreter">Social Interpreter</option>
                         <option value="Contextual Communicator">Contextual Communicator</option>
                         <option value="Purposeful Speaker">Purposeful Speaker</option>
                         <option value="Strategic Conversationalist">Strategic Conversationalist</option>
-                        <option value="Flexible Communicator">Flexible Communicator</option>
-                        <option value="Advanced Discourse User">Advanced Discourse User</option>
+                        <option value="Adaptive Communicator">Adaptive Communicator</option>
+                        <option value="Discourse Leader">Discourse Leader</option>
                     </select>
                 </div>
                 <div class="md:col-span-2">
@@ -336,7 +368,7 @@
             }
         };
 
-        // DOM elements
+        // DOM elements (ensure all are correct and present in your HTML)
         const studentAgeInput = document.getElementById('studentAge');
         const studentGradeSelect = document.getElementById('studentGrade');
         const reinforcerPreferencesInput = document.getElementById('reinforcerPreferences');
@@ -361,6 +393,11 @@
         const addReferralNo = document.getElementById('addReferralNo');
         const referralInfoContainer = document.getElementById('referralInfoContainer');
 
+        // --- NEW --- Info Modal Elements for Behavioral Skills
+        const behavioralInfoIcon = document.getElementById('behavioralInfoIcon');
+        const behavioralInfoModal = document.getElementById('behavioralInfoModal');
+        const closeBehavioralModalButton = document.getElementById('closeBehavioralModal');
+
 
         addReferralYes.addEventListener('change', () => {
             referralInfoContainer.classList.remove('hidden');
@@ -372,9 +409,11 @@
         function populateSelectWithOptions(selectElement, optionsArray, defaultOptionText, keepOther = true) {
             let otherOptionHTML = '';
             if (keepOther) {
-                const existingOther = selectElement.querySelector('option[value="Other"]');
-                if (existingOther) {
-                    otherOptionHTML = existingOther.outerHTML; 
+                // Try to get "Other" option from the select element directly IF it's one of the pre-defined ones.
+                // Otherwise, construct it.
+                const existingOtherInSelect = selectElement.querySelector('option[value="Other"]');
+                if (existingOtherInSelect) {
+                    otherOptionHTML = existingOtherInSelect.outerHTML;
                 } else {
                     otherOptionHTML = '<option value="Other">Other (Specify in Notes)</option>';
                 }
@@ -390,7 +429,6 @@
                     selectElement.appendChild(option);
                 });
             }
-
 
             if (keepOther && otherOptionHTML) { 
                 selectElement.insertAdjacentHTML('beforeend', otherOptionHTML);
@@ -413,27 +451,52 @@
                 if (!behaviorSelect) console.warn(`Warning: Element with ID 'behaviorSelect_${i}' not found. Dependent dropdown will not work for block ${i}.`);
                 if (!consequenceSelect) console.warn(`Warning: Element with ID 'consequenceSelect_${i}' not found. Dependent dropdown will not work for block ${i}.`);
 
-                populateSelectWithOptions(behaviorTypeSelect, behaviorTypeKeys, "Select Behavior Type");
-
-                behaviorTypeSelect.addEventListener('change', function() {
-                    const selectedBehaviorType = this.value;
-                    if (selectedBehaviorType && bipData[selectedBehaviorType]) {
-                        if (antecedentSelect) populateSelectWithOptions(antecedentSelect, bipData[selectedBehaviorType].antecedents, "Select Antecedent");
-                        if (behaviorSelect) populateSelectWithOptions(behaviorSelect, bipData[selectedBehaviorType].behaviors, "Select Specific Behavior");
-                        if (consequenceSelect) populateSelectWithOptions(consequenceSelect, bipData[selectedBehaviorType].consequences, "Select Consequence");
-                    } else {
-                        if (antecedentSelect) populateSelectWithOptions(antecedentSelect, [], "Select Antecedent (after choosing type)");
-                        if (behaviorSelect) populateSelectWithOptions(behaviorSelect, [], "Select Specific Behavior (after choosing type)");
-                        if (consequenceSelect) populateSelectWithOptions(consequenceSelect, [], "Select Consequence (after choosing type)");
-                    }
-                });
-
+                // Ensure elements exist before proceeding with them
+                if (behaviorTypeSelect) {
+                    populateSelectWithOptions(behaviorTypeSelect, behaviorTypeKeys, "Select Behavior Type");
+                    behaviorTypeSelect.addEventListener('change', function() {
+                        const selectedBehaviorType = this.value;
+                        if (selectedBehaviorType && bipData[selectedBehaviorType]) {
+                            if (antecedentSelect) populateSelectWithOptions(antecedentSelect, bipData[selectedBehaviorType].antecedents, "Select Antecedent");
+                            if (behaviorSelect) populateSelectWithOptions(behaviorSelect, bipData[selectedBehaviorType].behaviors, "Select Specific Behavior");
+                            if (consequenceSelect) populateSelectWithOptions(consequenceSelect, bipData[selectedBehaviorType].consequences, "Select Consequence");
+                        } else {
+                            if (antecedentSelect) populateSelectWithOptions(antecedentSelect, [], "Select Antecedent (after choosing type)");
+                            if (behaviorSelect) populateSelectWithOptions(behaviorSelect, [], "Select Specific Behavior (after choosing type)");
+                            if (consequenceSelect) populateSelectWithOptions(consequenceSelect, [], "Select Consequence (after choosing type)");
+                        }
+                    });
+                }
                 if (antecedentSelect) populateSelectWithOptions(antecedentSelect, [], "Select Antecedent (after choosing type)");
                 if (behaviorSelect) populateSelectWithOptions(behaviorSelect, [], "Select Specific Behavior (after choosing type)");
                 if (consequenceSelect) populateSelectWithOptions(consequenceSelect, [], "Select Consequence (after choosing type)");
             }
         }
         
+        // --- NEW --- Event Listeners for Info Modal
+        if (behavioralInfoIcon && behavioralInfoModal) {
+            behavioralInfoIcon.addEventListener('click', (event) => {
+                event.stopPropagation(); 
+                behavioralInfoModal.classList.toggle('hidden');
+            });
+        }
+
+        if (closeBehavioralModalButton && behavioralInfoModal) {
+            closeBehavioralModalButton.addEventListener('click', () => {
+                behavioralInfoModal.classList.add('hidden');
+            });
+        }
+
+        document.addEventListener('click', (event) => {
+            if (behavioralInfoModal && !behavioralInfoModal.classList.contains('hidden')) {
+                // Check if the click is outside the modal AND not on the icon
+                if (!behavioralInfoModal.contains(event.target) && event.target !== behavioralInfoIcon) {
+                    behavioralInfoModal.classList.add('hidden');
+                }
+            }
+        });
+        // --- END NEW ---
+
         document.addEventListener('DOMContentLoaded', () => {
             initializeBehaviorDropdowns();
         });
@@ -455,10 +518,16 @@
             const pragmaticLevel = pragmaticLanguageSkillsSelect.value || 'Not specified';
 
             function getBehaviorBlock(index) {
-                const type = document.getElementById(`behaviorTypeSelect_${index}`)?.value || '';
-                const antecedent = document.getElementById(`antecedentSelect_${index}`)?.value || '';
-                const behavior = document.getElementById(`behaviorSelect_${index}`)?.value || '';
-                const consequence = document.getElementById(`consequenceSelect_${index}`)?.value || '';
+                const typeSelect = document.getElementById(`behaviorTypeSelect_${index}`);
+                const antecedentSelect = document.getElementById(`antecedentSelect_${index}`);
+                const behaviorSelect = document.getElementById(`behaviorSelect_${index}`);
+                const consequenceSelect = document.getElementById(`consequenceSelect_${index}`);
+
+                const type = typeSelect ? typeSelect.value : '';
+                const antecedent = antecedentSelect ? antecedentSelect.value : '';
+                const behavior = behaviorSelect ? behaviorSelect.value : '';
+                const consequence = consequenceSelect ? consequenceSelect.value : '';
+                
                 let result = '';
                 if (type || antecedent || behavior || consequence) {
                     result = `Observed Recurring Behavior Pattern ${index + 1} (ABC Data):\n  Selected Behavior Type: ${type || 'Not specified'}\n  Selected Antecedent: ${antecedent || 'Not specified'}\n  Selected Specific Behavior: ${behavior || 'Not specified'}\n  Selected Typical Consequence: ${consequence || 'Not specified'}`;
