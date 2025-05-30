@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>Function Based Problem Solving Worksheet</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Tailwind CSS for styling (CDN) -->
     <script src="https://cdn.tailwindcss.com/"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -69,7 +68,6 @@
                     </select>
                 </div>
                 <div id="behaviorsContainer" class="md:col-span-2">
-                    <!-- 3 Behavior Blocks -->
                     <div class="behavior-block" data-behavior-index="0">
                         <div class="behavior-block-header">
                             <h3 class="text-lg font-semibold text-gray-700">Behavior 1</h3>
@@ -129,10 +127,10 @@
                     </div>
                     <div class="behavior-block" data-behavior-index="1">
                         <div class="behavior-block-header">
-                            <h3 class="text-lg font-semibold text-gray-700">Behavior 2 (Optional)</h3>
+                             <h3 class="text-lg font-semibold text-gray-700">Behavior 2 (Optional)</h3>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
+                           <div>
                                 <label for="behaviorTypeSelect_1" class="block text-gray-700 text-sm font-semibold mb-2">Behavior Type</label>
                                 <select id="behaviorTypeSelect_1">
                                     <option value="">Select Behavior Type</option>
@@ -186,7 +184,7 @@
                     </div>
                     <div class="behavior-block" data-behavior-index="2">
                         <div class="behavior-block-header">
-                            <h3 class="text-lg font-semibold text-gray-700">Behavior 3 (Optional)</h3>
+                             <h3 class="text-lg font-semibold text-gray-700">Behavior 3 (Optional)</h3>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -500,48 +498,73 @@ Response Strategies for Problem Behavior:
             bipOutputDiv.classList.add('hidden');
         }
 
+        // --- MODIFIED FUNCTION ---
         async function generatePlanWithGemini() {
             generateBIPSpinner.classList.remove('hidden');
             generateBIPButton.disabled = true;
             sessionStatusDisplay.textContent = "Generating...";
             hidePlanOutput();
 
-            const prompt = createPromptFromForm();
+            const userGeneratedPrompt = createPromptFromForm();
 
-            // Gemini API endpoint and key
-const GEMINI_API_KEY = "...";
-const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`;
-            const body = {
-                contents: [{
-                    parts: [{ text: prompt }]
-                }]
+            // This should be the path to your Vercel serverless function
+            const backendApiUrl = '/api/ask'; // CORRECTED PATH
+
+            const requestBody = {
+                prompt: userGeneratedPrompt
             };
 
             try {
-                const response = await fetch(url, {
+                const response = await fetch(backendApiUrl, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body)
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
                 });
+
                 const data = await response.json();
 
-                if (data.error) {
+                if (!response.ok) {
+                    // Handle errors from your backend (e.g., 400, 405, 500 status codes)
+                    // Your backend returns { error: "message" }
+                    let errorMsg = data.error || `Request failed with status ${response.status}`;
+                    showErrorOutput("Failed to generate a plan (server error).\n" + errorMsg);
+                    console.error("Backend Error:", data);
+                } else if (data.error) {
+                    // Handle errors returned by the Gemini API but passed through by your backend
+                    // (e.g., if Gemini API key is invalid on the backend, or Gemini itself has an issue)
+                    // This 'data.error' structure comes from the Gemini API response format if your backend just forwards it.
+                    // Your backend script sends Gemini's 'data' directly.
+                    // Gemini API error format is often { error: { code: ..., message: ..., status: ... }}
                     let errorMsg = data.error.message || JSON.stringify(data.error, null, 2);
-                    showErrorOutput("Failed to generate a plan.\n" + errorMsg);
-                } else {
-                    const planText = data.candidates?.[0]?.content?.parts?.[0]?.text || "No plan generated.";
+                    if (data.error.details) { // Sometimes Gemini puts more info in details
+                        errorMsg += `\nDetails: ${JSON.stringify(data.error.details, null, 2)}`;
+                    }
+                    showErrorOutput("Failed to generate a plan (API error).\n" + errorMsg);
+                    console.error("Gemini API Error (via backend):", data.error);
+                }
+                 else if (data.candidates && data.candidates.length > 0 && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts.length > 0) {
+                    const planText = data.candidates[0].content.parts[0].text;
                     const sections = parsePlanSections(planText);
                     showPlanSections(sections);
                 }
+                 else {
+                    // Handle unexpected successful response structure or no content
+                    showErrorOutput("Received an unexpected response from the server or no plan was generated.");
+                    console.error("Unexpected successful response:", data);
+                }
             } catch (err) {
-                showErrorOutput("An error occurred: " + err.message);
-                console.error(err);
+                // Handle network errors or other issues with the fetch call itself
+                showErrorOutput("An error occurred while communicating with the server: " + err.message);
+                console.error("Network or Fetch Error:", err);
             } finally {
                 generateBIPSpinner.classList.add('hidden');
                 generateBIPButton.disabled = false;
                 sessionStatusDisplay.textContent = "Active";
             }
         }
+        // --- END OF MODIFIED FUNCTION ---
 
         generateBIPButton.addEventListener('click', (e) => {
             e.preventDefault();
@@ -550,7 +573,7 @@ const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:
 
         // Copy Plan Button
         copyBIPButton.addEventListener('click', () => {
-            let text = 
+            let textToCopy = // Renamed variable to avoid conflict
 `Function Hypothesis Statement:
 ${bipFunctionHypothesis.textContent}
 
@@ -572,8 +595,43 @@ ${bipLongTermBehaviors.textContent}
 Response Strategies for Problem Behavior:
 ${bipResponseStrategies.textContent}
 `;
-            navigator.clipboard.writeText(text);
+            navigator.clipboard.writeText(textToCopy); // Use the new variable name
+            // Optional: Add a visual confirmation that text was copied
+            const originalButtonText = copyBIPButton.innerHTML; // Renamed variable
+            copyBIPButton.innerHTML = '<i class="fas fa-check mr-2"></i> Copied!';
+            setTimeout(() => {
+                copyBIPButton.innerHTML = originalButtonText; // Use the new variable name
+            }, 2000);
         });
+
+        // New Plan Button Functionality (Example: Clear fields and hide output)
+        document.getElementById('newPlanButton').addEventListener('click', () => {
+            // Clear input fields
+            studentAgeInput.value = '';
+            studentGradeSelect.value = '';
+            reinforcerPreferencesInput.value = '';
+            anecdotalInput.value = '';
+            referralInput.value = '';
+            behavioralSkillsSelect.value = '';
+            socialSkillsSelect.value = '';
+            pragmaticLanguageSkillsSelect.value = '';
+
+            for (let i = 0; i < 3; i++) {
+                document.getElementById(`behaviorTypeSelect_${i}`).value = '';
+                document.getElementById(`antecedentSelect_${i}`).value = '';
+                document.getElementById(`behaviorSelect_${i}`).value = '';
+                document.getElementById(`consequenceSelect_${i}`).value = '';
+            }
+            
+            addReferralNo.checked = true;
+            referralInfoContainer.classList.add('hidden');
+
+            // Hide the output section
+            hidePlanOutput();
+            sessionStatusDisplay.textContent = "Active";
+            console.log("New plan started, fields cleared.");
+        });
+
     </script>
 </body>
 </html>
