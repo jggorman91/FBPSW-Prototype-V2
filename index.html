@@ -353,7 +353,6 @@
         <div id="bipOutput" class="card hidden">
             <h2 class="text-2xl font-bold text-gray-800 mb-4">Generated Function Based Problem Solving Worksheet</h2>
             <div class="mb-4">
-                <p class="text-lg font-semibold text-gray-700">Function Hypothesis Statement:</p>
                 <p id="bipFunctionHypothesis" class="text-blue-600 font-medium text-xl"></p>
             </div>
             <div class="plan-section">
@@ -753,12 +752,12 @@ Response Strategies for Problem Behavior:
             return sections;
         }
 
-        // --- THIS IS THE UPDATED FUNCTION ---
+        // --- THIS IS THE UPDATED FUNCTION (from your provided code, it's already correct for formatting the hypothesis) ---
         function showPlanSections(sections) {
             console.log("[FRONTEND] showPlanSections received sections:", JSON.parse(JSON.stringify(sections)));
             const fallbackMsg = "The AI attempted to generate this section but may require more specific input for optimal results. Review and refine as needed.";
             
-            // --- MODIFICATION START ---
+            // --- MODIFICATION START (This part from your code is correct for formatting the hypothesis) ---
             const aiHypothesis = sections["Function Hypothesis Statement"] || fallbackMsg;
             const hypothesisPrefixLine1 = "Function Hypothesis Statement - The following provides an overview of the current behavior(s).";
             const hypothesisPrefixLine2 = "Summary Statement: [When... the student will... because...; therefore, the function of behavior appears to be...] : ";
@@ -780,7 +779,7 @@ Response Strategies for Problem Behavior:
 
         function showErrorOutput(msg) {
             console.log("[FRONTEND] showErrorOutput called with msg:", msg);
-            bipFunctionHypothesis.textContent = msg;
+            bipFunctionHypothesis.textContent = msg; // Error message will appear in the hypothesis content area
             bipAntecedentStrategies.textContent = ""; 
             bipShortTermBehaviors.textContent = "";
             bipTeachingStrategies.textContent = "";
@@ -840,12 +839,12 @@ Response Strategies for Problem Behavior:
                     if (data.candidates && data.candidates.length > 0 && data.candidates[0].finishReason) {
                          specificError = `The response generation finished with reason: ${data.candidates[0].finishReason}. `;
                          if (data.candidates[0].finishReason === "SAFETY") {
-                            specificError += "This often means the content was blocked by safety filters. Review input and safety settings. ";
-                            console.warn("[FRONTEND] Response blocked due to SAFETY finishReason", data.candidates[0].safetyRatings);
+                             specificError += "This often means the content was blocked by safety filters. Review input and safety settings. ";
+                             console.warn("[FRONTEND] Response blocked due to SAFETY finishReason", data.candidates[0].safetyRatings);
                          } else if (data.candidates[0].finishReason === "MAX_TOKENS") {
-                             specificError += "The maximum number of tokens for the response was reached. The plan may be incomplete. ";
+                              specificError += "The maximum number of tokens for the response was reached. The plan may be incomplete. ";
                          } else if (data.candidates[0].finishReason === "RECITATION") {
-                             specificError += "The response was blocked due to detected recitation from a source. ";
+                              specificError += "The response was blocked due to detected recitation from a source. ";
                          }
                     } else if (data.promptFeedback && data.promptFeedback.blockReason) {
                          specificError = `The prompt was blocked by the API. Reason: ${data.promptFeedback.blockReason}.`;
@@ -873,28 +872,35 @@ Response Strategies for Problem Behavior:
             generatePlanWithGemini();
         });
 
+        // MODIFICATION START: Updated copyBIPButton to reflect the new hypothesis format
         copyBIPButton.addEventListener('click', () => {
             let textToCopy = 
-`Function Hypothesis Statement:
-${bipFunctionHypothesis.textContent}
+`${bipFunctionHypothesis.textContent} 
+
 Antecedent Strategies:
 ${bipAntecedentStrategies.textContent}
+
 Short-term Replacement Behaviors:
 ${bipShortTermBehaviors.textContent}
+
 Teaching Strategies for Short-Term Replacement Behaviors:
 ${bipTeachingStrategies.textContent}
+
 Reinforcement Strategies for Short-Term Replacement Behaviors:
 ${bipReinforcementShortTerm.textContent}
+
 Long-term Replacement Behaviors:
 ${bipLongTermBehaviors.textContent}
+
 Response Strategies for Problem Behavior:
 ${bipResponseStrategies.textContent}
 `;
-            navigator.clipboard.writeText(textToCopy);
+            navigator.clipboard.writeText(textToCopy.trim()); // .trim() to remove potential leading/trailing newlines from template literal
             const originalButtonText = copyBIPButton.innerHTML; 
             copyBIPButton.innerHTML = '<i class="fas fa-check mr-2"></i> Copied!';
             setTimeout(() => { copyBIPButton.innerHTML = originalButtonText; }, 2000);
         });
+        // MODIFICATION END
 
         document.getElementById('newPlanButton').addEventListener('click', () => {
             studentAgeInput.value = '';
