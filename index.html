@@ -57,17 +57,25 @@
         </div>
 
         <div class="card">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Plan Details</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Plan Context</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                     <label for="planDate" class="block text-gray-700 text-sm font-semibold mb-2">Plan Date</label>
                     <input type="date" id="planDate">
                 </div>
+                 <div>
+                    <label for="caseManagerInitials" class="block text-gray-700 text-sm font-semibold mb-2">Case Manager/Teacher Initials (Optional)</label>
+                    <input type="text" id="caseManagerInitials" placeholder="e.g., JD">
+                </div>
+                <div>
+                    <label for="schoolYear" class="block text-gray-700 text-sm font-semibold mb-2">School Year (Optional)</label>
+                    <input type="text" id="schoolYear" placeholder="e.g., 2025-2026">
+                </div>
             </div>
         </div>
 
         <div class="card">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Teacher Input</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Student Information (Non-Identifiable)</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="md:col-span-2">
                     <label for="strengthsFactors" class="block text-gray-700 text-sm font-semibold mb-2">Strengths, Interests, and Resiliency Factors</label>
@@ -376,6 +384,14 @@
                     <p>Plan Date:</p>
                     <p id="bipPlanDate" class="text-gray-700"></p>
                 </div>
+                 <div>
+                    <p>Case Manager/Teacher Initials:</p>
+                    <p id="bipCaseManagerInitials" class="text-gray-700"></p>
+                </div>
+                 <div>
+                    <p>School Year:</p>
+                    <p id="bipSchoolYear" class="text-gray-700"></p>
+                </div>
             </div>
 
             <div class="plan-section">
@@ -472,6 +488,8 @@
         // const studentNameInput = document.getElementById('studentName'); // Removed
         // const dateOfBirthInput = document.getElementById('dateOfBirth'); // Removed
         const planDateInput = document.getElementById('planDate');
+        const caseManagerInitialsInput = document.getElementById('caseManagerInitials');
+        const schoolYearInput = document.getElementById('schoolYear');
         const strengthsFactorsInput = document.getElementById('strengthsFactors');
         const studentAgeInput = document.getElementById('studentAge');
         const studentGradeSelect = document.getElementById('studentGrade');
@@ -489,6 +507,8 @@
         // const bipStudentName = document.getElementById('bipStudentName'); // Removed
         // const bipDateOfBirth = document.getElementById('bipDateOfBirth'); // Removed
         const bipPlanDate = document.getElementById('bipPlanDate');
+        const bipCaseManagerInitials = document.getElementById('bipCaseManagerInitials');
+        const bipSchoolYear = document.getElementById('bipSchoolYear');
         const bipStrengthsFactors = document.getElementById('bipStrengthsFactors');
         const bipFunctionHypothesis = document.getElementById('bipFunctionHypothesis');
         const bipAntecedentStrategies = document.getElementById('bipAntecedentStrategies');
@@ -640,6 +660,8 @@
             // const studentName = studentNameInput.value || 'Not specified'; // Removed
             // const dob = dateOfBirthInput.value || 'Not specified'; // Removed
             const planDate = planDateInput.value || 'Not specified';
+            const caseManagerInitials = caseManagerInitialsInput.value || 'Not specified';
+            const schoolYear = schoolYearInput.value || 'Not specified';
             const strengths = strengthsFactorsInput.value || 'Not specified';
             const age = studentAgeInput.value || 'Not specified';
             const grade = studentGradeSelect.value || 'Not specified';
@@ -654,6 +676,8 @@
             const behavioralLevel = behavioralSkillsSelect.value || 'Not specified';
             const socialLevel = socialSkillsSelect.value || 'Not specified';
             const pragmaticLevel = pragmaticLanguageSkillsSelect.value || 'Not specified';
+            const fixedMonitoringPlanStatement = "This plan needs to be reviewed by the school team no less than every four to six weeks starting the 25-26 school year. If the plan is not working, then some aspects should be revised at the meeting. If the plan is successful (extinguished maladaptive behaviors) for four consecutive weeks, then the IEP team should meet to amend the IEP and turn it into a full behavior intervention plan (BIP). Data supporting more intervention or success will be determined by Infinite Campus classroom incidents and referrals.";
+
 
             function getBehaviorBlock(index) {
                 const typeSelect = document.getElementById(`behaviorTypeSelect_${index}`);
@@ -712,8 +736,12 @@ Act as an expert Board Certified Behavior Analyst (BCBA) in a school setting. Yo
 
 It is crucial to understand that the observed behaviors described are **recurring patterns that have been happening over time**, not isolated incidents. Therefore, the entire BIP, including all strategies, must reflect this understanding of chronicity and learned history.
 
-Student Information:
+Plan Context:
 Plan Date: ${planDate}
+Case Manager/Teacher Initials: ${caseManagerInitials}
+School Year: ${schoolYear}
+
+Student Information (Non-Identifiable):
 Student Age: ${age}
 Grade: ${grade}
 Strengths, Interests, and Resiliency Factors: ${strengths}
@@ -733,6 +761,8 @@ Please generate the Behavior Intervention Plan. Format your response using these
 
 For "Teaching Strategies for Short-Term Replacement Behaviors", ensure to include "Instruct:", "Model:", and "Practice:" sub-points.
 For "Antecedent Strategies", ensure to consider and include sub-points for "Throughout The Day:", "When Giving Directions:", "Around Transitions:", and "During Work Time:" where applicable.
+For the "Monitoring and Plan for Review" section, you MUST use the following exact text:
+${fixedMonitoringPlanStatement}
 
 **Critically, the 'Response Strategies for Problem Behavior' section must be detailed and robust.** This section should clearly outline:
 1.  Immediate actions to take when the problem behavior pattern occurs to ensure the safety of the student and others.
@@ -801,11 +831,13 @@ Monitoring and Plan for Review:
         function showPlanSections(sections) {
             console.log("[FRONTEND] showPlanSections received sections:", JSON.parse(JSON.stringify(sections)));
             const fallbackMsg = "The AI attempted to generate this section but may require more specific input for optimal results. Review and refine as needed.";
-            const monitoringStatement = "This plan needs to be reviewed by the school team no less than every four to six weeks starting the 25-26 school year. If the plan is not working, then some aspects should be revised at the meeting. If the plan is successful (extinguished maladaptive behaviors) for four consecutive weeks, then the IEP team should meet to amend the IEP and turn it into a full behavior intervention plan (BIP). Data supporting more intervention or success will be determined by Infinite Campus classroom incidents and referrals.";
 
             // bipStudentName.textContent = studentNameInput.value || 'N/A'; // Removed
             // bipDateOfBirth.textContent = dateOfBirthInput.value || 'N/A'; // Removed
             bipPlanDate.textContent = planDateInput.value || 'N/A';
+            bipCaseManagerInitials.textContent = caseManagerInitialsInput.value || 'N/A';
+            bipSchoolYear.textContent = schoolYearInput.value || 'N/A';
+
 
             bipStrengthsFactors.textContent = sections["Strengths, Interests, and Resiliency Factors"] || strengthsFactorsInput.value || fallbackMsg;
             bipFunctionHypothesis.textContent = sections["Function Hypothesis Statement"] || fallbackMsg;
@@ -815,7 +847,7 @@ Monitoring and Plan for Review:
             bipReinforcementShortTerm.textContent = sections["Reinforcement Strategies for Short-Term Replacement Behaviors"] || fallbackMsg;
             bipLongTermBehaviors.textContent = sections["Long-term Replacement Behaviors"] || fallbackMsg;
             bipResponseStrategies.textContent = sections["Response Strategies for Problem Behavior"] || fallbackMsg;
-            bipMonitoringPlan.textContent = monitoringStatement;
+            bipMonitoringPlan.textContent = sections["Monitoring and Plan for Review"] || fallbackMsg;
 
             bipOutputDiv.classList.remove('hidden');
             console.log("[FRONTEND] bipOutputDiv should now be visible.");
@@ -826,6 +858,8 @@ Monitoring and Plan for Review:
             // bipStudentName.textContent = studentNameInput.value || 'N/A'; // Removed
             // bipDateOfBirth.textContent = dateOfBirthInput.value || 'N/A'; // Removed
             bipPlanDate.textContent = planDateInput.value || 'N/A';
+            bipCaseManagerInitials.textContent = caseManagerInitialsInput.value || 'N/A';
+            bipSchoolYear.textContent = schoolYearInput.value || 'N/A';
             bipStrengthsFactors.textContent = "";
             bipFunctionHypothesis.textContent = msg;
             bipAntecedentStrategies.textContent = "";
@@ -842,6 +876,8 @@ Monitoring and Plan for Review:
             // bipStudentName.textContent = ""; // Removed
             // bipDateOfBirth.textContent = ""; // Removed
             bipPlanDate.textContent = "";
+            bipCaseManagerInitials.textContent = "";
+            bipSchoolYear.textContent = "";
             bipStrengthsFactors.textContent = "";
             bipFunctionHypothesis.textContent = "";
             bipAntecedentStrategies.textContent = "";
@@ -878,7 +914,8 @@ Monitoring and Plan for Review:
                 });
                 console.log("[FRONTEND] Received response from Gemini. Status:", response.status, "Ok:", response.ok);
                 const data = await response.json();
-                console.log("[FRONTEND] Parsed data from Gemini response:", data);
+                console.log("[FRONTEND] Parsed data from Gemini response (structure check):", data ? "Data received" : "No data received", data);
+
 
                 if (!response.ok) {
                     let errorMsg = (data.error && data.error.message) ? data.error.message : `Request failed with status ${response.status}`;
@@ -886,7 +923,7 @@ Monitoring and Plan for Review:
                     showErrorOutput("Failed to generate a plan (API error).\n" + errorMsg);
                     console.error("[FRONTEND] Gemini API Error (response not ok):", data);
                 } else if (data.candidates && data.candidates.length > 0 && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts.length > 0 && data.candidates[0].content.parts[0].text) {
-                    console.log("[FRONTEND] Valid candidates found. Processing plan.");
+                    console.log("[FRONTEND] Valid candidates found in data. Processing plan.");
                     const planText = data.candidates[0].content.parts[0].text;
                     const sections = parsePlanSections(planText);
                     showPlanSections(sections);
@@ -908,13 +945,13 @@ Monitoring and Plan for Review:
                         if (data.promptFeedback.safetyRatings) specificError += ` Details: ${JSON.stringify(data.promptFeedback.safetyRatings)}`;
                         console.warn("[FRONTEND] Prompt blocked by API", data.promptFeedback);
                     } else {
-                        console.log("[FRONTEND] Response OK, but no valid candidates or text found, or unexpected structure.");
+                        console.log("[FRONTEND] Response OK, but no valid candidates or text found in data, or unexpected structure.");
                         console.error("[FRONTEND] Unexpected successful response structure:", data);
                     }
                     showErrorOutput(specificError);
                 }
             } catch (err) {
-                console.error("[FRONTEND] Error in fetch try-catch block:", err);
+                console.error("[FRONTEND] Error in fetch try-catch block (e.g., network error, or response.json() failed):", err);
                 showErrorOutput("An error occurred while communicating with the server: " + err.message);
             } finally {
                 generateBIPSpinner.classList.add('hidden');
@@ -930,9 +967,10 @@ Monitoring and Plan for Review:
         });
 
         copyBIPButton.addEventListener('click', () => {
-            const monitoringStatement = "This plan needs to be reviewed by the school team no less than every four to six weeks starting the 25-26 school year. If the plan is not working, then some aspects should be revised at the meeting. If the plan is successful (extinguished maladaptive behaviors) for four consecutive weeks, then the IEP team should meet to amend the IEP and turn it into a full behavior intervention plan (BIP). Data supporting more intervention or success will be determined by Infinite Campus classroom incidents and referrals.";
             let textToCopy =
 `Plan Date: ${bipPlanDate.textContent}
+Case Manager/Teacher Initials: ${bipCaseManagerInitials.textContent}
+School Year: ${bipSchoolYear.textContent}
 
 Strengths, Interests, and Resiliency Factors:
 ${bipStrengthsFactors.textContent}
@@ -959,7 +997,7 @@ Response Strategies for Problem Behavior:
 ${bipResponseStrategies.textContent}
 
 Monitoring and Plan for Review:
-${monitoringStatement}
+${bipMonitoringPlan.textContent}
 `;
             clipboardHelper.value = textToCopy;
             clipboardHelper.select();
@@ -997,6 +1035,8 @@ ${monitoringStatement}
             // studentNameInput.value = ''; // Removed
             // dateOfBirthInput.value = ''; // Removed
             planDateInput.valueAsDate = new Date();
+            caseManagerInitialsInput.value = '';
+            schoolYearInput.value = '';
             strengthsFactorsInput.value = '';
             studentAgeInput.value = '';
             studentGradeSelect.value = '';
@@ -1013,10 +1053,13 @@ ${monitoringStatement}
                     behaviorTypeSelect.value = '';
                     behaviorTypeSelect.dispatchEvent(new Event('change'));
                 }
+
                 const antecedentSelect = document.getElementById(`antecedentSelect_${i}`);
                 if (antecedentSelect) populateSelectWithOptions(antecedentSelect, [], "Select Antecedent (after choosing type)");
+
                 const behaviorSelect = document.getElementById(`behaviorSelect_${i}`);
                 if (behaviorSelect) populateSelectWithOptions(behaviorSelect, [], "Select Specific Behavior (after choosing type)");
+
                 const consequenceSelect = document.getElementById(`consequenceSelect_${i}`);
                 if (consequenceSelect) populateSelectWithOptions(consequenceSelect, [], "Select Consequence (after choosing type)");
             }
