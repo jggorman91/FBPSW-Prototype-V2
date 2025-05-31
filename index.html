@@ -605,7 +605,7 @@
                          if (selectedBehaviorType === "Other") {
                             currentBlockHeader.textContent = `Behavior Pattern ${parseInt(this.closest('.behavior-block').dataset.behaviorIndex) + 1} (Other - specify in notes)`;
                         } else {
-                            currentBlockHeader.textContent = selectedBehaviorType;
+                            currentBlockHeader.textContent = selectedBehaviorType; // Update header to Behavior Type
                         }
                     } else if (currentBlockHeader) {
                          currentBlockHeader.textContent = `Behavior Pattern ${parseInt(this.closest('.behavior-block').dataset.behaviorIndex) + 1}${parseInt(this.closest('.behavior-block').dataset.behaviorIndex) > 0 ? ' (Optional)' : '' }`;
@@ -693,6 +693,7 @@
             });
         });
 
+        // MODIFICATION START: Updated createPromptFromForm function for new labeling
         function createPromptFromForm() {
             const age = studentAgeInput.value || 'Not specified';
             const grade = studentGradeSelect.value || 'Not specified';
@@ -709,7 +710,6 @@
             const socialLevel = socialSkillsSelect.value || 'Not specified';
             const pragmaticLevel = pragmaticLanguageSkillsSelect.value || 'Not specified';
 
-            // MODIFICATION START: Updated getBehaviorBlock for new labeling
             function getBehaviorBlock(index) {
                 const typeSelect = document.getElementById(`behaviorTypeSelect_${index}`);
                 const antecedentSelect = document.getElementById(`antecedentSelect_${index}`);
@@ -728,9 +728,11 @@
                 } else if (typeValue === "Other") {
                     titleForPrompt = "Other Behavior Pattern (refer to anecdotal notes for specifics)";
                 } else if (specificBehaviorValue && specificBehaviorValue !== "Other (Specify in Notes)" && specificBehaviorValue !== "Other") {
-                    titleForPrompt = specificBehaviorValue; // Fallback, less likely with current UI
+                    // This case is less likely if typeValue is empty due to chained dropdown logic, but included as a fallback.
+                    titleForPrompt = specificBehaviorValue;
                 }
-                // If titleForPrompt is still empty, the block won't be generated if other fields are also empty.
+                // If titleForPrompt is still empty, it implies no primary behavior type was selected for this block.
+                // The .filter(Boolean) later will remove this block if it's entirely empty.
 
                 let result = '';
                 // Only create a block if a title was determined AND at least one of A, B (specific), or C is specified.
@@ -739,7 +741,7 @@
                 }
                 return result;
             }
-            // MODIFICATION END: Updated getBehaviorBlock
+            // MODIFICATION END
 
             const behaviors = [0,1,2].map(getBehaviorBlock).filter(Boolean).join('\n\n');
 
@@ -873,7 +875,7 @@ Response Strategies for Problem Behavior:
         }
 
         function parsePlanSections(planText) {
-            // console.log("[FRONTEND] parsePlanSections received planText (length):", planText.length); // Keep for debugging if needed
+            // console.log("[FRONTEND] parsePlanSections received planText (length):", planText.length);
             const sectionKeys = [
                 "Function Hypothesis Statement", "Antecedent Strategies", "Short-term Replacement Behaviors",
                 "Teaching Strategies for Short-Term Replacement Behaviors", "Reinforcement Strategies for Short-Term Replacement Behaviors",
@@ -890,7 +892,6 @@ Response Strategies for Problem Behavior:
                 let matchedNewSection = false;
                 for (const key of sectionKeys) {
                     const trimmedLine = line.trim();
-                    // Regex to match the key, potentially bolded with markdown (**) and followed by a colon
                     const pattern = new RegExp(`^(?:\\*\\*)?${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?:\\*\\*)?:`, "i");
                     if (pattern.test(trimmedLine)) {
                         if (currentSectionKey && contentForCurrentSection.length > 0) {
@@ -898,7 +899,6 @@ Response Strategies for Problem Behavior:
                         }
                         currentSectionKey = key;
                         contentForCurrentSection = [];
-                        // Capture content on the same line after the heading
                         const contentOnHeadingLine = trimmedLine.replace(pattern, "").trim();
                         if (contentOnHeadingLine) {
                             contentForCurrentSection.push(contentOnHeadingLine);
@@ -908,7 +908,6 @@ Response Strategies for Problem Behavior:
                     }
                 }
                 if (!matchedNewSection && currentSectionKey) {
-                     // Add line to current section if it's not empty or if previous lines had content (to preserve blank lines within sections)
                     if (line.trim() !== "" || contentForCurrentSection.some(l => l.trim() !== "")) {
                         contentForCurrentSection.push(line);
                     }
@@ -917,55 +916,94 @@ Response Strategies for Problem Behavior:
             if (currentSectionKey && contentForCurrentSection.length > 0) {
                 sections[currentSectionKey] = contentForCurrentSection.join('\n').trim();
             }
-            // Trim whitespace from all section content
             for (let key in sections) {
                 sections[key] = sections[key].trim();
             }
-            // console.log("[FRONTEND] parsePlanSections generated sections:", JSON.parse(JSON.stringify(sections))); // Keep for debugging
+            // console.log("[FRONTEND] parsePlanSections generated sections:", JSON.parse(JSON.stringify(sections)));
             return sections;
         }
 
-        // MODIFICATION START: Updated showPlanSections to remove asterisks
-        function showPlanSections(sections) {
-            // console.log("[FRONTEND] showPlanSections received sections:", JSON.parse(JSON.stringify(sections))); // Keep for debugging
+        // MODIFICATION START: Function to get active problem behavior phrases
+        function getActiveProblemBehaviorPhrases() {
+            const phrases = new Set();
+            for (let i = 0; i < 3; i++) {
+                const typeSelect = document.getElementById(`behaviorTypeSelect_${i}`);
+                const behaviorSpecificSelect = document.getElementById(`behaviorSelect_${i}`);
+
+                const typeValue = typeSelect ? typeSelect.value : '';
+                const specificBehaviorValue = behaviorSpecificSelect ? behaviorSpecificSelect.value : '';
+
+                if (typeValue && typeValue !== "Other" && typeValue.trim().length > 2) {
+                    phrases.add(typeValue.trim());
+                }
+                // Also add specific behaviors if they are not generic placeholders and are distinct
+                if (specificBehaviorValue && specificBehaviorValue !== "Other (Specify in Notes)" && specificBehaviorValue !== "Other" && specificBehaviorValue.trim().length > 2) {
+                    phrases.add(specificBehaviorValue.trim());
+                }
+            }
+            return Array.from(phrases);
+        }
+
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+        // MODIFICATION END
+
+        // MODIFICATION START: Updated showPlanSections to remove asterisks and bold problem behaviors
+        function showPlanSections(sections, problemBehaviorPhrases = []) {
+            // console.log("[FRONTEND] showPlanSections received sections:", JSON.parse(JSON.stringify(sections)));
+            // console.log("[FRONTEND] Problem behavior phrases for bolding:", problemBehaviorPhrases);
             const fallbackMsg = "The AI attempted to generate this section but may require more specific input for optimal results. Review and refine as needed.";
-            
-            function cleanContent(text) {
+
+            function cleanAndBoldContent(text, phrasesToBold) {
                 if (typeof text !== 'string') return '';
-                return text.replace(/\*/g, ''); // Remove all asterisks
+                let processedText = text.replace(/\*/g, ''); // Remove all asterisks
+
+                // Sort phrases by length descending to bold longer matches first
+                const sortedPhrases = [...phrasesToBold].sort((a, b) => b.length - a.length);
+
+                sortedPhrases.forEach(phrase => {
+                    if (phrase && phrase.trim() !== '') {
+                        // Match whole words/phrases, case-insensitive
+                        const regex = new RegExp(`(\\b${escapeRegExp(phrase.trim())}\\b)`, 'gi');
+                        processedText = processedText.replace(regex, (match) => `<strong>${match}</strong>`);
+                    }
+                });
+                return processedText;
             }
 
             let hypothesisContent = sections["Function Hypothesis Statement"] || fallbackMsg;
             const hypothesisDisplayPrefixLine1 = "Function Hypothesis Statement - The following provides an overview of the current behavior(s).";
             const hypothesisDisplayPrefixLine2 = "Summary Statement: ";
-            bipFunctionHypothesis.textContent = cleanContent(`${hypothesisDisplayPrefixLine1}\n${hypothesisDisplayPrefixLine2}${hypothesisContent}`);
-            
-            bipAntecedentStrategies.textContent = cleanContent(sections["Antecedent Strategies"] || fallbackMsg);
-            bipShortTermBehaviors.textContent = cleanContent(sections["Short-term Replacement Behaviors"] || fallbackMsg);
-            bipTeachingStrategies.textContent = cleanContent(sections["Teaching Strategies for Short-Term Replacement Behaviors"] || fallbackMsg);
-            bipReinforcementShortTerm.textContent = cleanContent(sections["Reinforcement Strategies for Short-Term Replacement Behaviors"] || fallbackMsg);
-            bipLongTermBehaviors.textContent = cleanContent(sections["Long-term Replacement Behaviors"] || fallbackMsg);
-            bipResponseStrategies.textContent = cleanContent(sections["Response Strategies for Problem Behavior"] || fallbackMsg);
+            bipFunctionHypothesis.innerHTML = cleanAndBoldContent(`${hypothesisDisplayPrefixLine1}\n${hypothesisDisplayPrefixLine2}${hypothesisContent}`, problemBehaviorPhrases);
+
+            bipAntecedentStrategies.innerHTML = cleanAndBoldContent(sections["Antecedent Strategies"] || fallbackMsg, problemBehaviorPhrases);
+            bipShortTermBehaviors.innerHTML = cleanAndBoldContent(sections["Short-term Replacement Behaviors"] || fallbackMsg, problemBehaviorPhrases);
+            bipTeachingStrategies.innerHTML = cleanAndBoldContent(sections["Teaching Strategies for Short-Term Replacement Behaviors"] || fallbackMsg, problemBehaviorPhrases);
+            bipReinforcementShortTerm.innerHTML = cleanAndBoldContent(sections["Reinforcement Strategies for Short-Term Replacement Behaviors"] || fallbackMsg, problemBehaviorPhrases);
+            bipLongTermBehaviors.innerHTML = cleanAndBoldContent(sections["Long-term Replacement Behaviors"] || fallbackMsg, problemBehaviorPhrases);
+            bipResponseStrategies.innerHTML = cleanAndBoldContent(sections["Response Strategies for Problem Behavior"] || fallbackMsg, problemBehaviorPhrases);
+
             bipOutputDiv.classList.remove('hidden');
-            // console.log("[FRONTEND] bipOutputDiv should now be visible."); // Keep for debugging
+            // console.log("[FRONTEND] bipOutputDiv should now be visible.");
         }
-        // MODIFICATION END: Updated showPlanSections
+        // MODIFICATION END
 
 
         function showErrorOutput(msg) {
-            // console.log("[FRONTEND] showErrorOutput called with msg:", msg); // Keep for debugging
-            bipFunctionHypothesis.textContent = msg;
-            bipAntecedentStrategies.textContent = "";
-            bipShortTermBehaviors.textContent = "";
-            bipTeachingStrategies.textContent = "";
-            bipReinforcementShortTerm.textContent = "";
-            bipLongTermBehaviors.textContent = "";
-            bipResponseStrategies.textContent = "";
+            // console.log("[FRONTEND] showErrorOutput called with msg:", msg);
+            bipFunctionHypothesis.innerHTML = msg; // Use innerHTML here too if errors might contain HTML
+            bipAntecedentStrategies.innerHTML = "";
+            bipShortTermBehaviors.innerHTML = "";
+            bipTeachingStrategies.innerHTML = "";
+            bipReinforcementShortTerm.innerHTML = "";
+            bipLongTermBehaviors.innerHTML = "";
+            bipResponseStrategies.innerHTML = "";
             bipOutputDiv.classList.remove('hidden');
         }
 
         function hidePlanOutput() {
-            bipFunctionHypothesis.textContent = "";
+            bipFunctionHypothesis.textContent = ""; // Can remain textContent if errors are plain text
             bipAntecedentStrategies.textContent = "";
             bipShortTermBehaviors.textContent = "";
             bipTeachingStrategies.textContent = "";
@@ -975,14 +1013,20 @@ Response Strategies for Problem Behavior:
             bipOutputDiv.classList.add('hidden');
         }
 
+        // MODIFICATION START: generatePlanWithGemini to call getActiveProblemBehaviorPhrases
         async function generatePlanWithGemini() {
-            // console.log("[FRONTEND] generatePlanWithGemini called"); // Keep for debugging
+            // console.log("[FRONTEND] generatePlanWithGemini called");
             generateBIPSpinner.classList.remove('hidden');
             generateBIPButton.disabled = true;
             sessionStatusDisplay.textContent = "Generating...";
             hidePlanOutput();
+
+            const activePhrases = getActiveProblemBehaviorPhrases(); // Get phrases
             const userGeneratedPrompt = createPromptFromForm();
-            // console.log("[FRONTEND] Generated prompt for backend (first 500 chars):", userGeneratedPrompt.substring(0,500) + "..."); // Keep for debugging
+
+            // console.log("[FRONTEND] Generated prompt for backend (first 500 chars):", userGeneratedPrompt.substring(0,500) + "...");
+            // console.log("[FRONTEND] Active phrases for bolding:", activePhrases);
+
             const backendApiUrl = '/api/ask';
             const requestBody = { prompt: userGeneratedPrompt };
             try {
@@ -991,9 +1035,9 @@ Response Strategies for Problem Behavior:
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(requestBody)
                 });
-                // console.log("[FRONTEND] Received response from backend. Status:", response.status, "Ok:", response.ok); // Keep for debugging
+                // console.log("[FRONTEND] Received response from backend. Status:", response.status, "Ok:", response.ok);
                 const data = await response.json();
-                // console.log("[FRONTEND] Parsed data from backend response (structure check):", data ? "Data received" : "No data received"); // Keep for debugging
+                // console.log("[FRONTEND] Parsed data from backend response (structure check):", data ? "Data received" : "No data received");
                 if (!response.ok) {
                     let errorMsg = data.error || `Request failed with status ${response.status}`;
                     if (data.details) errorMsg += `\nDetails: ${typeof data.details === 'object' ? JSON.stringify(data.details) : data.details}`;
@@ -1005,10 +1049,10 @@ Response Strategies for Problem Behavior:
                     showErrorOutput("Failed to generate a plan (API error).\n" + errorMsg);
                     console.error("[FRONTEND] Gemini API Error (via backend, data.error is present):", data.error);
                 } else if (data.candidates && data.candidates.length > 0 && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts.length > 0 && data.candidates[0].content.parts[0].text) {
-                    // console.log("[FRONTEND] Valid candidates found in data. Processing plan."); // Keep for debugging
+                    // console.log("[FRONTEND] Valid candidates found in data. Processing plan.");
                     const planText = data.candidates[0].content.parts[0].text;
                     const sections = parsePlanSections(planText);
-                    showPlanSections(sections);
+                    showPlanSections(sections, activePhrases); // Pass phrases here
                 } else {
                     let specificError = "Received an unexpected response from the server or no plan was generated.";
                     if (data.candidates && data.candidates.length > 0 && data.candidates[0].finishReason) {
@@ -1026,7 +1070,7 @@ Response Strategies for Problem Behavior:
                          if (data.promptFeedback.safetyRatings) specificError += ` Details: ${JSON.stringify(data.promptFeedback.safetyRatings)}`;
                          console.warn("[FRONTEND] Prompt blocked by API", data.promptFeedback);
                     } else {
-                        // console.log("[FRONTEND] Response OK, but no valid candidates or text found in data, or unexpected structure."); // Keep for debugging
+                        // console.log("[FRONTEND] Response OK, but no valid candidates or text found in data, or unexpected structure.");
                         console.error("[FRONTEND] Unexpected successful response structure:", data);
                     }
                     showErrorOutput(specificError);
@@ -1038,9 +1082,10 @@ Response Strategies for Problem Behavior:
                 generateBIPSpinner.classList.add('hidden');
                 generateBIPButton.disabled = false;
                 sessionStatusDisplay.textContent = "Active";
-                // console.log("[FRONTEND] generatePlanWithGemini finished."); // Keep for debugging
+                // console.log("[FRONTEND] generatePlanWithGemini finished.");
             }
         }
+        // MODIFICATION END
 
         generateBIPButton.addEventListener('click', (e) => {
             e.preventDefault();
@@ -1049,27 +1094,41 @@ Response Strategies for Problem Behavior:
 
         copyBIPButton.addEventListener('click', () => {
             const monitoringStatementText = monitoringStatementContentElement ? monitoringStatementContentElement.textContent.trim() : "";
+            // For copying, we want the plain text without the <strong> tags.
+            // We can get this by temporarily rendering to a hidden div or by stripping HTML.
+            // Simpler approach: copy from elements' textContent, which doesn't include HTML tags.
+
+            const tempDiv = document.createElement('div');
+            function getCleanText(elementId) {
+                const element = document.getElementById(elementId);
+                if (!element) return "";
+                // Clone the element to avoid altering the live display for textContent extraction
+                const clone = element.cloneNode(true);
+                // If we used innerHTML to set it, textContent should give us the de-HTML'd version
+                return clone.textContent || "";
+            }
+
 
             let textToCopy =
-`${bipFunctionHypothesis.textContent.trim()}
+`${getCleanText('bipFunctionHypothesis').trim()}
 
 Antecedent Strategies:
-${bipAntecedentStrategies.textContent.trim()}
+${getCleanText('bipAntecedentStrategies').trim()}
 
 Short-term Replacement Behaviors:
-${bipShortTermBehaviors.textContent.trim()}
+${getCleanText('bipShortTermBehaviors').trim()}
 
 Teaching Strategies for Short-Term Replacement Behaviors:
-${bipTeachingStrategies.textContent.trim()}
+${getCleanText('bipTeachingStrategies').trim()}
 
 Reinforcement Strategies for Short-Term Replacement Behaviors:
-${bipReinforcementShortTerm.textContent.trim()}
+${getCleanText('bipReinforcementShortTerm').trim()}
 
 Long-term Replacement Behaviors:
-${bipLongTermBehaviors.textContent.trim()}
+${getCleanText('bipLongTermBehaviors').trim()}
 
 Response Strategies for Problem Behavior:
-${bipResponseStrategies.textContent.trim()}
+${getCleanText('bipResponseStrategies').trim()}
 
 Monitoring and Plan Review:
 ${monitoringStatementText}
@@ -1091,7 +1150,6 @@ ${monitoringStatementText}
             socialSkillsSelect.value = '';
             pragmaticLanguageSkillsSelect.value = '';
 
-            // Reset behavior block headers and dropdowns
             for (let i = 0; i < 3; i++) {
                 const behaviorBlock = document.querySelector(`.behavior-block[data-behavior-index="${i}"]`);
                 if (behaviorBlock) {
@@ -1104,16 +1162,14 @@ ${monitoringStatementText}
                 const behaviorTypeSelect = document.getElementById(`behaviorTypeSelect_${i}`);
                 if (behaviorTypeSelect) {
                     behaviorTypeSelect.value = '';
-                    // Trigger change to reset dependent dropdowns
                     behaviorTypeSelect.dispatchEvent(new Event('change'));
                 }
-                // Redundant re-population, already handled by change event, but safe:
                 const antecedentSelect = document.getElementById(`antecedentSelect_${i}`);
                 if (antecedentSelect) populateSelectWithOptions(antecedentSelect, [], "Select Antecedent (after choosing type)");
-                
+
                 const behaviorSelect = document.getElementById(`behaviorSelect_${i}`);
                 if (behaviorSelect) populateSelectWithOptions(behaviorSelect, [], "Select Specific Behavior (after choosing type)");
-                
+
                 const consequenceSelect = document.getElementById(`consequenceSelect_${i}`);
                 if (consequenceSelect) populateSelectWithOptions(consequenceSelect, [], "Select Consequence (after choosing type)");
             }
@@ -1122,7 +1178,7 @@ ${monitoringStatementText}
             referralInfoContainer.classList.add('hidden');
             hidePlanOutput();
             sessionStatusDisplay.textContent = "Active";
-            // console.log("[FRONTEND] New plan started, fields cleared."); // Keep for debugging
+            // console.log("[FRONTEND] New plan started, fields cleared.");
         });
     </script>
 </body>
