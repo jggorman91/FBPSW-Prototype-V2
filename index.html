@@ -37,9 +37,8 @@
             min-width: 320px; 
             max-width: 500px; 
         }
-        /* MODIFICATION: Added whitespace-pre-line to relevant output divs if not already covered by prose */
         .ai-output-content {
-            white-space: pre-line; /* Ensures \n characters create line breaks */
+            white-space: pre-line; 
         }
     </style>
 </head>
@@ -650,14 +649,17 @@
                 const consequence = consequenceSelect ? consequenceSelect.value : '';
                 
                 let behaviorPatternLabel = `Behavior Pattern ${index + 1}`;
-                if (type) {
+                if (type && type !== "Other") { // Add type to label if it's specific
                     behaviorPatternLabel += ` (${type.length > 20 ? type.substring(0,17) + "..." : type })`;
+                } else if (type === "Other" && behavior) { // If type is "Other", try to use specific behavior if short
+                     behaviorPatternLabel += ` (${behavior.length > 20 ? behavior.substring(0,17) + "..." : behavior })`;
                 }
 
 
                 let result = '';
                 if (type || antecedent || behavior || consequence) {
-                    result = `Observed Recurring ${behaviorPatternLabel} (ABC Data):\n  Selected Behavior Type: ${type || 'Not specified'}\n  Selected Antecedent: ${antecedent || 'Not specified'}\n  Selected Specific Behavior: ${behavior || 'Not specified'}\n  Selected Typical Consequence: ${consequence || 'Not specified'}`;
+                    result = `Observed Recurring ${behaviorPatternLabel}:\n  Antecedent: ${antecedent || 'Not specified'}\n  Specific Behavior: ${behavior || 'Not specified'}\n  Typical Consequence: ${consequence || 'Not specified'}`;
+                     if (type) result = result.replace(`Observed Recurring ${behaviorPatternLabel}:`, `Observed Recurring ${behaviorPatternLabel} (Overall Type: ${type}):`);
                 }
                 return result;
             }
@@ -701,7 +703,7 @@ For the 'Function Hypothesis Statement' section, you MUST synthesize the provide
 If only one behavior pattern is primarily being addressed, the statement MUST strictly follow this structure:
 'When [accurately describe the specific antecedent conditions based on input...], the student will [accurately describe the specific observable problem behavior based on input...] because [accurately describe what the student typically obtains or escapes as a result of the behavior...] therefore, the function of the behavior appears to be [clearly state the hypothesized function for this pattern...].'
 If multiple distinct behavior patterns are provided with potentially different hypothesized functions, you MUST address each clearly. You can do this by:
-a) Providing a separate hypothesis statement in the above format for each distinct pattern (e.g., "For Behavior Pattern 1 (e.g., Task Refusal): When..., the student will..., because..., therefore the function is X. For Behavior Pattern 2 (e.g., Peer Aggression): When..., the student will..., because..., therefore the function is Y.").
+a) Providing a separate hypothesis statement in the above format for each distinct pattern (e.g., "For Behavior Pattern 1 (e.g., Task Refusal): When..., the student will..., because..., therefore the function is X. For Behavior Pattern 2 (e.g., Peer Aggression): When..., the student will..., because..., therefore the function is Y."). Use the behavior pattern labels provided in the 'Observed Recurring Behavior Patterns' input as reference for your subheadings.
 b) Or, if appropriate, a comprehensive summary that clearly links different functions to specific patterns.
 Ensure each part of any hypothesis statement ([antecedent], [behavior], [consequence/reason], and [function]) is directly derived from and consistent with the student information and behavior patterns provided. Do not use placeholders like "[antecedent]" in your actual output; fill them with specific descriptions based on the input.
 `;
@@ -716,12 +718,24 @@ Do not just list these factors; demonstrate their application in the strategies 
 `;
 
             const multiBehaviorInstruction = `
-GUIDANCE FOR HANDLING MULTIPLE BEHAVIOR PATTERNS:
-If more than one 'Observed Recurring Behavior Pattern' is detailed in the input, it is crucial that the generated Behavior Intervention Plan addresses each pattern systematically. For each of the following sections – 'Antecedent Strategies', 'Short-term Replacement Behaviors', 'Teaching Strategies for Short-Term Replacement Behaviors', 'Reinforcement Strategies for Short-Term Replacement Behaviors', 'Long-term Replacement Behaviors', and 'Response Strategies for Problem Behavior' – you MUST:
+GUIDANCE FOR HANDLING MULTIPLE BEHAVIOR PATTERNS (APPLIES TO ALL STRATEGY SECTIONS):
+If more than one 'Observed Recurring Behavior Pattern' is detailed in the input, it is crucial that the generated Behavior Intervention Plan addresses each pattern systematically. For each of the following sections – 'Antecedent Strategies', 'Short-term Replacement Behaviors', 'Teaching Strategies for Short-Term Replacement Behaviors', 'Reinforcement Strategies for Short-Term Replacement Behaviors', 'Long-term Replacement Behaviors' – you MUST:
 1.  Consider each behavior pattern individually, especially if their hypothesized functions or topographies differ.
-2.  Clearly delineate or preface which strategies apply to which behavior pattern. For example, you might use subheadings like "For Behavior Pattern 1 (Task Refusal):" followed by relevant strategies, then "For Behavior Pattern 2 (Verbal Aggression):" followed by its strategies, within a single BIP section like 'Antecedent Strategies'. The labels for behavior patterns should match those provided in the 'Observed Recurring Behavior Patterns' input (e.g., "Behavior Pattern 1 (Task Refusal / Noncompliance)", "Behavior Pattern 2 (Physical Aggression)").
+2.  Clearly delineate or preface which strategies apply to which behavior pattern. For example, you might use subheadings like "For Behavior Pattern 1 (Task Refusal):" followed by relevant strategies, then "For Behavior Pattern 2 (Verbal Aggression):" followed by its strategies, within a single BIP section like 'Antecedent Strategies'. The labels for behavior patterns (e.g., "Behavior Pattern 1 (Task Refusal / Noncompliance)", "Behavior Pattern 2 (Physical Aggression)") should be used as reference for your subheadings.
 3.  If a strategy is applicable to multiple or all identified behavior patterns, you may consolidate, but explicitly state which patterns it covers.
 Ensure the generated text within each section clearly indicates how it relates to the specific behavior patterns provided.
+(Specific instructions for "Response Strategies for Problem Behavior" section are provided separately below).
+`;
+            const responseStrategyRefinedInstruction = `
+**Critically, the 'Response Strategies for Problem Behavior' section must be detailed and robust.**
+If multiple distinct 'Observed Recurring Behavior Patterns' are provided (as detailed in the 'Observed Recurring Behavior Patterns' input), you MUST structure this section to provide a complete and distinct set of response strategies for EACH behavior pattern. Use the exact labels for the behavior patterns as provided in the input (e.g., "Behavior Pattern 1 (Task Refusal / Noncompliance)", "Behavior Pattern 2 (Physical Aggression)") as subheadings for each set of responses. For each behavior pattern, clearly outline:
+    a. Immediate actions to take when this specific problem behavior pattern occurs to ensure the safety of the student and others.
+    b. De-escalation techniques suitable for this specific behavior pattern and student characteristics.
+    c. Clear, brief, and consistent verbal and non-verbal responses from staff for this pattern.
+    d. Procedures for follow-up after an incident of this pattern, including re-teaching, and how to return the student to the learning environment.
+    e. How to avoid strategies that could inadvertently reinforce this specific problem behavior based on its hypothesized function.
+
+If only one behavior pattern is provided, you should present a single consolidated list covering points a-e above for that behavior.
 `;
 
             return `
@@ -753,12 +767,7 @@ ${multiBehaviorInstruction}
 
 Please generate the Behavior Intervention Plan. Format your response using these section headings (exactly as written). Ensure ALL sections are thoroughly addressed with specific, actionable, and research-based strategies appropriate for a school environment, drawing from the evidence-based strategies provided above where relevant to the hypothesized function. **You should act as if you have all necessary information to complete every section of the plan comprehensively and should attempt to provide recommendations for all listed sections. Do not state that more information is needed for any section; instead, provide the best possible strategies based on the information at hand.**
 
-**Critically, the 'Response Strategies for Problem Behavior' section must be detailed and robust.** This section should clearly outline:
-1.  Immediate actions to take when the problem behavior pattern occurs to ensure the safety of the student and others.
-2.  De-escalation techniques suitable for the described behavior patterns and student characteristics.
-3.  Clear, brief, and consistent verbal and non-verbal responses from staff.
-4.  Procedures for follow-up after an incident, including re-teaching, and how to return the student to the learning environment.
-5.  Avoid strategies that could inadvertently reinforce the problem behavior based on its hypothesized function.
+${responseStrategyRefinedInstruction}
 
 Required BIP Sections:
 Function Hypothesis Statement:
@@ -826,7 +835,6 @@ Response Strategies for Problem Behavior:
 
             const formattedHypothesisText = `${hypothesisDisplayPrefixLine1}\n${hypothesisDisplayPrefixLine2}${aiGeneratedFullHypothesis}`;
             bipFunctionHypothesis.textContent = formattedHypothesisText;
-            // class 'whitespace-pre-line' is already on bipFunctionHypothesis via HTML
             
             bipAntecedentStrategies.textContent = sections["Antecedent Strategies"] || fallbackMsg;
             bipShortTermBehaviors.textContent = sections["Short-term Replacement Behaviors"] || fallbackMsg;
@@ -842,7 +850,6 @@ Response Strategies for Problem Behavior:
         function showErrorOutput(msg) {
             console.log("[FRONTEND] showErrorOutput called with msg:", msg);
             bipFunctionHypothesis.textContent = msg; 
-            // class 'whitespace-pre-line' is already on bipFunctionHypothesis via HTML
             bipAntecedentStrategies.textContent = ""; 
             bipShortTermBehaviors.textContent = "";
             bipTeachingStrategies.textContent = "";
