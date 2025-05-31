@@ -29,16 +29,16 @@
         .behavior-block { border: 2px solid #90caf9; border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; background-color: #e3f2fd; box-shadow: 0 4px 8px rgba(0,0,0,0.08);}
         .behavior-block-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 2px solid #64b5f6;}
         .info-modal-parent {
-            position: relative; 
+            position: relative;
         }
         .info-modal {
-            left: 0; 
-            top: 100%; 
-            min-width: 320px; 
-            max-width: 500px; 
+            left: 0;
+            top: 100%;
+            min-width: 320px;
+            max-width: 500px;
         }
         .ai-output-content {
-            white-space: pre-line; 
+            white-space: pre-line;
         }
     </style>
 </head>
@@ -202,7 +202,7 @@
                 </div>
 
                 <div class="info-modal-parent">
-                    <div class="flex items-center mb-1"> 
+                    <div class="flex items-center mb-1">
                         <label for="behavioralSkillsSelect" class="block text-gray-700 text-sm font-semibold">Behavioral Skills Level</label>
                         <i id="behavioralInfoIcon" class="fas fa-info-circle text-blue-500 ml-2 cursor-pointer hover:text-blue-700" title="Show behavioral levels"></i>
                     </div>
@@ -218,7 +218,7 @@
                         <option value="Strategic Manager">Strategic Manager</option>
                         <option value="Autonomous Problem-Solver">Autonomous Problem-Solver</option>
                     </select>
-                    <div id="behavioralInfoModal" class="info-modal hidden absolute z-50 mt-1 p-4 bg-white border-2 border-blue-300 rounded-lg shadow-xl"> 
+                    <div id="behavioralInfoModal" class="info-modal hidden absolute z-50 mt-1 p-4 bg-white border-2 border-blue-300 rounded-lg shadow-xl">
                         <div class="flex justify-between items-center mb-2">
                             <h4 class="text-md font-semibold text-blue-700">Behavioral Developmental Levels</h4>
                             <button id="closeBehavioralModal" class="text-gray-500 hover:text-gray-800 text-2xl leading-none">&times;</button>
@@ -378,7 +378,7 @@
     </div>
 
     <script type="module">
-        // --- Data from "ABC_Framework_Behavior_Plan (Chat GPT Orginal)" ---
+        // --- Data for ABC dropdowns from "ABC_Framework_Behavior_Plan (Chat GPT Orginal)" ---
         const bipData = {
             "Physical Aggression": {
                 antecedents: ["Challenging tasks", "denial of requests", "transitions", "peer conflicts", "sensory overload"],
@@ -397,7 +397,7 @@
             },
             "Task Refusal / Noncompliance": {
                 antecedents: ["Difficult tasks", "transitions", "denied requests"],
-                behaviors: ["Saying 'no,' ignoring instructions", "leaving area"], // Combined for brevity from source
+                behaviors: ["Saying 'no,' ignoring instructions", "leaving area"],
                 consequences: ["Task postponed", "breaks given", "adult prompts"]
             },
             "Elopement (Running Away)": {
@@ -458,7 +458,7 @@
                 { level: "Discourse Leader", description: "Communicates abstract ideas and leads discussions." }
             ]
         };
-        
+
         // --- Data for Grade-Level Context from "Combined_Developmental_Levels_by_Grade.docx" ---
         const gradeLevelContexts = {
             "K": {
@@ -506,7 +506,6 @@
                 social: "Relational Strategist to Leadership Model – Students manage social identity, complex relationships, and lead by modeling inclusiveness.",
                 language: "Strategic Conversationalist to Discourse Leader – Students use advanced dialogue, adjust communication styles across settings, and engage in persuasive or abstract discussions."
             }
-            // "Higher" and "Other" grades could default to no specific context or a general statement.
         };
 
 
@@ -562,13 +561,13 @@
             if (keepOther) {
                 const existingOther = selectElement.querySelector('option[value="Other"]');
                 if (existingOther) {
-                    otherOptionHTML = existingOther.outerHTML; 
+                    otherOptionHTML = existingOther.outerHTML;
                 } else {
                     otherOptionHTML = '<option value="Other">Other (Specify in Notes)</option>';
                 }
             }
-            selectElement.innerHTML = `<option value="">${defaultOptionText}</option>`; 
-            if (optionsArray && Array.isArray(optionsArray)) { 
+            selectElement.innerHTML = `<option value="">${defaultOptionText}</option>`;
+            if (optionsArray && Array.isArray(optionsArray)) {
                 optionsArray.forEach(optionText => {
                     const option = document.createElement('option');
                     option.value = optionText;
@@ -576,7 +575,7 @@
                     selectElement.appendChild(option);
                 });
             }
-            if (keepOther && otherOptionHTML) { 
+            if (keepOther && otherOptionHTML) {
                 selectElement.insertAdjacentHTML('beforeend', otherOptionHTML);
             }
         }
@@ -591,16 +590,28 @@
 
                 if (!behaviorTypeSelect) {
                     console.error(`ERROR: Element with ID 'behaviorTypeSelect_${i}' not found.`);
-                    continue; 
+                    continue;
                 }
                 if (!antecedentSelect) console.warn(`Warning: Element with ID 'antecedentSelect_${i}' not found. Dependent dropdown will not work for block ${i}.`);
                 if (!behaviorSelect) console.warn(`Warning: Element with ID 'behaviorSelect_${i}' not found. Dependent dropdown will not work for block ${i}.`);
                 if (!consequenceSelect) console.warn(`Warning: Element with ID 'consequenceSelect_${i}' not found. Dependent dropdown will not work for block ${i}.`);
-                
+
                 populateSelectWithOptions(behaviorTypeSelect, behaviorTypeKeys, "Select Behavior Type");
 
                 behaviorTypeSelect.addEventListener('change', function() {
                     const selectedBehaviorType = this.value;
+                    const currentBlockHeader = this.closest('.behavior-block').querySelector('h3');
+                    if (selectedBehaviorType && currentBlockHeader) {
+                         if (selectedBehaviorType === "Other") {
+                            currentBlockHeader.textContent = `Behavior Pattern ${parseInt(this.closest('.behavior-block').dataset.behaviorIndex) + 1} (Other - specify in notes)`;
+                        } else {
+                            currentBlockHeader.textContent = selectedBehaviorType;
+                        }
+                    } else if (currentBlockHeader) {
+                         currentBlockHeader.textContent = `Behavior Pattern ${parseInt(this.closest('.behavior-block').dataset.behaviorIndex) + 1}${parseInt(this.closest('.behavior-block').dataset.behaviorIndex) > 0 ? ' (Optional)' : '' }`;
+                    }
+
+
                     if (selectedBehaviorType && bipData[selectedBehaviorType]) {
                         if (antecedentSelect) populateSelectWithOptions(antecedentSelect, bipData[selectedBehaviorType].antecedents, "Select Antecedent");
                         if (behaviorSelect) populateSelectWithOptions(behaviorSelect, bipData[selectedBehaviorType].behaviors, "Select Specific Behavior");
@@ -616,7 +627,7 @@
                 if (consequenceSelect) populateSelectWithOptions(consequenceSelect, [], "Select Consequence (after choosing type)");
             }
         }
-        
+
         function populateInfoModalTable(modalBodyElement, levelsData) {
             modalBodyElement.innerHTML = ''; // Clear existing rows
             levelsData.forEach(item => {
@@ -658,7 +669,6 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             initializeBehaviorDropdowns();
-            // Populate modals with new data
             setupInfoModal('behavioralInfoIcon', 'behavioralInfoModal', 'closeBehavioralModal', developmentalLevels.behavioral);
             setupInfoModal('socialInfoIcon', 'socialInfoModal', 'closeSocialModal', developmentalLevels.social);
             setupInfoModal('pragmaticInfoIcon', 'pragmaticInfoModal', 'closePragmaticModal', developmentalLevels.pragmatic);
@@ -670,9 +680,9 @@
 
             modals.forEach((modal, index) => {
                 if (modal && !modal.classList.contains('hidden')) {
-                    let currentIcon = icons[index]; 
+                    let currentIcon = icons[index];
                     let targetIsIconOrChild = false;
-                    if (currentIcon) { 
+                    if (currentIcon) {
                         targetIsIconOrChild = currentIcon.contains(event.target) || currentIcon === event.target;
                     }
 
@@ -686,9 +696,9 @@
         function createPromptFromForm() {
             const age = studentAgeInput.value || 'Not specified';
             const grade = studentGradeSelect.value || 'Not specified';
-            const strengthsInterests = strengthsInterestsResiliencyInput.value || 'Not specified'; 
+            const strengthsInterests = strengthsInterestsResiliencyInput.value || 'Not specified';
             const reinforcers = reinforcerPreferencesInput.value || 'Not specified';
-            
+
             let anecdotal = anecdotalInput.value || 'No specific anecdotal notes provided.';
             if (anecdotalInput.value && !anecdotalInput.value.toLowerCase().includes("daily") && !anecdotalInput.value.toLowerCase().includes("weekly") && !anecdotalInput.value.toLowerCase().includes("often") && !anecdotalInput.value.toLowerCase().includes("frequently")) {
                 anecdotal += " (Note: Assume these behavioral observations represent recurring patterns over time unless otherwise specified in the patterns below.)";
@@ -699,35 +709,40 @@
             const socialLevel = socialSkillsSelect.value || 'Not specified';
             const pragmaticLevel = pragmaticLanguageSkillsSelect.value || 'Not specified';
 
+            // MODIFICATION START: Updated getBehaviorBlock for new labeling
             function getBehaviorBlock(index) {
                 const typeSelect = document.getElementById(`behaviorTypeSelect_${index}`);
                 const antecedentSelect = document.getElementById(`antecedentSelect_${index}`);
-                const behaviorSelect = document.getElementById(`behaviorSelect_${index}`);
+                const behaviorSpecificSelect = document.getElementById(`behaviorSelect_${index}`);
                 const consequenceSelect = document.getElementById(`consequenceSelect_${index}`);
 
-                const type = typeSelect ? typeSelect.value : '';
-                const antecedent = antecedentSelect ? antecedentSelect.value : '';
-                const behavior = behaviorSelect ? behaviorSelect.value : '';
-                const consequence = consequenceSelect ? consequenceSelect.value : '';
-                
-                let behaviorPatternLabel = `Behavior Pattern ${index + 1}`;
-                if (type && type !== "Other") { 
-                    behaviorPatternLabel += ` (${type.length > 20 ? type.substring(0,17) + "..." : type })`;
-                } else if (type === "Other" && behavior) { 
-                     behaviorPatternLabel += ` (${behavior.length > 20 ? behavior.substring(0,17) + "..." : behavior })`;
-                }
+                const typeValue = typeSelect ? typeSelect.value : '';
+                const antecedentValue = antecedentSelect ? antecedentSelect.value : '';
+                const specificBehaviorValue = behaviorSpecificSelect ? behaviorSpecificSelect.value : '';
+                const consequenceValue = consequenceSelect ? consequenceSelect.value : '';
 
+                let titleForPrompt = '';
+
+                if (typeValue && typeValue !== "Other") {
+                    titleForPrompt = typeValue;
+                } else if (typeValue === "Other") {
+                    titleForPrompt = "Other Behavior Pattern (refer to anecdotal notes for specifics)";
+                } else if (specificBehaviorValue && specificBehaviorValue !== "Other (Specify in Notes)" && specificBehaviorValue !== "Other") {
+                    titleForPrompt = specificBehaviorValue; // Fallback, less likely with current UI
+                }
+                // If titleForPrompt is still empty, the block won't be generated if other fields are also empty.
 
                 let result = '';
-                if (type || antecedent || behavior || consequence) {
-                    result = `Observed Recurring ${behaviorPatternLabel}:\n  Antecedent: ${antecedent || 'Not specified'}\n  Specific Behavior: ${behavior || 'Not specified'}\n  Typical Consequence: ${consequence || 'Not specified'}`;
-                     if (type) result = result.replace(`Observed Recurring ${behaviorPatternLabel}:`, `Observed Recurring ${behaviorPatternLabel} (Overall Type: ${type}):`);
+                // Only create a block if a title was determined AND at least one of A, B (specific), or C is specified.
+                if (titleForPrompt && (antecedentValue || specificBehaviorValue || consequenceValue)) {
+                    result = `Observed Recurring Pattern - ${titleForPrompt}:\n  Antecedent: ${antecedentValue || 'Not specified'}\n  Specific Behavior: ${specificBehaviorValue || 'Not specified'}\n  Typical Consequence: ${consequenceValue || 'Not specified'}`;
                 }
                 return result;
             }
+            // MODIFICATION END: Updated getBehaviorBlock
+
             const behaviors = [0,1,2].map(getBehaviorBlock).filter(Boolean).join('\n\n');
 
-            // --- Updated evidenceBasedStrategies from "Behavior_Replacement_Strategy_Guide_K-8 (Chat GPT Orginal)" ---
             const evidenceBasedStrategies = `
 ADDITIONAL GUIDANCE FOR REPLACEMENT BEHAVIORS:
 When developing the 'Short-term Replacement Behaviors', 'Teaching Strategies for Short-Term Replacement Behaviors', 'Reinforcement Strategies for Short-Term Replacement Behaviors', and 'Long-term Replacement Behaviors' sections, please consider the following evidence-based approaches, categorized by common behavioral functions. First, hypothesize the function based on the provided ABC data and student information. Then, select and adapt strategies relevant to that hypothesized function. These strategies are based on principles from evidence-based practices like Applied Behavior Analysis (ABA), Positive Behavioral Interventions and Supports (PBIS), and Functional Behavior Assessments (FBA). Implementation should be individualized and aligned with student needs, context, and data.
@@ -760,18 +775,16 @@ FOR STUDENTS WITH SENSORY-BASED NEEDS:
 
 Remember that all strategies should be consistently implemented across settings and by all relevant staff.
 `;
-            // --- End of Updated evidenceBasedStrategies ---
-
             let gradeContext = '';
             const selectedGradeKey = studentGradeSelect.value;
             if (gradeLevelContexts[selectedGradeKey]) {
                 const context = gradeLevelContexts[selectedGradeKey];
                 gradeContext = `
-Typical Developmental Context for ${selectedGradeKey} Grade (from "Combined_Developmental_Levels_by_Grade.docx"):
+Typical Developmental Context for Student's Grade (${selectedGradeKey}):
 - Behavioral Context: ${context.behavioral}
 - Social Context: ${context.social}
 - Language Context: ${context.language}
-This context should be considered alongside the specifically selected skill levels.
+This grade-level context should be considered alongside the specifically selected individual skill levels.
 `;
             }
 
@@ -782,7 +795,7 @@ For the 'Function Hypothesis Statement' section, you MUST synthesize the provide
 If only one behavior pattern is primarily being addressed, the statement MUST strictly follow this structure:
 'When [accurately describe the specific antecedent conditions based on input...], the student will [accurately describe the specific observable problem behavior based on input...] because [accurately describe what the student typically obtains or escapes as a result of the behavior...] therefore, the function of the behavior appears to be [clearly state the hypothesized function for this pattern...].'
 If multiple distinct behavior patterns are provided with potentially different hypothesized functions, you MUST address each clearly. You can do this by:
-a) Providing a separate hypothesis statement in the above format for each distinct pattern (e.g., "For Behavior Pattern 1 (e.g., Task Refusal): When..., the student will..., because..., therefore the function is X. For Behavior Pattern 2 (e.g., Peer Aggression): When..., the student will..., because..., therefore the function is Y."). Use the behavior pattern labels provided in the 'Observed Recurring Behavior Patterns' input as reference for your subheadings.
+a) Providing a separate hypothesis statement in the above format for each distinct pattern (e.g., "For [Pattern Title from input, e.g., Physical Aggression]: When..., the student will..., because..., therefore the function is X. For [Second Pattern Title from input, e.g., Task Refusal]: When..., the student will..., because..., therefore the function is Y."). Use the pattern titles derived from the 'Observed Recurring Behavior Patterns' input as reference for your subheadings.
 b) Or, if appropriate, a comprehensive summary that clearly links different functions to specific patterns.
 Ensure each part of any hypothesis statement ([antecedent], [behavior], [consequence/reason], and [function]) is directly derived from and consistent with the student information and behavior patterns provided. Do not use placeholders like "[antecedent]" in your actual output; fill them with specific descriptions based on the input.
 `;
@@ -800,21 +813,21 @@ Do not just list these factors; demonstrate their application in the strategies 
 GUIDANCE FOR HANDLING MULTIPLE BEHAVIOR PATTERNS (APPLIES TO ALL STRATEGY SECTIONS):
 If more than one 'Observed Recurring Behavior Pattern' is detailed in the input, it is crucial that the generated Behavior Intervention Plan addresses each pattern systematically. For each of the following sections – 'Antecedent Strategies', 'Short-term Replacement Behaviors', 'Teaching Strategies for Short-Term Replacement Behaviors', 'Reinforcement Strategies for Short-Term Replacement Behaviors', 'Long-term Replacement Behaviors' – you MUST:
 1.  Consider each behavior pattern individually, especially if their hypothesized functions or topographies differ.
-2.  Clearly delineate or preface which strategies apply to which behavior pattern. For example, you might use subheadings like "For Behavior Pattern 1 (Task Refusal):" followed by relevant strategies, then "For Behavior Pattern 2 (Verbal Aggression):" followed by its strategies, within a single BIP section like 'Antecedent Strategies'. The labels for behavior patterns (e.g., "Behavior Pattern 1 (Task Refusal / Noncompliance)", "Behavior Pattern 2 (Physical Aggression)") should be used as reference for your subheadings.
+2.  Clearly delineate or preface which strategies apply to which behavior pattern. For example, you might use subheadings like "For [Pattern Title from input, e.g., Physical Aggression]:" followed by relevant strategies, then "For [Second Pattern Title from input, e.g., Task Refusal]:" followed by its strategies. Use the pattern titles derived from the 'Observed Recurring Behavior Patterns' input for these subheadings.
 3.  If a strategy is applicable to multiple or all identified behavior patterns, you may consolidate, but explicitly state which patterns it covers.
 Ensure the generated text within each section clearly indicates how it relates to the specific behavior patterns provided.
 (Specific instructions for "Response Strategies for Problem Behavior" section are provided separately below).
 `;
             const responseStrategyRefinedInstruction = `
 **Critically, the 'Response Strategies for Problem Behavior' section must be detailed and robust.**
-If multiple distinct 'Observed Recurring Behavior Patterns' are provided (as detailed in the 'Observed Recurring Behavior Patterns' input), you MUST structure this section to provide a complete and distinct set of response strategies for EACH behavior pattern. Use the exact labels for the behavior patterns as provided in the input (e.g., "Behavior Pattern 1 (Task Refusal / Noncompliance)", "Behavior Pattern 2 (Physical Aggression)") as subheadings for each set of responses. For each behavior pattern, clearly outline:
+If multiple distinct 'Observed Recurring Behavior Patterns' are provided (as detailed in the 'Observed Recurring Behavior Patterns' input), you MUST structure this section to provide a complete and distinct set of response strategies for EACH behavior pattern. Use the exact pattern titles derived from the 'Observed Recurring Behavior Patterns' input (e.g., "Physical Aggression", "Task Refusal / Noncompliance", or "Other Behavior Pattern (refer to anecdotal notes for specifics)") as subheadings for each set of responses. For each behavior pattern, clearly outline:
     a. Immediate actions to take when this specific problem behavior pattern occurs to ensure the safety of the student and others.
     b. De-escalation techniques suitable for this specific behavior pattern and student characteristics.
     c. Clear, brief, and consistent verbal and non-verbal responses from staff for this pattern.
     d. Procedures for follow-up after an incident of this pattern, including re-teaching, and how to return the student to the learning environment.
     e. How to avoid strategies that could inadvertently reinforce this specific problem behavior based on its hypothesized function.
 
-If only one behavior pattern is provided, you should present a single consolidated list covering points a-e above for that behavior.
+If only one behavior pattern is provided, you should present a single consolidated list covering points a-e above for that behavior, using its pattern title.
 `;
 
             return `
@@ -860,14 +873,14 @@ Response Strategies for Problem Behavior:
         }
 
         function parsePlanSections(planText) {
-            console.log("[FRONTEND] parsePlanSections received planText (length):", planText.length);
-            const sectionKeys = [ 
+            // console.log("[FRONTEND] parsePlanSections received planText (length):", planText.length); // Keep for debugging if needed
+            const sectionKeys = [
                 "Function Hypothesis Statement", "Antecedent Strategies", "Short-term Replacement Behaviors",
                 "Teaching Strategies for Short-Term Replacement Behaviors", "Reinforcement Strategies for Short-Term Replacement Behaviors",
                 "Long-term Replacement Behaviors", "Response Strategies for Problem Behavior"
             ];
             const sections = {};
-            sectionKeys.forEach(key => sections[key] = ""); 
+            sectionKeys.forEach(key => sections[key] = "");
 
             const lines = planText.split('\n');
             let currentSectionKey = null;
@@ -877,63 +890,77 @@ Response Strategies for Problem Behavior:
                 let matchedNewSection = false;
                 for (const key of sectionKeys) {
                     const trimmedLine = line.trim();
+                    // Regex to match the key, potentially bolded with markdown (**) and followed by a colon
                     const pattern = new RegExp(`^(?:\\*\\*)?${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?:\\*\\*)?:`, "i");
                     if (pattern.test(trimmedLine)) {
                         if (currentSectionKey && contentForCurrentSection.length > 0) {
                             sections[currentSectionKey] = contentForCurrentSection.join('\n').trim();
                         }
                         currentSectionKey = key;
-                        contentForCurrentSection = []; 
+                        contentForCurrentSection = [];
+                        // Capture content on the same line after the heading
                         const contentOnHeadingLine = trimmedLine.replace(pattern, "").trim();
-                        if (contentOnHeadingLine) contentForCurrentSection.push(contentOnHeadingLine);
+                        if (contentOnHeadingLine) {
+                            contentForCurrentSection.push(contentOnHeadingLine);
+                        }
                         matchedNewSection = true;
-                        break; 
+                        break;
                     }
                 }
                 if (!matchedNewSection && currentSectionKey) {
-                    if (line.trim() !== "" || contentForCurrentSection.length > 0) contentForCurrentSection.push(line); 
+                     // Add line to current section if it's not empty or if previous lines had content (to preserve blank lines within sections)
+                    if (line.trim() !== "" || contentForCurrentSection.some(l => l.trim() !== "")) {
+                        contentForCurrentSection.push(line);
+                    }
                 }
             }
             if (currentSectionKey && contentForCurrentSection.length > 0) {
                 sections[currentSectionKey] = contentForCurrentSection.join('\n').trim();
             }
-            for (let key in sections) sections[key] = sections[key].trim();
-            console.log("[FRONTEND] parsePlanSections generated sections:", JSON.parse(JSON.stringify(sections)));
+            // Trim whitespace from all section content
+            for (let key in sections) {
+                sections[key] = sections[key].trim();
+            }
+            // console.log("[FRONTEND] parsePlanSections generated sections:", JSON.parse(JSON.stringify(sections))); // Keep for debugging
             return sections;
         }
 
+        // MODIFICATION START: Updated showPlanSections to remove asterisks
         function showPlanSections(sections) {
-            console.log("[FRONTEND] showPlanSections received sections:", JSON.parse(JSON.stringify(sections)));
-            const fallbackMsg = "The AI attempted to generate this section but may require more specific input for optimal results. Review and refine as needed, ensuring it follows the 'When... will... because... therefore...' format.";
+            // console.log("[FRONTEND] showPlanSections received sections:", JSON.parse(JSON.stringify(sections))); // Keep for debugging
+            const fallbackMsg = "The AI attempted to generate this section but may require more specific input for optimal results. Review and refine as needed.";
             
-            const aiGeneratedFullHypothesis = sections["Function Hypothesis Statement"] || fallbackMsg; 
-            
-            const hypothesisDisplayPrefixLine1 = "Function Hypothesis Statement - The following provides an overview of the current behavior(s).";
-            const hypothesisDisplayPrefixLine2 = "Summary Statement: "; 
+            function cleanContent(text) {
+                if (typeof text !== 'string') return '';
+                return text.replace(/\*/g, ''); // Remove all asterisks
+            }
 
-            const formattedHypothesisText = `${hypothesisDisplayPrefixLine1}\n${hypothesisDisplayPrefixLine2}${aiGeneratedFullHypothesis}`;
-            bipFunctionHypothesis.textContent = formattedHypothesisText;
+            let hypothesisContent = sections["Function Hypothesis Statement"] || fallbackMsg;
+            const hypothesisDisplayPrefixLine1 = "Function Hypothesis Statement - The following provides an overview of the current behavior(s).";
+            const hypothesisDisplayPrefixLine2 = "Summary Statement: ";
+            bipFunctionHypothesis.textContent = cleanContent(`${hypothesisDisplayPrefixLine1}\n${hypothesisDisplayPrefixLine2}${hypothesisContent}`);
             
-            bipAntecedentStrategies.textContent = sections["Antecedent Strategies"] || fallbackMsg;
-            bipShortTermBehaviors.textContent = sections["Short-term Replacement Behaviors"] || fallbackMsg;
-            bipTeachingStrategies.textContent = sections["Teaching Strategies for Short-Term Replacement Behaviors"] || fallbackMsg;
-            bipReinforcementShortTerm.textContent = sections["Reinforcement Strategies for Short-Term Replacement Behaviors"] || fallbackMsg;
-            bipLongTermBehaviors.textContent = sections["Long-term Replacement Behaviors"] || fallbackMsg;
-            bipResponseStrategies.textContent = sections["Response Strategies for Problem Behavior"] || fallbackMsg; 
+            bipAntecedentStrategies.textContent = cleanContent(sections["Antecedent Strategies"] || fallbackMsg);
+            bipShortTermBehaviors.textContent = cleanContent(sections["Short-term Replacement Behaviors"] || fallbackMsg);
+            bipTeachingStrategies.textContent = cleanContent(sections["Teaching Strategies for Short-Term Replacement Behaviors"] || fallbackMsg);
+            bipReinforcementShortTerm.textContent = cleanContent(sections["Reinforcement Strategies for Short-Term Replacement Behaviors"] || fallbackMsg);
+            bipLongTermBehaviors.textContent = cleanContent(sections["Long-term Replacement Behaviors"] || fallbackMsg);
+            bipResponseStrategies.textContent = cleanContent(sections["Response Strategies for Problem Behavior"] || fallbackMsg);
             bipOutputDiv.classList.remove('hidden');
-            console.log("[FRONTEND] bipOutputDiv should now be visible.");
+            // console.log("[FRONTEND] bipOutputDiv should now be visible."); // Keep for debugging
         }
+        // MODIFICATION END: Updated showPlanSections
 
 
         function showErrorOutput(msg) {
-            console.log("[FRONTEND] showErrorOutput called with msg:", msg);
-            bipFunctionHypothesis.textContent = msg; 
-            bipAntecedentStrategies.textContent = ""; 
+            // console.log("[FRONTEND] showErrorOutput called with msg:", msg); // Keep for debugging
+            bipFunctionHypothesis.textContent = msg;
+            bipAntecedentStrategies.textContent = "";
             bipShortTermBehaviors.textContent = "";
             bipTeachingStrategies.textContent = "";
             bipReinforcementShortTerm.textContent = "";
             bipLongTermBehaviors.textContent = "";
-            bipResponseStrategies.textContent = ""; 
+            bipResponseStrategies.textContent = "";
             bipOutputDiv.classList.remove('hidden');
         }
 
@@ -944,19 +971,19 @@ Response Strategies for Problem Behavior:
             bipTeachingStrategies.textContent = "";
             bipReinforcementShortTerm.textContent = "";
             bipLongTermBehaviors.textContent = "";
-            bipResponseStrategies.textContent = ""; 
+            bipResponseStrategies.textContent = "";
             bipOutputDiv.classList.add('hidden');
         }
 
         async function generatePlanWithGemini() {
-            console.log("[FRONTEND] generatePlanWithGemini called");
+            // console.log("[FRONTEND] generatePlanWithGemini called"); // Keep for debugging
             generateBIPSpinner.classList.remove('hidden');
             generateBIPButton.disabled = true;
             sessionStatusDisplay.textContent = "Generating...";
             hidePlanOutput();
             const userGeneratedPrompt = createPromptFromForm();
-            console.log("[FRONTEND] Generated prompt for backend (first 500 chars):", userGeneratedPrompt.substring(0,500) + "..."); 
-            const backendApiUrl = '/api/ask'; 
+            // console.log("[FRONTEND] Generated prompt for backend (first 500 chars):", userGeneratedPrompt.substring(0,500) + "..."); // Keep for debugging
+            const backendApiUrl = '/api/ask';
             const requestBody = { prompt: userGeneratedPrompt };
             try {
                 const response = await fetch(backendApiUrl, {
@@ -964,21 +991,21 @@ Response Strategies for Problem Behavior:
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(requestBody)
                 });
-                console.log("[FRONTEND] Received response from backend. Status:", response.status, "Ok:", response.ok); 
+                // console.log("[FRONTEND] Received response from backend. Status:", response.status, "Ok:", response.ok); // Keep for debugging
                 const data = await response.json();
-                console.log("[FRONTEND] Parsed data from backend response (structure check):", data ? "Data received" : "No data received");
+                // console.log("[FRONTEND] Parsed data from backend response (structure check):", data ? "Data received" : "No data received"); // Keep for debugging
                 if (!response.ok) {
                     let errorMsg = data.error || `Request failed with status ${response.status}`;
                     if (data.details) errorMsg += `\nDetails: ${typeof data.details === 'object' ? JSON.stringify(data.details) : data.details}`;
                     showErrorOutput("Failed to generate a plan (server error).\n" + errorMsg);
                     console.error("[FRONTEND] Backend Error (response not ok):", data);
-                } else if (data.error) { 
+                } else if (data.error) {
                     let errorMsg = data.error.message || JSON.stringify(data.error, null, 2);
                     if (data.error.details) errorMsg += `\nDetails: ${JSON.stringify(data.error.details, null, 2)}`;
                     showErrorOutput("Failed to generate a plan (API error).\n" + errorMsg);
                     console.error("[FRONTEND] Gemini API Error (via backend, data.error is present):", data.error);
                 } else if (data.candidates && data.candidates.length > 0 && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts.length > 0 && data.candidates[0].content.parts[0].text) {
-                    console.log("[FRONTEND] Valid candidates found in data. Processing plan.");
+                    // console.log("[FRONTEND] Valid candidates found in data. Processing plan."); // Keep for debugging
                     const planText = data.candidates[0].content.parts[0].text;
                     const sections = parsePlanSections(planText);
                     showPlanSections(sections);
@@ -999,19 +1026,19 @@ Response Strategies for Problem Behavior:
                          if (data.promptFeedback.safetyRatings) specificError += ` Details: ${JSON.stringify(data.promptFeedback.safetyRatings)}`;
                          console.warn("[FRONTEND] Prompt blocked by API", data.promptFeedback);
                     } else {
-                        console.log("[FRONTEND] Response OK, but no valid candidates or text found in data, or unexpected structure."); 
+                        // console.log("[FRONTEND] Response OK, but no valid candidates or text found in data, or unexpected structure."); // Keep for debugging
                         console.error("[FRONTEND] Unexpected successful response structure:", data);
                     }
                     showErrorOutput(specificError);
                 }
             } catch (err) {
-                console.error("[FRONTEND] Error in fetch try-catch block (e.g., network error, or response.json() failed):", err); 
+                console.error("[FRONTEND] Error in fetch try-catch block (e.g., network error, or response.json() failed):", err);
                 showErrorOutput("An error occurred while communicating with the server: " + err.message);
             } finally {
                 generateBIPSpinner.classList.add('hidden');
                 generateBIPButton.disabled = false;
                 sessionStatusDisplay.textContent = "Active";
-                console.log("[FRONTEND] generatePlanWithGemini finished.");
+                // console.log("[FRONTEND] generatePlanWithGemini finished."); // Keep for debugging
             }
         }
 
@@ -1023,7 +1050,7 @@ Response Strategies for Problem Behavior:
         copyBIPButton.addEventListener('click', () => {
             const monitoringStatementText = monitoringStatementContentElement ? monitoringStatementContentElement.textContent.trim() : "";
 
-            let textToCopy = 
+            let textToCopy =
 `${bipFunctionHypothesis.textContent.trim()}
 
 Antecedent Strategies:
@@ -1047,8 +1074,8 @@ ${bipResponseStrategies.textContent.trim()}
 Monitoring and Plan Review:
 ${monitoringStatementText}
 `;
-            navigator.clipboard.writeText(textToCopy.trim()); 
-            const originalButtonText = copyBIPButton.innerHTML; 
+            navigator.clipboard.writeText(textToCopy.trim());
+            const originalButtonText = copyBIPButton.innerHTML;
             copyBIPButton.innerHTML = '<i class="fas fa-check mr-2"></i> Copied!';
             setTimeout(() => { copyBIPButton.innerHTML = originalButtonText; }, 2000);
         });
@@ -1056,34 +1083,46 @@ ${monitoringStatementText}
         document.getElementById('newPlanButton').addEventListener('click', () => {
             studentAgeInput.value = '';
             studentGradeSelect.value = '';
-            strengthsInterestsResiliencyInput.value = ''; 
+            strengthsInterestsResiliencyInput.value = '';
             reinforcerPreferencesInput.value = '';
             anecdotalInput.value = '';
             referralInput.value = '';
             behavioralSkillsSelect.value = '';
             socialSkillsSelect.value = '';
             pragmaticLanguageSkillsSelect.value = '';
+
+            // Reset behavior block headers and dropdowns
             for (let i = 0; i < 3; i++) {
-                const behaviorTypeSelect = document.getElementById(`behaviorTypeSelect_${i}`);
-                if (behaviorTypeSelect) { 
-                    behaviorTypeSelect.value = '';
-                    behaviorTypeSelect.dispatchEvent(new Event('change'));
+                const behaviorBlock = document.querySelector(`.behavior-block[data-behavior-index="${i}"]`);
+                if (behaviorBlock) {
+                    const header = behaviorBlock.querySelector('h3');
+                    if (header) {
+                         header.textContent = `Behavior Pattern ${i + 1}${i > 0 ? ' (Optional)' : ''}`;
+                    }
                 }
 
+                const behaviorTypeSelect = document.getElementById(`behaviorTypeSelect_${i}`);
+                if (behaviorTypeSelect) {
+                    behaviorTypeSelect.value = '';
+                    // Trigger change to reset dependent dropdowns
+                    behaviorTypeSelect.dispatchEvent(new Event('change'));
+                }
+                // Redundant re-population, already handled by change event, but safe:
                 const antecedentSelect = document.getElementById(`antecedentSelect_${i}`);
-                if (antecedentSelect) antecedentSelect.innerHTML = '<option value="">Select Antecedent (after choosing type)</option><option value="Other">Other (Specify in Notes)</option>';
+                if (antecedentSelect) populateSelectWithOptions(antecedentSelect, [], "Select Antecedent (after choosing type)");
                 
                 const behaviorSelect = document.getElementById(`behaviorSelect_${i}`);
-                if (behaviorSelect) behaviorSelect.innerHTML = '<option value="">Select Specific Behavior (after choosing type)</option><option value="Other">Other (Specify in Notes)</option>';
+                if (behaviorSelect) populateSelectWithOptions(behaviorSelect, [], "Select Specific Behavior (after choosing type)");
                 
                 const consequenceSelect = document.getElementById(`consequenceSelect_${i}`);
-                if (consequenceSelect) consequenceSelect.innerHTML = '<option value="">Select Consequence (after choosing type)</option><option value="Other">Other (Specify in Notes)</option>';
+                if (consequenceSelect) populateSelectWithOptions(consequenceSelect, [], "Select Consequence (after choosing type)");
             }
+
             addReferralNo.checked = true;
             referralInfoContainer.classList.add('hidden');
             hidePlanOutput();
             sessionStatusDisplay.textContent = "Active";
-            console.log("[FRONTEND] New plan started, fields cleared.");
+            // console.log("[FRONTEND] New plan started, fields cleared."); // Keep for debugging
         });
     </script>
 </body>
