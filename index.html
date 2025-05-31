@@ -37,6 +37,10 @@
             min-width: 320px; 
             max-width: 500px; 
         }
+        /* MODIFICATION: Added whitespace-pre-line to relevant output divs if not already covered by prose */
+        .ai-output-content {
+            white-space: pre-line; /* Ensures \n characters create line breaks */
+        }
     </style>
 </head>
 <body class="bg-gray-100 p-4">
@@ -81,6 +85,7 @@
                     <label for="strengthsInterestsResiliency" class="block text-gray-700 text-sm font-semibold mb-2">Strengths, Interests, and Resiliency Factors</label>
                     <textarea id="strengthsInterestsResiliency" rows="3" placeholder="e.g., Strong in art, loves dinosaurs, responds well to positive adult attention, supportive family..."></textarea>
                 </div>
+
                 <div id="behaviorsContainer" class="md:col-span-2">
                     <div class="behavior-block" data-behavior-index="0">
                         <div class="behavior-block-header">
@@ -362,27 +367,27 @@
             </div>
             <div class="plan-section">
                 <h3>Antecedent Strategies:</h3>
-                <div id="bipAntecedentStrategies" class="prose max-w-none text-gray-800"></div>
+                <div id="bipAntecedentStrategies" class="prose max-w-none text-gray-800 ai-output-content"></div>
             </div>
             <div class="plan-section">
                 <h3>Short-term Replacement Behaviors:</h3>
-                <div id="bipShortTermBehaviors" class="prose max-w-none text-gray-800"></div>
+                <div id="bipShortTermBehaviors" class="prose max-w-none text-gray-800 ai-output-content"></div>
             </div>
             <div class="plan-section">
                 <h3>Teaching Strategies for Short-Term Replacement Behaviors:</h3>
-                <div id="bipTeachingStrategies" class="prose max-w-none text-gray-800"></div>
+                <div id="bipTeachingStrategies" class="prose max-w-none text-gray-800 ai-output-content"></div>
             </div>
             <div class="plan-section">
                 <h3>Reinforcement Strategies for Short-Term Replacement Behaviors:</h3>
-                <div id="bipReinforcementShortTerm" class="prose max-w-none text-gray-800"></div>
+                <div id="bipReinforcementShortTerm" class="prose max-w-none text-gray-800 ai-output-content"></div>
             </div>
             <div class="plan-section">
                 <h3>Long-term Replacement Behaviors:</h3>
-                <div id="bipLongTermBehaviors" class="prose max-w-none text-gray-800"></div>
+                <div id="bipLongTermBehaviors" class="prose max-w-none text-gray-800 ai-output-content"></div>
             </div>
             <div class="plan-section">
                 <h3>Response Strategies for Problem Behavior:</h3>
-                <div id="bipResponseStrategies" class="prose max-w-none text-gray-800"></div>
+                <div id="bipResponseStrategies" class="prose max-w-none text-gray-800 ai-output-content"></div>
             </div>
 
             <div class="plan-section">
@@ -465,9 +470,7 @@
         // DOM elements
         const studentAgeInput = document.getElementById('studentAge');
         const studentGradeSelect = document.getElementById('studentGrade');
-        // MODIFICATION START: Added DOM element for new input
         const strengthsInterestsResiliencyInput = document.getElementById('strengthsInterestsResiliency');
-        // MODIFICATION END
         const reinforcerPreferencesInput = document.getElementById('reinforcerPreferences');
         const behavioralSkillsSelect = document.getElementById('behavioralSkillsSelect');
         const socialSkillsSelect = document.getElementById('socialSkillsSelect');
@@ -622,7 +625,7 @@
         function createPromptFromForm() {
             const age = studentAgeInput.value || 'Not specified';
             const grade = studentGradeSelect.value || 'Not specified';
-            const strengthsInterests = strengthsInterestsResiliencyInput.value || 'Not specified'; // Capture new input
+            const strengthsInterests = strengthsInterestsResiliencyInput.value || 'Not specified'; 
             const reinforcers = reinforcerPreferencesInput.value || 'Not specified';
             
             let anecdotal = anecdotalInput.value || 'No specific anecdotal notes provided.';
@@ -646,9 +649,15 @@
                 const behavior = behaviorSelect ? behaviorSelect.value : '';
                 const consequence = consequenceSelect ? consequenceSelect.value : '';
                 
+                let behaviorPatternLabel = `Behavior Pattern ${index + 1}`;
+                if (type) {
+                    behaviorPatternLabel += ` (${type.length > 20 ? type.substring(0,17) + "..." : type })`;
+                }
+
+
                 let result = '';
                 if (type || antecedent || behavior || consequence) {
-                    result = `Observed Recurring Behavior Pattern ${index + 1} (ABC Data):\n  Selected Behavior Type: ${type || 'Not specified'}\n  Selected Antecedent: ${antecedent || 'Not specified'}\n  Selected Specific Behavior: ${behavior || 'Not specified'}\n  Selected Typical Consequence: ${consequence || 'Not specified'}`;
+                    result = `Observed Recurring ${behaviorPatternLabel} (ABC Data):\n  Selected Behavior Type: ${type || 'Not specified'}\n  Selected Antecedent: ${antecedent || 'Not specified'}\n  Selected Specific Behavior: ${behavior || 'Not specified'}\n  Selected Typical Consequence: ${consequence || 'Not specified'}`;
                 }
                 return result;
             }
@@ -689,9 +698,12 @@ Remember that all strategies should be consistently implemented across settings 
             const hypothesisGenerationInstructions = `
 IMPORTANT INSTRUCTION FOR 'Function Hypothesis Statement':
 For the 'Function Hypothesis Statement' section, you MUST synthesize the provided ABC data (Antecedent, Behavior, Consequence from the selected patterns and/or anecdotal notes) to formulate a clear and concise hypothesis.
-The statement MUST strictly follow this structure:
-'When [accurately describe the specific antecedent conditions based on input, e.g., 'When asked to complete non-preferred academic tasks'], the student will [accurately describe the specific observable problem behavior based on input, e.g., 'tear worksheets and refuse to write'] because [accurately describe what the student typically obtains or escapes as a result of the behavior, linking to the provided consequence data or inferred maintaining consequence, e.g., 'the task is often delayed or removed' or 'they receive peer attention'] therefore, the function of the behavior appears to be [clearly state the single primary hypothesized function: e.g., 'escape from academic demands', 'to gain attention', 'to access preferred items', 'automatic reinforcement due to sensory input'].'
-Ensure each part of this structured hypothesis ([antecedent], [behavior], [consequence/reason], and [function]) is directly derived from and consistent with the student information and behavior patterns provided. Do not use placeholders like "[antecedent]" in your actual output; fill them with specific descriptions based on the input.
+If only one behavior pattern is primarily being addressed, the statement MUST strictly follow this structure:
+'When [accurately describe the specific antecedent conditions based on input...], the student will [accurately describe the specific observable problem behavior based on input...] because [accurately describe what the student typically obtains or escapes as a result of the behavior...] therefore, the function of the behavior appears to be [clearly state the hypothesized function for this pattern...].'
+If multiple distinct behavior patterns are provided with potentially different hypothesized functions, you MUST address each clearly. You can do this by:
+a) Providing a separate hypothesis statement in the above format for each distinct pattern (e.g., "For Behavior Pattern 1 (e.g., Task Refusal): When..., the student will..., because..., therefore the function is X. For Behavior Pattern 2 (e.g., Peer Aggression): When..., the student will..., because..., therefore the function is Y.").
+b) Or, if appropriate, a comprehensive summary that clearly links different functions to specific patterns.
+Ensure each part of any hypothesis statement ([antecedent], [behavior], [consequence/reason], and [function]) is directly derived from and consistent with the student information and behavior patterns provided. Do not use placeholders like "[antecedent]" in your actual output; fill them with specific descriptions based on the input.
 `;
             const personalizationInstruction = `
 IMPORTANT PERSONALIZATION GUIDANCE:
@@ -701,6 +713,15 @@ When developing ALL sections of the Behavior Intervention Plan (especially Antec
 - If anecdotal notes highlight specific triggers or successful past interactions, these must inform the antecedent and response strategies.
 - 'Preferred Reinforcers' should be directly and creatively integrated into the 'Reinforcement Strategies for Short-Term Replacement Behaviors' and considered for long-term motivation.
 Do not just list these factors; demonstrate their application in the strategies you propose throughout the plan.
+`;
+
+            const multiBehaviorInstruction = `
+GUIDANCE FOR HANDLING MULTIPLE BEHAVIOR PATTERNS:
+If more than one 'Observed Recurring Behavior Pattern' is detailed in the input, it is crucial that the generated Behavior Intervention Plan addresses each pattern systematically. For each of the following sections – 'Antecedent Strategies', 'Short-term Replacement Behaviors', 'Teaching Strategies for Short-Term Replacement Behaviors', 'Reinforcement Strategies for Short-Term Replacement Behaviors', 'Long-term Replacement Behaviors', and 'Response Strategies for Problem Behavior' – you MUST:
+1.  Consider each behavior pattern individually, especially if their hypothesized functions or topographies differ.
+2.  Clearly delineate or preface which strategies apply to which behavior pattern. For example, you might use subheadings like "For Behavior Pattern 1 (Task Refusal):" followed by relevant strategies, then "For Behavior Pattern 2 (Verbal Aggression):" followed by its strategies, within a single BIP section like 'Antecedent Strategies'. The labels for behavior patterns should match those provided in the 'Observed Recurring Behavior Patterns' input (e.g., "Behavior Pattern 1 (Task Refusal / Noncompliance)", "Behavior Pattern 2 (Physical Aggression)").
+3.  If a strategy is applicable to multiple or all identified behavior patterns, you may consolidate, but explicitly state which patterns it covers.
+Ensure the generated text within each section clearly indicates how it relates to the specific behavior patterns provided.
 `;
 
             return `
@@ -727,6 +748,8 @@ ${evidenceBasedStrategies}
 ${hypothesisGenerationInstructions}
 
 ${personalizationInstruction}
+
+${multiBehaviorInstruction}
 
 Please generate the Behavior Intervention Plan. Format your response using these section headings (exactly as written). Ensure ALL sections are thoroughly addressed with specific, actionable, and research-based strategies appropriate for a school environment, drawing from the evidence-based strategies provided above where relevant to the hypothesized function. **You should act as if you have all necessary information to complete every section of the plan comprehensively and should attempt to provide recommendations for all listed sections. Do not state that more information is needed for any section; instead, provide the best possible strategies based on the information at hand.**
 
@@ -803,7 +826,7 @@ Response Strategies for Problem Behavior:
 
             const formattedHypothesisText = `${hypothesisDisplayPrefixLine1}\n${hypothesisDisplayPrefixLine2}${aiGeneratedFullHypothesis}`;
             bipFunctionHypothesis.textContent = formattedHypothesisText;
-            bipFunctionHypothesis.classList.add('whitespace-pre-line'); 
+            // class 'whitespace-pre-line' is already on bipFunctionHypothesis via HTML
             
             bipAntecedentStrategies.textContent = sections["Antecedent Strategies"] || fallbackMsg;
             bipShortTermBehaviors.textContent = sections["Short-term Replacement Behaviors"] || fallbackMsg;
@@ -819,7 +842,7 @@ Response Strategies for Problem Behavior:
         function showErrorOutput(msg) {
             console.log("[FRONTEND] showErrorOutput called with msg:", msg);
             bipFunctionHypothesis.textContent = msg; 
-            bipFunctionHypothesis.classList.add('whitespace-pre-line');
+            // class 'whitespace-pre-line' is already on bipFunctionHypothesis via HTML
             bipAntecedentStrategies.textContent = ""; 
             bipShortTermBehaviors.textContent = "";
             bipTeachingStrategies.textContent = "";
@@ -945,11 +968,10 @@ ${monitoringStatementText}
             setTimeout(() => { copyBIPButton.innerHTML = originalButtonText; }, 2000);
         });
 
-        // MODIFICATION START: Update "New Plan" button to clear the new field
         document.getElementById('newPlanButton').addEventListener('click', () => {
             studentAgeInput.value = '';
             studentGradeSelect.value = '';
-            strengthsInterestsResiliencyInput.value = ''; // Clear new field
+            strengthsInterestsResiliencyInput.value = ''; 
             reinforcerPreferencesInput.value = '';
             anecdotalInput.value = '';
             referralInput.value = '';
@@ -978,7 +1000,6 @@ ${monitoringStatementText}
             sessionStatusDisplay.textContent = "Active";
             console.log("[FRONTEND] New plan started, fields cleared.");
         });
-        // MODIFICATION END
     </script>
 </body>
 </html>
