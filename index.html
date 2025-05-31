@@ -753,10 +753,19 @@ Response Strategies for Problem Behavior:
             return sections;
         }
 
+        // --- THIS IS THE UPDATED FUNCTION ---
         function showPlanSections(sections) {
             console.log("[FRONTEND] showPlanSections received sections:", JSON.parse(JSON.stringify(sections)));
             const fallbackMsg = "The AI attempted to generate this section but may require more specific input for optimal results. Review and refine as needed.";
-            bipFunctionHypothesis.textContent = sections["Function Hypothesis Statement"] || fallbackMsg;
+            
+            // --- MODIFICATION START ---
+            const aiHypothesis = sections["Function Hypothesis Statement"] || fallbackMsg;
+            const hypothesisPrefixLine1 = "Function Hypothesis Statement - The following provides an overview of the current behavior(s).";
+            const hypothesisPrefixLine2 = "Summary Statement: [When... the student will... because...; therefore, the function of behavior appears to be...] : ";
+            const formattedHypothesis = `${hypothesisPrefixLine1}\n${hypothesisPrefixLine2}${aiHypothesis}`;
+            bipFunctionHypothesis.textContent = formattedHypothesis;
+            // --- MODIFICATION END ---
+            
             bipAntecedentStrategies.textContent = sections["Antecedent Strategies"] || fallbackMsg;
             bipShortTermBehaviors.textContent = sections["Short-term Replacement Behaviors"] || fallbackMsg;
             bipTeachingStrategies.textContent = sections["Teaching Strategies for Short-Term Replacement Behaviors"] || fallbackMsg;
@@ -766,6 +775,8 @@ Response Strategies for Problem Behavior:
             bipOutputDiv.classList.remove('hidden');
             console.log("[FRONTEND] bipOutputDiv should now be visible.");
         }
+        // --- END OF UPDATED FUNCTION ---
+
 
         function showErrorOutput(msg) {
             console.log("[FRONTEND] showErrorOutput called with msg:", msg);
@@ -829,12 +840,12 @@ Response Strategies for Problem Behavior:
                     if (data.candidates && data.candidates.length > 0 && data.candidates[0].finishReason) {
                          specificError = `The response generation finished with reason: ${data.candidates[0].finishReason}. `;
                          if (data.candidates[0].finishReason === "SAFETY") {
-                           specificError += "This often means the content was blocked by safety filters. Review input and safety settings. ";
-                           console.warn("[FRONTEND] Response blocked due to SAFETY finishReason", data.candidates[0].safetyRatings);
+                            specificError += "This often means the content was blocked by safety filters. Review input and safety settings. ";
+                            console.warn("[FRONTEND] Response blocked due to SAFETY finishReason", data.candidates[0].safetyRatings);
                          } else if (data.candidates[0].finishReason === "MAX_TOKENS") {
-                            specificError += "The maximum number of tokens for the response was reached. The plan may be incomplete. ";
+                             specificError += "The maximum number of tokens for the response was reached. The plan may be incomplete. ";
                          } else if (data.candidates[0].finishReason === "RECITATION") {
-                            specificError += "The response was blocked due to detected recitation from a source. ";
+                             specificError += "The response was blocked due to detected recitation from a source. ";
                          }
                     } else if (data.promptFeedback && data.promptFeedback.blockReason) {
                          specificError = `The prompt was blocked by the API. Reason: ${data.promptFeedback.blockReason}.`;
