@@ -76,6 +76,11 @@
                         <option value="Other">Other / Not Applicable</option>
                     </select>
                 </div>
+
+                <div class="md:col-span-2">
+                    <label for="strengthsInterestsResiliency" class="block text-gray-700 text-sm font-semibold mb-2">Strengths, Interests, and Resiliency Factors</label>
+                    <textarea id="strengthsInterestsResiliency" rows="3" placeholder="e.g., Strong in art, loves dinosaurs, responds well to positive adult attention, supportive family..."></textarea>
+                </div>
                 <div id="behaviorsContainer" class="md:col-span-2">
                     <div class="behavior-block" data-behavior-index="0">
                         <div class="behavior-block-header">
@@ -386,6 +391,7 @@
                     <p>This plan needs to be reviewed by the school team no less than every four to six weeks starting the 25-26 school year. If the plan is not working, then some aspects should be revised at the meeting. If the plan is successful (extinguished maladaptive behaviors) for four consecutive weeks, then the IEP team should meet to amend the IEP and turn it into a full behavior intervention plan (BIP). Data supporting more intervention or success will be determined by Infinite Campus classroom incidents and referrals.</p>
                 </div>
             </div>
+
             <div class="mt-6 flex justify-end space-x-4">
                 <button id="copyBIPButton" class="btn-secondary">
                     <i class="fas fa-copy mr-2"></i> Copy Plan
@@ -459,6 +465,9 @@
         // DOM elements
         const studentAgeInput = document.getElementById('studentAge');
         const studentGradeSelect = document.getElementById('studentGrade');
+        // MODIFICATION START: Added DOM element for new input
+        const strengthsInterestsResiliencyInput = document.getElementById('strengthsInterestsResiliency');
+        // MODIFICATION END
         const reinforcerPreferencesInput = document.getElementById('reinforcerPreferences');
         const behavioralSkillsSelect = document.getElementById('behavioralSkillsSelect');
         const socialSkillsSelect = document.getElementById('socialSkillsSelect');
@@ -480,9 +489,7 @@
         const addReferralYes = document.getElementById('addReferralYes');
         const addReferralNo = document.getElementById('addReferralNo');
         const referralInfoContainer = document.getElementById('referralInfoContainer');
-        // MODIFICATION START: Added DOM element for monitoring statement content
         const monitoringStatementContentElement = document.getElementById('monitoringStatementContent');
-        // MODIFICATION END
 
         const behavioralInfoIcon = document.getElementById('behavioralInfoIcon');
         const behavioralInfoModal = document.getElementById('behavioralInfoModal');
@@ -611,9 +618,11 @@
             });
         });
 
+        // MODIFICATION START: Updated createPromptFromForm function
         function createPromptFromForm() {
             const age = studentAgeInput.value || 'Not specified';
             const grade = studentGradeSelect.value || 'Not specified';
+            const strengthsInterests = strengthsInterestsResiliencyInput.value || 'Not specified'; // Capture new input
             const reinforcers = reinforcerPreferencesInput.value || 'Not specified';
             
             let anecdotal = anecdotalInput.value || 'No specific anecdotal notes provided.';
@@ -684,6 +693,15 @@ The statement MUST strictly follow this structure:
 'When [accurately describe the specific antecedent conditions based on input, e.g., 'When asked to complete non-preferred academic tasks'], the student will [accurately describe the specific observable problem behavior based on input, e.g., 'tear worksheets and refuse to write'] because [accurately describe what the student typically obtains or escapes as a result of the behavior, linking to the provided consequence data or inferred maintaining consequence, e.g., 'the task is often delayed or removed' or 'they receive peer attention'] therefore, the function of the behavior appears to be [clearly state the single primary hypothesized function: e.g., 'escape from academic demands', 'to gain attention', 'to access preferred items', 'automatic reinforcement due to sensory input'].'
 Ensure each part of this structured hypothesis ([antecedent], [behavior], [consequence/reason], and [function]) is directly derived from and consistent with the student information and behavior patterns provided. Do not use placeholders like "[antecedent]" in your actual output; fill them with specific descriptions based on the input.
 `;
+            const personalizationInstruction = `
+IMPORTANT PERSONALIZATION GUIDANCE:
+When developing ALL sections of the Behavior Intervention Plan (especially Antecedent Strategies, all aspects of Replacement Behaviors including teaching and reinforcement, and Response Strategies), you MUST actively and explicitly incorporate the student's stated 'Strengths, Interests, and Resiliency Factors', their 'Preferred Reinforcers', and the contextual details from the 'Anecdotal Notes'. The goal is to create a highly personalized and practical plan. For example:
+- If a student is interested in dinosaurs, consider how this interest can be woven into replacement behaviors, rewards, or task modifications.
+- If strengths include artistic ability, explore how this can be used in coping strategies or alternative tasks.
+- If anecdotal notes highlight specific triggers or successful past interactions, these must inform the antecedent and response strategies.
+- 'Preferred Reinforcers' should be directly and creatively integrated into the 'Reinforcement Strategies for Short-Term Replacement Behaviors' and considered for long-term motivation.
+Do not just list these factors; demonstrate their application in the strategies you propose throughout the plan.
+`;
 
             return `
 Act as an expert Board Certified Behavior Analyst (BCBA) in a school setting. Your primary task is to develop a comprehensive and actionable Behavior Intervention Plan (BIP) based on the student information provided below.
@@ -693,6 +711,7 @@ It is crucial to understand that the observed behaviors described are **recurrin
 Student Information:
 Student Age: ${age}
 Grade: ${grade}
+Strengths, Interests, and Resiliency Factors: ${strengthsInterests}
 Preferred Reinforcers: ${reinforcers}
 Anecdotal Notes (including context of recurrence, frequency, intensity, duration if available): ${anecdotal}
 ${referral ? "Referral Information: " + referral : ""}
@@ -706,6 +725,8 @@ ${behaviors || 'No specific recurring behavior patterns selected. If none are de
 ${evidenceBasedStrategies}
 
 ${hypothesisGenerationInstructions}
+
+${personalizationInstruction}
 
 Please generate the Behavior Intervention Plan. Format your response using these section headings (exactly as written). Ensure ALL sections are thoroughly addressed with specific, actionable, and research-based strategies appropriate for a school environment, drawing from the evidence-based strategies provided above where relevant to the hypothesized function. **You should act as if you have all necessary information to complete every section of the plan comprehensively and should attempt to provide recommendations for all listed sections. Do not state that more information is needed for any section; instead, provide the best possible strategies based on the information at hand.**
 
@@ -726,6 +747,7 @@ Long-term Replacement Behaviors:
 Response Strategies for Problem Behavior:
             `.trim();
         }
+        // MODIFICATION END
 
         function parsePlanSections(planText) {
             console.log("[FRONTEND] parsePlanSections received planText (length):", planText.length);
@@ -890,7 +912,6 @@ Response Strategies for Problem Behavior:
             generatePlanWithGemini();
         });
 
-        // MODIFICATION START: Updated copyBIPButton to include monitoring statement
         copyBIPButton.addEventListener('click', () => {
             const monitoringStatementText = monitoringStatementContentElement ? monitoringStatementContentElement.textContent.trim() : "";
 
@@ -923,11 +944,12 @@ ${monitoringStatementText}
             copyBIPButton.innerHTML = '<i class="fas fa-check mr-2"></i> Copied!';
             setTimeout(() => { copyBIPButton.innerHTML = originalButtonText; }, 2000);
         });
-        // MODIFICATION END
 
+        // MODIFICATION START: Update "New Plan" button to clear the new field
         document.getElementById('newPlanButton').addEventListener('click', () => {
             studentAgeInput.value = '';
             studentGradeSelect.value = '';
+            strengthsInterestsResiliencyInput.value = ''; // Clear new field
             reinforcerPreferencesInput.value = '';
             anecdotalInput.value = '';
             referralInput.value = '';
@@ -956,6 +978,7 @@ ${monitoringStatementText}
             sessionStatusDisplay.textContent = "Active";
             console.log("[FRONTEND] New plan started, fields cleared.");
         });
+        // MODIFICATION END
     </script>
 </body>
 </html>
