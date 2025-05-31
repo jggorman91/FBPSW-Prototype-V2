@@ -379,6 +379,13 @@
                 <h3>Response Strategies for Problem Behavior:</h3>
                 <div id="bipResponseStrategies" class="prose max-w-none text-gray-800"></div>
             </div>
+
+            <div class="plan-section">
+                <h3>Monitoring and Plan Review:</h3>
+                <div id="monitoringStatementContent" class="prose max-w-none text-gray-800">
+                    <p>This plan needs to be reviewed by the school team no less than every four to six weeks starting the 25-26 school year. If the plan is not working, then some aspects should be revised at the meeting. If the plan is successful (extinguished maladaptive behaviors) for four consecutive weeks, then the IEP team should meet to amend the IEP and turn it into a full behavior intervention plan (BIP). Data supporting more intervention or success will be determined by Infinite Campus classroom incidents and referrals.</p>
+                </div>
+            </div>
             <div class="mt-6 flex justify-end space-x-4">
                 <button id="copyBIPButton" class="btn-secondary">
                     <i class="fas fa-copy mr-2"></i> Copy Plan
@@ -473,6 +480,9 @@
         const addReferralYes = document.getElementById('addReferralYes');
         const addReferralNo = document.getElementById('addReferralNo');
         const referralInfoContainer = document.getElementById('referralInfoContainer');
+        // MODIFICATION START: Added DOM element for monitoring statement content
+        const monitoringStatementContentElement = document.getElementById('monitoringStatementContent');
+        // MODIFICATION END
 
         const behavioralInfoIcon = document.getElementById('behavioralInfoIcon');
         const behavioralInfoModal = document.getElementById('behavioralInfoModal');
@@ -601,7 +611,6 @@
             });
         });
 
-        // MODIFICATION START: Updated createPromptFromForm function
         function createPromptFromForm() {
             const age = studentAgeInput.value || 'Not specified';
             const grade = studentGradeSelect.value || 'Not specified';
@@ -717,7 +726,6 @@ Long-term Replacement Behaviors:
 Response Strategies for Problem Behavior:
             `.trim();
         }
-        // MODIFICATION END: Updated createPromptFromForm function
 
         function parsePlanSections(planText) {
             console.log("[FRONTEND] parsePlanSections received planText (length):", planText.length);
@@ -762,20 +770,17 @@ Response Strategies for Problem Behavior:
             return sections;
         }
 
-        // MODIFICATION START: Updated showPlanSections function
         function showPlanSections(sections) {
             console.log("[FRONTEND] showPlanSections received sections:", JSON.parse(JSON.stringify(sections)));
             const fallbackMsg = "The AI attempted to generate this section but may require more specific input for optimal results. Review and refine as needed, ensuring it follows the 'When... will... because... therefore...' format.";
             
-            // The AI is now expected to return the full "When...will...because...therefore..." statement for aiGeneratedFullHypothesis
             const aiGeneratedFullHypothesis = sections["Function Hypothesis Statement"] || fallbackMsg; 
             
             const hypothesisDisplayPrefixLine1 = "Function Hypothesis Statement - The following provides an overview of the current behavior(s).";
-            const hypothesisDisplayPrefixLine2 = "Summary Statement: "; // Simplified prefix
+            const hypothesisDisplayPrefixLine2 = "Summary Statement: "; 
 
             const formattedHypothesisText = `${hypothesisDisplayPrefixLine1}\n${hypothesisDisplayPrefixLine2}${aiGeneratedFullHypothesis}`;
             bipFunctionHypothesis.textContent = formattedHypothesisText;
-            // Adding a class to handle potential line breaks within the AI's hypothesis and the prefix.
             bipFunctionHypothesis.classList.add('whitespace-pre-line'); 
             
             bipAntecedentStrategies.textContent = sections["Antecedent Strategies"] || fallbackMsg;
@@ -787,7 +792,6 @@ Response Strategies for Problem Behavior:
             bipOutputDiv.classList.remove('hidden');
             console.log("[FRONTEND] bipOutputDiv should now be visible.");
         }
-        // MODIFICATION END: Updated showPlanSections function
 
 
         function showErrorOutput(msg) {
@@ -886,33 +890,40 @@ Response Strategies for Problem Behavior:
             generatePlanWithGemini();
         });
 
+        // MODIFICATION START: Updated copyBIPButton to include monitoring statement
         copyBIPButton.addEventListener('click', () => {
+            const monitoringStatementText = monitoringStatementContentElement ? monitoringStatementContentElement.textContent.trim() : "";
+
             let textToCopy = 
-`${bipFunctionHypothesis.textContent} 
+`${bipFunctionHypothesis.textContent.trim()}
 
 Antecedent Strategies:
-${bipAntecedentStrategies.textContent}
+${bipAntecedentStrategies.textContent.trim()}
 
 Short-term Replacement Behaviors:
-${bipShortTermBehaviors.textContent}
+${bipShortTermBehaviors.textContent.trim()}
 
 Teaching Strategies for Short-Term Replacement Behaviors:
-${bipTeachingStrategies.textContent}
+${bipTeachingStrategies.textContent.trim()}
 
 Reinforcement Strategies for Short-Term Replacement Behaviors:
-${bipReinforcementShortTerm.textContent}
+${bipReinforcementShortTerm.textContent.trim()}
 
 Long-term Replacement Behaviors:
-${bipLongTermBehaviors.textContent}
+${bipLongTermBehaviors.textContent.trim()}
 
 Response Strategies for Problem Behavior:
-${bipResponseStrategies.textContent}
+${bipResponseStrategies.textContent.trim()}
+
+Monitoring and Plan Review:
+${monitoringStatementText}
 `;
             navigator.clipboard.writeText(textToCopy.trim()); 
             const originalButtonText = copyBIPButton.innerHTML; 
             copyBIPButton.innerHTML = '<i class="fas fa-check mr-2"></i> Copied!';
             setTimeout(() => { copyBIPButton.innerHTML = originalButtonText; }, 2000);
         });
+        // MODIFICATION END
 
         document.getElementById('newPlanButton').addEventListener('click', () => {
             studentAgeInput.value = '';
