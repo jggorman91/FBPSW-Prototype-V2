@@ -353,7 +353,7 @@
         <div id="bipOutput" class="card hidden">
             <h2 class="text-2xl font-bold text-gray-800 mb-4">Generated Function Based Problem Solving Worksheet</h2>
             <div class="mb-4">
-                <p id="bipFunctionHypothesis" class="text-blue-600 font-medium text-xl"></p>
+                <p id="bipFunctionHypothesis" class="text-blue-600 font-medium text-xl whitespace-pre-line"></p>
             </div>
             <div class="plan-section">
                 <h3>Antecedent Strategies:</h3>
@@ -425,7 +425,7 @@
                 behaviors: ["Daydreaming, staring into space", "Fiddling with materials, doodling, or handling unrelated objects", "Beginning a task very slowly or on wrong assignment", "Pretending to work while doing something else (e.g. playing on a device)", "Asking off-topic questions to stall"],
                 consequences: ["Teacher prompts or reminders to focus (teacher attention)", "Task may be simplified or re-taught", "Student may lose participation privileges or breaks", "If behavior continues, student may be removed from task (escape from demand)"]
             },
-            "Property Destruction": { // **** THIS ENTRY IS CORRECTED ****
+            "Property Destruction": { 
                 antecedents: [
                     "Task demand", 
                     "Denied access to desired object or activity (frustration)",
@@ -474,7 +474,6 @@
         const addReferralNo = document.getElementById('addReferralNo');
         const referralInfoContainer = document.getElementById('referralInfoContainer');
 
-        // Info Modal Elements
         const behavioralInfoIcon = document.getElementById('behavioralInfoIcon');
         const behavioralInfoModal = document.getElementById('behavioralInfoModal');
         const closeBehavioralModalButton = document.getElementById('closeBehavioralModal');
@@ -589,9 +588,9 @@
 
             modals.forEach((modal, index) => {
                 if (modal && !modal.classList.contains('hidden')) {
-                    let currentIcon = icons[index]; // ensure currentIcon is defined for this scope
+                    let currentIcon = icons[index]; 
                     let targetIsIconOrChild = false;
-                    if (currentIcon) { // only proceed if currentIcon exists
+                    if (currentIcon) { 
                         targetIsIconOrChild = currentIcon.contains(event.target) || currentIcon === event.target;
                     }
 
@@ -602,7 +601,7 @@
             });
         });
 
-
+        // MODIFICATION START: Updated createPromptFromForm function
         function createPromptFromForm() {
             const age = studentAgeInput.value || 'Not specified';
             const grade = studentGradeSelect.value || 'Not specified';
@@ -669,6 +668,14 @@ When developing the 'Short-term Replacement Behaviors', 'Teaching Strategies for
 Remember that all strategies should be consistently implemented across settings and by all relevant staff.
 `;
 
+            const hypothesisGenerationInstructions = `
+IMPORTANT INSTRUCTION FOR 'Function Hypothesis Statement':
+For the 'Function Hypothesis Statement' section, you MUST synthesize the provided ABC data (Antecedent, Behavior, Consequence from the selected patterns and/or anecdotal notes) to formulate a clear and concise hypothesis.
+The statement MUST strictly follow this structure:
+'When [accurately describe the specific antecedent conditions based on input, e.g., 'When asked to complete non-preferred academic tasks'], the student will [accurately describe the specific observable problem behavior based on input, e.g., 'tear worksheets and refuse to write'] because [accurately describe what the student typically obtains or escapes as a result of the behavior, linking to the provided consequence data or inferred maintaining consequence, e.g., 'the task is often delayed or removed' or 'they receive peer attention'] therefore, the function of the behavior appears to be [clearly state the single primary hypothesized function: e.g., 'escape from academic demands', 'to gain attention', 'to access preferred items', 'automatic reinforcement due to sensory input'].'
+Ensure each part of this structured hypothesis ([antecedent], [behavior], [consequence/reason], and [function]) is directly derived from and consistent with the student information and behavior patterns provided. Do not use placeholders like "[antecedent]" in your actual output; fill them with specific descriptions based on the input.
+`;
+
             return `
 Act as an expert Board Certified Behavior Analyst (BCBA) in a school setting. Your primary task is to develop a comprehensive and actionable Behavior Intervention Plan (BIP) based on the student information provided below.
 
@@ -685,9 +692,11 @@ Current Social Skills Level: ${socialLevel}
 Current Pragmatic Language Skills Level: ${pragmaticLevel}
 
 Observed Recurring Behavior Patterns (ABC Data - based on dropdown selections):
-${behaviors || 'No specific recurring behavior patterns selected. If none are detailed, use the anecdotal notes to infer patterns.'}
+${behaviors || 'No specific recurring behavior patterns selected. If none are detailed, use the anecdotal notes to infer patterns and hypothesize the most likely ABC sequence.'}
 
 ${evidenceBasedStrategies}
+
+${hypothesisGenerationInstructions}
 
 Please generate the Behavior Intervention Plan. Format your response using these section headings (exactly as written). Ensure ALL sections are thoroughly addressed with specific, actionable, and research-based strategies appropriate for a school environment, drawing from the evidence-based strategies provided above where relevant to the hypothesized function. **You should act as if you have all necessary information to complete every section of the plan comprehensively and should attempt to provide recommendations for all listed sections. Do not state that more information is needed for any section; instead, provide the best possible strategies based on the information at hand.**
 
@@ -708,6 +717,7 @@ Long-term Replacement Behaviors:
 Response Strategies for Problem Behavior:
             `.trim();
         }
+        // MODIFICATION END: Updated createPromptFromForm function
 
         function parsePlanSections(planText) {
             console.log("[FRONTEND] parsePlanSections received planText (length):", planText.length);
@@ -752,18 +762,21 @@ Response Strategies for Problem Behavior:
             return sections;
         }
 
-        // --- THIS IS THE UPDATED FUNCTION (from your provided code, it's already correct for formatting the hypothesis) ---
+        // MODIFICATION START: Updated showPlanSections function
         function showPlanSections(sections) {
             console.log("[FRONTEND] showPlanSections received sections:", JSON.parse(JSON.stringify(sections)));
-            const fallbackMsg = "The AI attempted to generate this section but may require more specific input for optimal results. Review and refine as needed.";
+            const fallbackMsg = "The AI attempted to generate this section but may require more specific input for optimal results. Review and refine as needed, ensuring it follows the 'When... will... because... therefore...' format.";
             
-            // --- MODIFICATION START (This part from your code is correct for formatting the hypothesis) ---
-            const aiHypothesis = sections["Function Hypothesis Statement"] || fallbackMsg;
-            const hypothesisPrefixLine1 = "Function Hypothesis Statement - The following provides an overview of the current behavior(s).";
-            const hypothesisPrefixLine2 = "Summary Statement: [When... the student will... because...; therefore, the function of behavior appears to be...] : ";
-            const formattedHypothesis = `${hypothesisPrefixLine1}\n${hypothesisPrefixLine2}${aiHypothesis}`;
-            bipFunctionHypothesis.textContent = formattedHypothesis;
-            // --- MODIFICATION END ---
+            // The AI is now expected to return the full "When...will...because...therefore..." statement for aiGeneratedFullHypothesis
+            const aiGeneratedFullHypothesis = sections["Function Hypothesis Statement"] || fallbackMsg; 
+            
+            const hypothesisDisplayPrefixLine1 = "Function Hypothesis Statement - The following provides an overview of the current behavior(s).";
+            const hypothesisDisplayPrefixLine2 = "Summary Statement: "; // Simplified prefix
+
+            const formattedHypothesisText = `${hypothesisDisplayPrefixLine1}\n${hypothesisDisplayPrefixLine2}${aiGeneratedFullHypothesis}`;
+            bipFunctionHypothesis.textContent = formattedHypothesisText;
+            // Adding a class to handle potential line breaks within the AI's hypothesis and the prefix.
+            bipFunctionHypothesis.classList.add('whitespace-pre-line'); 
             
             bipAntecedentStrategies.textContent = sections["Antecedent Strategies"] || fallbackMsg;
             bipShortTermBehaviors.textContent = sections["Short-term Replacement Behaviors"] || fallbackMsg;
@@ -774,12 +787,13 @@ Response Strategies for Problem Behavior:
             bipOutputDiv.classList.remove('hidden');
             console.log("[FRONTEND] bipOutputDiv should now be visible.");
         }
-        // --- END OF UPDATED FUNCTION ---
+        // MODIFICATION END: Updated showPlanSections function
 
 
         function showErrorOutput(msg) {
             console.log("[FRONTEND] showErrorOutput called with msg:", msg);
-            bipFunctionHypothesis.textContent = msg; // Error message will appear in the hypothesis content area
+            bipFunctionHypothesis.textContent = msg; 
+            bipFunctionHypothesis.classList.add('whitespace-pre-line');
             bipAntecedentStrategies.textContent = ""; 
             bipShortTermBehaviors.textContent = "";
             bipTeachingStrategies.textContent = "";
@@ -872,7 +886,6 @@ Response Strategies for Problem Behavior:
             generatePlanWithGemini();
         });
 
-        // MODIFICATION START: Updated copyBIPButton to reflect the new hypothesis format
         copyBIPButton.addEventListener('click', () => {
             let textToCopy = 
 `${bipFunctionHypothesis.textContent} 
@@ -895,12 +908,11 @@ ${bipLongTermBehaviors.textContent}
 Response Strategies for Problem Behavior:
 ${bipResponseStrategies.textContent}
 `;
-            navigator.clipboard.writeText(textToCopy.trim()); // .trim() to remove potential leading/trailing newlines from template literal
+            navigator.clipboard.writeText(textToCopy.trim()); 
             const originalButtonText = copyBIPButton.innerHTML; 
             copyBIPButton.innerHTML = '<i class="fas fa-check mr-2"></i> Copied!';
             setTimeout(() => { copyBIPButton.innerHTML = originalButtonText; }, 2000);
         });
-        // MODIFICATION END
 
         document.getElementById('newPlanButton').addEventListener('click', () => {
             studentAgeInput.value = '';
