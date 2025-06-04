@@ -265,7 +265,7 @@
                                     <th class="p-1 text-left font-semibold text-blue-800 w-2/3">Description</th>
                                 </tr>
                             </thead>
-                               <tbody class="text-gray-700">
+                                <tbody class="text-gray-700">
                                 </tbody>
                         </table>
                     </div>
@@ -288,22 +288,22 @@
                         <option value="Adaptive Communicator">Adaptive Communicator</option>
                         <option value="Discourse Leader">Discourse Leader</option>
                     </select>
-                       <div id="pragmaticInfoModal" class="info-modal hidden absolute z-50 mt-1 p-4 bg-white border-2 border-blue-300 rounded-lg shadow-xl">
-                        <div class="flex justify-between items-center mb-2">
-                            <h4 class="text-md font-semibold text-blue-700">Pragmatic Language Developmental Levels</h4>
-                            <button id="closePragmaticModal" class="text-gray-500 hover:text-gray-800 text-2xl leading-none">&times;</button>
-                        </div>
-                        <table class="w-full text-xs table-fixed">
-                            <thead class="sticky top-0 bg-blue-100">
-                                <tr>
-                                    <th class="p-1 text-left font-semibold text-blue-800 w-1/3">Level</th>
-                                    <th class="p-1 text-left font-semibold text-blue-800 w-2/3">Description</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-gray-700">
+                            <div id="pragmaticInfoModal" class="info-modal hidden absolute z-50 mt-1 p-4 bg-white border-2 border-blue-300 rounded-lg shadow-xl">
+                            <div class="flex justify-between items-center mb-2">
+                                <h4 class="text-md font-semibold text-blue-700">Pragmatic Language Developmental Levels</h4>
+                                <button id="closePragmaticModal" class="text-gray-500 hover:text-gray-800 text-2xl leading-none">&times;</button>
+                            </div>
+                            <table class="w-full text-xs table-fixed">
+                                <thead class="sticky top-0 bg-blue-100">
+                                    <tr>
+                                        <th class="p-1 text-left font-semibold text-blue-800 w-1/3">Level</th>
+                                        <th class="p-1 text-left font-semibold text-blue-800 w-2/3">Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-gray-700">
                                 </tbody>
-                        </table>
-                    </div>
+                            </table>
+                        </div>
                 </div>
 
                 <div class="md:col-span-2">
@@ -378,47 +378,66 @@
     </div>
 
     <script type="module">
-        // --- Data for ABC dropdowns from "ABC_Framework_Behavior_Plan (Chat GPT Orginal)" ---
+        // --- Data for ABC dropdowns from "ABC_Framework_Behavior_Plan (Chat GPT Orginal)" & User Expansion ---
         const bipData = {
             "Physical Aggression": {
-                antecedents: ["Challenging tasks", "denial of requests", "transitions", "peer conflicts", "sensory overload"],
-                behaviors: ["Hitting", "kicking", "biting", "throwing objects", "spitting"],
-                consequences: ["Removal from activity", "loss of privileges", "peer avoidance", "adult attention"]
+                antecedents: ["Challenging tasks", "Denial of requests", "Interruption of preferred activity", "Peer conflicts", "Protecting personal space/items", "Sensory overload", "Transitions", "Unwanted physical touch"].sort(),
+                behaviors: ["Biting (others)", "Hitting", "Kicking", "Pinching", "Pulling hair (others)", "Pushing", "Scratching (others)", "Shoving", "Spitting (at others)", "Throwing objects (at people/property with intent to harm/disrupt)"].sort(),
+                consequences: ["Adult attention (reprimand, comfort, intervention)", "Item/activity obtained", "Loss of privileges", "Peer avoidance/withdrawal", "Physical restraint (for safety)", "Removal from activity/area", "Task/demand escaped"].sort()
             },
             "Verbal Aggression": {
-                antecedents: ["Denial", "corrections", "peer teasing", "unexpected changes"],
-                behaviors: ["Yelling", "name-calling", "threats", "arguing"],
-                consequences: ["Time-outs", "reprimands", "loss of privileges", "peer reactions"]
+                antecedents: ["Denial of requests", "Feeling unheard/misunderstood", "Frustration with task", "Peer teasing/provocation", "Perceived unfairness", "Receiving corrections/reprimands", "Unexpected changes"].sort(),
+                behaviors: ["Arguing/Defiance (verbal, e.g., \"No!\")", "Name-calling/Insults", "Sarcasm/Rude comments", "Swearing/Profanity", "Threats (verbal)", "Yelling/Screaming"].sort(),
+                consequences: ["Adult attention (discussion, warning)", "Loss of privileges", "Peer reactions (laughter, arguing, fear)", "Reprimands (can be attention)", "Task/demand escaped or modified", "Time-outs"].sort()
             },
             "Self-Injurious Behavior": {
-                antecedents: ["High demands", "sensory discomfort", "emotional distress"],
-                behaviors: ["Head banging", "biting self", "scratching", "hair pulling"],
-                consequences: ["Intervention for safety", "task removal", "comfort provided"]
+                antecedents: ["Denial of preferred item/activity", "Emotional distress (anxiety, frustration)", "High task demands", "Lack of stimulation/boredom", "Physical pain/discomfort (internal)", "Sensory discomfort/overload", "Transitions"].sort(),
+                behaviors: ["Biting self", "Hair pulling (own)", "Head banging (against surface/self)", "Hitting self", "Picking skin/scabs", "Scratching self"].sort(),
+                consequences: ["Access to sensory input (automatic reinforcement)", "Comfort/attention provided", "Escape from demand/social interaction", "Intervention for safety (physical block, removal)", "Task removal/postponement"].sort()
             },
             "Task Refusal / Noncompliance": {
-                antecedents: ["Difficult tasks", "transitions", "denied requests"],
-                behaviors: ["Saying 'no,' ignoring instructions", "leaving area"],
-                consequences: ["Task postponed", "breaks given", "adult prompts"]
+                antecedents: ["Challenging/Difficult tasks", "Fatigue", "Lack of choice in task", "Long work periods", "Non-preferred tasks", "Transitions to non-preferred activity", "Unclear instructions"].sort(),
+                behaviors: ["Arguing about task", "Asking to do something else", "Ignoring instructions/prompts", "Leaving work area (not elopement)", "Passively not starting task", "Putting head down", "Saying 'no' to requests"].sort(),
+                consequences: ["Adult prompts/redirection (can be attention)", "Allowed to do preferred activity instead (escape)", "Break given", "Loss of reward/privilege if task incomplete", "Task postponed/removed", "Task simplification"].sort()
             },
             "Elopement (Running Away)": {
-                antecedents: ["Non-preferred settings", "transitions", "unstructured times"],
-                behaviors: ["Leaving supervised area", "running away"],
-                consequences: ["Chased by staff", "increased supervision", "loss of privileges"]
+                antecedents: ["Non-preferred settings/activities", "Overstimulating environment", "To escape a demand or aversive situation", "To gain access to a preferred item/area/person outside current setting", "Transitions", "Unstructured times"].sort(),
+                behaviors: ["Hiding from staff", "Leaving supervised area without permission", "Running away from staff/group"].sort(),
+                consequences: ["Access to desired location/item (if successful elopement)", "Chased by staff (can be reinforcing)", "Increased one-on-one supervision", "Loss of privileges", "Return to original area/task (sometimes delayed)"].sort()
             },
             "Disruptive Behavior (Non-Aggressive)": {
-                antecedents: ["Boring tasks", "lack of engagement", "unstructured periods"],
-                behaviors: ["Talking out", "making noises", "wandering"],
-                consequences: ["Teacher attention", "loss of rewards", "peer reactions"]
+                antecedents: ["Boring/Easy tasks", "Lack of engagement", "Seeking adult attention", "Seeking peer attention", "Transition periods", "Unstructured periods"].sort(),
+                behaviors: ["Making noises (vocal, tapping, etc.)", "Out-of-seat (without permission)", "Playing with non-task items", "Talking out of turn/Interrupting", "Touching/bothering peers' belongings", "Wandering around (not elopement)"].sort(),
+                consequences: ["Brief removal from group (if disruptive)", "Loss of rewards/points", "Peer attention (laughter, annoyance)", "Sent to a different seat", "Teacher attention (redirect, reprimand)"].sort()
             },
             "Off-Task Behavior": {
-                antecedents: ["Tasks too easy or hard", "unclear instructions"],
-                behaviors: ["Daydreaming", "fiddling", "slow task initiation"],
-                consequences: ["Prompts to focus", "task simplification", "loss of privileges"]
+                antecedents: ["Distractions in environment", "Internal distractions (thoughts, fatigue)", "Lack of interest in task", "Long work periods without breaks", "Tasks too easy or too hard", "Unclear instructions"].sort(),
+                behaviors: ["Daydreaming/Staring into space", "Doodling (unrelated to task)", "Fiddling with objects (non-task related)", "Getting up to do unrelated things (sharpen pencil repeatedly)", "Looking around the room (not at task)", "Slow task initiation/procrastination"].sort(),
+                consequences: ["Less free time later", "Loss of privileges (if work not done)", "Natural consequence (work not completed, doesn't learn material)", "Prompts to focus from adult", "Task simplification (if too hard)"].sort()
             },
-            "Property Destruction": {
-                antecedents: ["Denied access to desired items", "unstructured moments"],
-                behaviors: ["Tearing materials", "breaking objects", "drawing on property"],
-                consequences: ["Required cleanup", "loss of items", "time-out"]
+            "Property Destruction/Misuse": {
+                antecedents: ["Denied access to desired items/activities", "Escape from task", "Frustration/Anger", "Seeking attention", "Unstructured moments"].sort(),
+                behaviors: ["Breaking objects (pencils, crayons, toys)", "Drawing/writing on property (desks, walls, books)", "Tearing materials (books, worksheets)", "Throwing objects (not aimed at people, e.g., in frustration)"].sort(),
+                consequences: ["Loss of item/access to similar items", "Reprimand/adult attention", "Required cleanup/restitution", "Task delayed or removed", "Time-out"].sort()
+            },
+            "General / Other": { // For when behavior type is "Other"
+                antecedents: [
+                    "Academic demand", "Change in routine", "Correction/Feedback", "Denial of access",
+                    "Internal state (hungry, tired, anxious)", "Lack of attention", "Peer interaction (positive or negative)",
+                    "Presence of specific person/item", "Sensory input (loud noise, bright light)",
+                    "Social demand", "Transition", "Unstructured time"
+                ].sort(),
+                behaviors: [ // User will rely more on anecdotal notes for "Other" behaviors
+                    "Crying", "Inappropriate physical contact (non-aggressive)", "Not following social rules",
+                    "Pacing", "Refusing to speak", "Whining", "Withdrawing from interaction",
+                    "(Specify in anecdotal notes)"
+                ].sort(),
+                consequences: [
+                    "Access to preferred item/activity/person", "Adult attention (positive/negative)", "Comfort",
+                    "Escape/Avoidance of task/situation/person", "Ignoring", "Loss of privilege",
+                    "Peer attention (positive/negative)", "Removal from area", "Reprimand", "Redirection",
+                    "Sensory stimulation (automatic)", "Task modification"
+                ].sort()
             }
         };
 
@@ -617,9 +636,11 @@
                         if (behaviorSelect) populateSelectWithOptions(behaviorSelect, bipData[selectedBehaviorType].behaviors, "Select Specific Behavior");
                         if (consequenceSelect) populateSelectWithOptions(consequenceSelect, bipData[selectedBehaviorType].consequences, "Select Consequence");
                     } else {
-                        if (antecedentSelect) populateSelectWithOptions(antecedentSelect, [], "Select Antecedent (after choosing type)");
-                        if (behaviorSelect) populateSelectWithOptions(behaviorSelect, [], "Select Specific Behavior (after choosing type)");
-                        if (consequenceSelect) populateSelectWithOptions(consequenceSelect, [], "Select Consequence (after choosing type)");
+                        // If "Other" or no type is selected, use the "General / Other" lists or clear
+                        const defaultSource = selectedBehaviorType === "Other" ? bipData["General / Other"] : { antecedents: [], behaviors: [], consequences: [] };
+                        if (antecedentSelect) populateSelectWithOptions(antecedentSelect, defaultSource.antecedents, "Select Antecedent");
+                        if (behaviorSelect) populateSelectWithOptions(behaviorSelect, defaultSource.behaviors, "Select Specific Behavior");
+                        if (consequenceSelect) populateSelectWithOptions(consequenceSelect, defaultSource.consequences, "Select Consequence");
                     }
                 });
                 if (antecedentSelect) populateSelectWithOptions(antecedentSelect, [], "Select Antecedent (after choosing type)");
@@ -723,16 +744,14 @@
 
                 let titleForPrompt = '';
 
-                if (typeValue && typeValue !== "Other") {
+                if (typeValue && typeValue !== "Other" && typeValue !== "General / Other") { // Exclude "General / Other" as a title
                     titleForPrompt = typeValue;
-                } else if (typeValue === "Other") {
+                } else if (typeValue === "Other" || typeValue === "General / Other") {
                     titleForPrompt = "Other Behavior Pattern (refer to anecdotal notes for specifics)";
                 } else if (specificBehaviorValue && specificBehaviorValue !== "Other (Specify in Notes)" && specificBehaviorValue !== "Other") {
-                    // This case is less likely if typeValue is empty due to chained dropdown logic, but included as a fallback.
                     titleForPrompt = specificBehaviorValue;
                 }
-                // If titleForPrompt is still empty, it implies no primary behavior type was selected for this block.
-                // The .filter(Boolean) later will remove this block if it's entirely empty.
+
 
                 let result = '';
                 // Only create a block if a title was determined AND at least one of A, B (specific), or C is specified.
@@ -933,7 +952,7 @@ Response Strategies for Problem Behavior:
                 const typeValue = typeSelect ? typeSelect.value : '';
                 const specificBehaviorValue = behaviorSpecificSelect ? behaviorSpecificSelect.value : '';
 
-                if (typeValue && typeValue !== "Other" && typeValue.trim().length > 2) {
+                if (typeValue && typeValue !== "Other" && typeValue !== "General / Other" && typeValue.trim().length > 2) {
                     phrases.add(typeValue.trim());
                 }
                 // Also add specific behaviors if they are not generic placeholders and are distinct
@@ -1027,63 +1046,99 @@ Response Strategies for Problem Behavior:
             // console.log("[FRONTEND] Generated prompt for backend (first 500 chars):", userGeneratedPrompt.substring(0,500) + "...");
             // console.log("[FRONTEND] Active phrases for bolding:", activePhrases);
 
-            const backendApiUrl = '/api/ask';
-            const requestBody = { prompt: userGeneratedPrompt };
-            try {
-                const response = await fetch(backendApiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(requestBody)
-                });
-                // console.log("[FRONTEND] Received response from backend. Status:", response.status, "Ok:", response.ok);
-                const data = await response.json();
-                // console.log("[FRONTEND] Parsed data from backend response (structure check):", data ? "Data received" : "No data received");
-                if (!response.ok) {
-                    let errorMsg = data.error || `Request failed with status ${response.status}`;
-                    if (data.details) errorMsg += `\nDetails: ${typeof data.details === 'object' ? JSON.stringify(data.details) : data.details}`;
-                    showErrorOutput("Failed to generate a plan (server error).\n" + errorMsg);
-                    console.error("[FRONTEND] Backend Error (response not ok):", data);
-                } else if (data.error) {
-                    let errorMsg = data.error.message || JSON.stringify(data.error, null, 2);
-                    if (data.error.details) errorMsg += `\nDetails: ${JSON.stringify(data.error.details, null, 2)}`;
-                    showErrorOutput("Failed to generate a plan (API error).\n" + errorMsg);
-                    console.error("[FRONTEND] Gemini API Error (via backend, data.error is present):", data.error);
-                } else if (data.candidates && data.candidates.length > 0 && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts.length > 0 && data.candidates[0].content.parts[0].text) {
-                    // console.log("[FRONTEND] Valid candidates found in data. Processing plan.");
-                    const planText = data.candidates[0].content.parts[0].text;
+            // This is a FRONTEND ONLY example.
+            // In a real application, you would send `userGeneratedPrompt` to your backend,
+            // which then calls the Gemini API.
+            // For this example, we'll simulate a delay and a mock response structure.
+            console.log("Simulating API call with prompt (see console for full prompt):", userGeneratedPrompt.substring(0, 200) + "...");
+            // alert("This is a frontend-only example. The plan generation is mocked. Check console for the prompt that would be sent to a backend.");
+
+            // --- MOCK API CALL ---
+            // Replace this section with your actual `fetch` call to your backend API
+            // For demonstration purposes, this simulates a delay and uses a very basic response.
+            // You will need a backend to securely call the Gemini API.
+             try {
+                // Simulate a delay
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                // This is where you'd typically have:
+                // const response = await fetch('/api/ask', { method: 'POST', ... body: JSON.stringify({prompt: userGeneratedPrompt})});
+                // const data = await response.json();
+                // For now, we create a placeholder successful response.
+                // You will need to replace this with actual backend interaction for Gemini.
+
+                // IMPORTANT: This is a placeholder. The actual plan text would come from Gemini.
+                // For testing, you might put a very short, structured example here.
+                const placeholderPlanText = `
+Function Hypothesis Statement:
+When asked to do non-preferred tasks, the student will engage in task refusal to escape the demand. Therefore, the function is escape.
+
+Antecedent Strategies:
+- Use a visual schedule.
+- Offer choices.
+
+Short-term Replacement Behaviors:
+- Request a break using a card.
+
+Teaching Strategies for Short-Term Replacement Behaviors:
+- Model and practice requesting a break.
+
+Reinforcement Strategies for Short-Term Replacement Behaviors:
+- Provide a short break immediately when requested appropriately.
+
+Long-term Replacement Behaviors:
+- Complete tasks with fewer prompts.
+
+Response Strategies for Problem Behavior:
+For Task Refusal / Noncompliance:
+  a. Ensure safety.
+  b. calmly redirect.
+  c. Use minimal verbal interaction.
+  d. Re-present demand after a short cool-down.
+  e. Avoid lengthy discussions during refusal.
+`;
+
+                const mockData = {
+                    candidates: [{
+                        content: {
+                            parts: [{ text: placeholderPlanText }]
+                        },
+                        finishReason: "STOP",
+                        safetyRatings: [] // Assuming safe for this mock
+                    }]
+                };
+                 // console.log("[FRONTEND] Mock API successful response received.");
+
+                if (mockData.error) { // Simulating backend successfully forwarding an API error
+                    let errorMsg = mockData.error.message || JSON.stringify(mockData.error, null, 2);
+                    showErrorOutput("Failed to generate a plan (API error from backend).\n" + errorMsg);
+                    console.error("[FRONTEND] Mock Gemini API Error (via backend):", mockData.error);
+                } else if (mockData.candidates && mockData.candidates.length > 0 && mockData.candidates[0].content && mockData.candidates[0].content.parts && mockData.candidates[0].content.parts.length > 0 && mockData.candidates[0].content.parts[0].text) {
+                    const planText = mockData.candidates[0].content.parts[0].text;
                     const sections = parsePlanSections(planText);
-                    showPlanSections(sections, activePhrases); // Pass phrases here
+                    showPlanSections(sections, activePhrases);
                 } else {
-                    let specificError = "Received an unexpected response from the server or no plan was generated.";
-                    if (data.candidates && data.candidates.length > 0 && data.candidates[0].finishReason) {
-                         specificError = `The response generation finished with reason: ${data.candidates[0].finishReason}. `;
-                         if (data.candidates[0].finishReason === "SAFETY") {
-                             specificError += "This often means the content was blocked by safety filters. Review input and safety settings. ";
-                             console.warn("[FRONTEND] Response blocked due to SAFETY finishReason", data.candidates[0].safetyRatings);
-                         } else if (data.candidates[0].finishReason === "MAX_TOKENS") {
-                              specificError += "The maximum number of tokens for the response was reached. The plan may be incomplete. ";
-                         } else if (data.candidates[0].finishReason === "RECITATION") {
-                              specificError += "The response was blocked due to detected recitation from a source. ";
-                         }
-                    } else if (data.promptFeedback && data.promptFeedback.blockReason) {
-                         specificError = `The prompt was blocked by the API. Reason: ${data.promptFeedback.blockReason}.`;
-                         if (data.promptFeedback.safetyRatings) specificError += ` Details: ${JSON.stringify(data.promptFeedback.safetyRatings)}`;
-                         console.warn("[FRONTEND] Prompt blocked by API", data.promptFeedback);
-                    } else {
-                        // console.log("[FRONTEND] Response OK, but no valid candidates or text found in data, or unexpected structure.");
-                        console.error("[FRONTEND] Unexpected successful response structure:", data);
+                    // Handle other cases like MAX_TOKENS, SAFETY, etc., based on real Gemini response structure
+                    let specificError = "Received an unexpected response structure from the mock API or no plan was generated.";
+                    if (mockData.candidates && mockData.candidates.length > 0 && mockData.candidates[0].finishReason) {
+                        specificError = `The response generation finished with reason: ${mockData.candidates[0].finishReason}. (Mocked)`;
+                         // Add more specific messages for SAFETY, MAX_TOKENS if you want to test those paths in mock
+                    } else if (mockData.promptFeedback && mockData.promptFeedback.blockReason) {
+                         specificError = `The prompt was blocked by the API. Reason: ${mockData.promptFeedback.blockReason}. (Mocked)`;
                     }
                     showErrorOutput(specificError);
+                    console.error("[FRONTEND] Mock API - Unexpected successful response structure:", mockData);
                 }
             } catch (err) {
-                console.error("[FRONTEND] Error in fetch try-catch block (e.g., network error, or response.json() failed):", err);
-                showErrorOutput("An error occurred while communicating with the server: " + err.message);
+                console.error("[FRONTEND] Error in mock API call simulation (e.g., if you had network issues with a real API):", err);
+                showErrorOutput("An error occurred during the mock API call: " + err.message);
             } finally {
                 generateBIPSpinner.classList.add('hidden');
                 generateBIPButton.disabled = false;
-                sessionStatusDisplay.textContent = "Active";
-                // console.log("[FRONTEND] generatePlanWithGemini finished.");
+                sessionStatusDisplay.textContent = "Active (Mock Response)";
+                // console.log("[FRONTEND] generatePlanWithGemini (mock) finished.");
             }
+            // --- END MOCK API CALL ---
         }
         // MODIFICATION END
 
@@ -1155,7 +1210,7 @@ ${monitoringStatementText}
                 if (behaviorBlock) {
                     const header = behaviorBlock.querySelector('h3');
                     if (header) {
-                         header.textContent = `Behavior Pattern ${i + 1}${i > 0 ? ' (Optional)' : ''}`;
+                        header.textContent = `Behavior Pattern ${i + 1}${i > 0 ? ' (Optional)' : ''}`;
                     }
                 }
 
