@@ -621,7 +621,7 @@
                     const selectedBehaviorType = this.value;
                     const currentBlockHeader = this.closest('.behavior-block').querySelector('h3');
                     if (selectedBehaviorType && currentBlockHeader) {
-                         if (selectedBehaviorType === "Other") {
+                         if (selectedBehaviorType === "Other" || selectedBehaviorType === "General / Other") {
                             currentBlockHeader.textContent = `Behavior Pattern ${parseInt(this.closest('.behavior-block').dataset.behaviorIndex) + 1} (Other - specify in notes)`;
                         } else {
                             currentBlockHeader.textContent = selectedBehaviorType; // Update header to Behavior Type
@@ -636,8 +636,10 @@
                         if (behaviorSelect) populateSelectWithOptions(behaviorSelect, bipData[selectedBehaviorType].behaviors, "Select Specific Behavior");
                         if (consequenceSelect) populateSelectWithOptions(consequenceSelect, bipData[selectedBehaviorType].consequences, "Select Consequence");
                     } else {
-                        // If "Other" or no type is selected, use the "General / Other" lists or clear
-                        const defaultSource = selectedBehaviorType === "Other" ? bipData["General / Other"] : { antecedents: [], behaviors: [], consequences: [] };
+                        // If "Other" is selected from main type, or no type, use "General / Other" or clear
+                        const sourceKey = (selectedBehaviorType === "Other") ? "General / Other" : null;
+                        const defaultSource = sourceKey && bipData[sourceKey] ? bipData[sourceKey] : { antecedents: [], behaviors: [], consequences: [] };
+
                         if (antecedentSelect) populateSelectWithOptions(antecedentSelect, defaultSource.antecedents, "Select Antecedent");
                         if (behaviorSelect) populateSelectWithOptions(behaviorSelect, defaultSource.behaviors, "Select Specific Behavior");
                         if (consequenceSelect) populateSelectWithOptions(consequenceSelect, defaultSource.consequences, "Select Consequence");
@@ -714,7 +716,6 @@
             });
         });
 
-        // MODIFICATION START: Updated createPromptFromForm function for new labeling
         function createPromptFromForm() {
             const age = studentAgeInput.value || 'Not specified';
             const grade = studentGradeSelect.value || 'Not specified';
@@ -744,23 +745,25 @@
 
                 let titleForPrompt = '';
 
-                if (typeValue && typeValue !== "Other" && typeValue !== "General / Other") { // Exclude "General / Other" as a title
+                if (typeValue && typeValue !== "Other" && typeValue !== "General / Other") {
                     titleForPrompt = typeValue;
                 } else if (typeValue === "Other" || typeValue === "General / Other") {
-                    titleForPrompt = "Other Behavior Pattern (refer to anecdotal notes for specifics)";
+                    if (specificBehaviorValue && specificBehaviorValue !== "Other (Specify in Notes)" && specificBehaviorValue !== "Other") {
+                        titleForPrompt = `${specificBehaviorValue} (Described as 'Other' type)`;
+                    } else {
+                        titleForPrompt = "Other Behavior Pattern (refer to anecdotal notes for specifics)";
+                    }
                 } else if (specificBehaviorValue && specificBehaviorValue !== "Other (Specify in Notes)" && specificBehaviorValue !== "Other") {
                     titleForPrompt = specificBehaviorValue;
                 }
 
 
                 let result = '';
-                // Only create a block if a title was determined AND at least one of A, B (specific), or C is specified.
                 if (titleForPrompt && (antecedentValue || specificBehaviorValue || consequenceValue)) {
                     result = `Observed Recurring Pattern - ${titleForPrompt}:\n  Antecedent: ${antecedentValue || 'Not specified'}\n  Specific Behavior: ${specificBehaviorValue || 'Not specified'}\n  Typical Consequence: ${consequenceValue || 'Not specified'}`;
                 }
                 return result;
             }
-            // MODIFICATION END
 
             const behaviors = [0,1,2].map(getBehaviorBlock).filter(Boolean).join('\n\n');
 
@@ -894,7 +897,6 @@ Response Strategies for Problem Behavior:
         }
 
         function parsePlanSections(planText) {
-            // console.log("[FRONTEND] parsePlanSections received planText (length):", planText.length);
             const sectionKeys = [
                 "Function Hypothesis Statement", "Antecedent Strategies", "Short-term Replacement Behaviors",
                 "Teaching Strategies for Short-Term Replacement Behaviors", "Reinforcement Strategies for Short-Term Replacement Behaviors",
@@ -938,11 +940,9 @@ Response Strategies for Problem Behavior:
             for (let key in sections) {
                 sections[key] = sections[key].trim();
             }
-            // console.log("[FRONTEND] parsePlanSections generated sections:", JSON.parse(JSON.stringify(sections)));
             return sections;
         }
 
-        // MODIFICATION START: Function to get active problem behavior phrases
         function getActiveProblemBehaviorPhrases() {
             const phrases = new Set();
             for (let i = 0; i < 3; i++) {
@@ -955,7 +955,6 @@ Response Strategies for Problem Behavior:
                 if (typeValue && typeValue !== "Other" && typeValue !== "General / Other" && typeValue.trim().length > 2) {
                     phrases.add(typeValue.trim());
                 }
-                // Also add specific behaviors if they are not generic placeholders and are distinct
                 if (specificBehaviorValue && specificBehaviorValue !== "Other (Specify in Notes)" && specificBehaviorValue !== "Other" && specificBehaviorValue.trim().length > 2) {
                     phrases.add(specificBehaviorValue.trim());
                 }
@@ -966,24 +965,18 @@ Response Strategies for Problem Behavior:
         function escapeRegExp(string) {
             return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
-        // MODIFICATION END
 
-        // MODIFICATION START: Updated showPlanSections to remove asterisks and bold problem behaviors
         function showPlanSections(sections, problemBehaviorPhrases = []) {
-            // console.log("[FRONTEND] showPlanSections received sections:", JSON.parse(JSON.stringify(sections)));
-            // console.log("[FRONTEND] Problem behavior phrases for bolding:", problemBehaviorPhrases);
             const fallbackMsg = "The AI attempted to generate this section but may require more specific input for optimal results. Review and refine as needed.";
 
             function cleanAndBoldContent(text, phrasesToBold) {
                 if (typeof text !== 'string') return '';
-                let processedText = text.replace(/\*/g, ''); // Remove all asterisks
+                let processedText = text.replace(/\*/g, ''); 
 
-                // Sort phrases by length descending to bold longer matches first
                 const sortedPhrases = [...phrasesToBold].sort((a, b) => b.length - a.length);
 
                 sortedPhrases.forEach(phrase => {
                     if (phrase && phrase.trim() !== '') {
-                        // Match whole words/phrases, case-insensitive
                         const regex = new RegExp(`(\\b${escapeRegExp(phrase.trim())}\\b)`, 'gi');
                         processedText = processedText.replace(regex, (match) => `<strong>${match}</strong>`);
                     }
@@ -1004,14 +997,11 @@ Response Strategies for Problem Behavior:
             bipResponseStrategies.innerHTML = cleanAndBoldContent(sections["Response Strategies for Problem Behavior"] || fallbackMsg, problemBehaviorPhrases);
 
             bipOutputDiv.classList.remove('hidden');
-            // console.log("[FRONTEND] bipOutputDiv should now be visible.");
         }
-        // MODIFICATION END
 
 
         function showErrorOutput(msg) {
-            // console.log("[FRONTEND] showErrorOutput called with msg:", msg);
-            bipFunctionHypothesis.innerHTML = msg; // Use innerHTML here too if errors might contain HTML
+            bipFunctionHypothesis.innerHTML = msg; 
             bipAntecedentStrategies.innerHTML = "";
             bipShortTermBehaviors.innerHTML = "";
             bipTeachingStrategies.innerHTML = "";
@@ -1022,7 +1012,7 @@ Response Strategies for Problem Behavior:
         }
 
         function hidePlanOutput() {
-            bipFunctionHypothesis.textContent = ""; // Can remain textContent if errors are plain text
+            bipFunctionHypothesis.textContent = ""; 
             bipAntecedentStrategies.textContent = "";
             bipShortTermBehaviors.textContent = "";
             bipTeachingStrategies.textContent = "";
@@ -1032,115 +1022,152 @@ Response Strategies for Problem Behavior:
             bipOutputDiv.classList.add('hidden');
         }
 
-        // MODIFICATION START: generatePlanWithGemini to call getActiveProblemBehaviorPhrases
+        // NEW: Helper function to generate a mock hypothesis based on inputs
+        function generateMockHypothesis(antecedent, specificBehavior, consequence) {
+            const a = antecedent || "a situation occurs";
+            let b = specificBehavior || "engage in a behavior";
+            // Refine behavior description if it's a generic "Other"
+            if (b && (b.toLowerCase().includes("other behavior pattern") || b.toLowerCase().includes("other (specify in notes)"))) {
+                b = "the behavior detailed in anecdotal notes";
+            } else if (b && b.toLowerCase().includes("(described as 'other' type)")) {
+                 b = `the behavior '${b.replace("(Described as 'Other' type)", "").trim()}' (which was categorized as 'Other')`;
+            }
+
+
+            const c = consequence || "an outcome happens";
+            let inferredReason = `it is unclear from the mock what they gain or avoid, but the typical outcome is '${c}'`;
+            let mockFunction = "Undetermined (Mock)";
+
+            if (consequence) {
+                const consLower = consequence.toLowerCase();
+                if (consLower.includes("escape") || consLower.includes("removal from activity") || consLower.includes("task postponed") || consLower.includes("avoid") || consLower.includes("break given")) {
+                    inferredReason = `they appear to escape or avoid the task/situation (based on the consequence: '${consequence}')`;
+                    mockFunction = "Escape (Mock)";
+                } else if (consLower.includes("attention") || consLower.includes("reprimand") || consLower.includes("comfort") || consLower.includes("peer reaction") || consLower.includes("adult prompt")) {
+                    inferredReason = `they appear to gain attention (based on the consequence: '${consequence}')`;
+                    mockFunction = "Attention (Mock)";
+                } else if (consLower.includes("obtain") || consLower.includes("access") || consLower.includes("given item") || consLower.includes("item/activity obtained")) {
+                    inferredReason = `they appear to obtain a desired item/activity (based on the consequence: '${consequence}')`;
+                    mockFunction = "Tangible (Mock)";
+                } else if (consLower.includes("sensory input") || consLower.includes("self-stim")) {
+                    inferredReason = `they appear to gain automatic/sensory reinforcement (based on the consequence: '${consequence}')`;
+                    mockFunction = "Sensory/Automatic (Mock)";
+                }
+            }
+
+            return `When ${a}, the student will ${b} because ${inferredReason}; therefore, the function of the behavior appears to be ${mockFunction}.`;
+        }
+
+
         async function generatePlanWithGemini() {
-            // console.log("[FRONTEND] generatePlanWithGemini called");
             generateBIPSpinner.classList.remove('hidden');
             generateBIPButton.disabled = true;
             sessionStatusDisplay.textContent = "Generating...";
             hidePlanOutput();
 
-            const activePhrases = getActiveProblemBehaviorPhrases(); // Get phrases
+            const activePhrases = getActiveProblemBehaviorPhrases(); 
             const userGeneratedPrompt = createPromptFromForm();
-
-            // console.log("[FRONTEND] Generated prompt for backend (first 500 chars):", userGeneratedPrompt.substring(0,500) + "...");
-            // console.log("[FRONTEND] Active phrases for bolding:", activePhrases);
-
-            // This is a FRONTEND ONLY example.
-            // In a real application, you would send `userGeneratedPrompt` to your backend,
-            // which then calls the Gemini API.
-            // For this example, we'll simulate a delay and a mock response structure.
-            console.log("Simulating API call with prompt (see console for full prompt):", userGeneratedPrompt.substring(0, 200) + "...");
+            
+            // --- MOCK API CALL ---
+            console.log("Simulating API call with prompt (see console for full prompt details). This is a frontend-only mock.");
             // alert("This is a frontend-only example. The plan generation is mocked. Check console for the prompt that would be sent to a backend.");
 
-            // --- MOCK API CALL ---
-            // Replace this section with your actual `fetch` call to your backend API
-            // For demonstration purposes, this simulates a delay and uses a very basic response.
-            // You will need a backend to securely call the Gemini API.
-             try {
-                // Simulate a delay
-                await new Promise(resolve => setTimeout(resolve, 2000));
+            // Extract data from the first behavior block for the dynamic mock hypothesis
+            const firstBehaviorTypeElement = document.getElementById('behaviorTypeSelect_0');
+            const firstAntecedentElement = document.getElementById('antecedentSelect_0');
+            const firstBehaviorSpecificElement = document.getElementById('behaviorSelect_0');
+            const firstConsequenceElement = document.getElementById('consequenceSelect_0');
 
-                // This is where you'd typically have:
-                // const response = await fetch('/api/ask', { method: 'POST', ... body: JSON.stringify({prompt: userGeneratedPrompt})});
-                // const data = await response.json();
-                // For now, we create a placeholder successful response.
-                // You will need to replace this with actual backend interaction for Gemini.
+            const firstBehaviorType = firstBehaviorTypeElement ? firstBehaviorTypeElement.value : '';
+            const firstAntecedent = firstAntecedentElement ? firstAntecedentElement.value : '';
+            const firstBehaviorSpecific = firstBehaviorSpecificElement ? firstBehaviorSpecificElement.value : '';
+            const firstConsequence = firstConsequenceElement ? firstConsequenceElement.value : '';
 
-                // IMPORTANT: This is a placeholder. The actual plan text would come from Gemini.
-                // For testing, you might put a very short, structured example here.
-                const placeholderPlanText = `
+            let primaryBehaviorDescriptionForMock = "the behavior of concern";
+            if (firstBehaviorSpecific && firstBehaviorSpecific !== "Other (Specify in Notes)" && firstBehaviorSpecific !== "Other") {
+                primaryBehaviorDescriptionForMock = firstBehaviorSpecific;
+            } else if (firstBehaviorType && firstBehaviorType !== "Other" && firstBehaviorType !== "General / Other") {
+                primaryBehaviorDescriptionForMock = firstBehaviorType;
+            } else if (firstBehaviorType === "Other" || firstBehaviorType === "General / Other") {
+                 if (firstBehaviorSpecific && firstBehaviorSpecific !== "Other (Specify in Notes)" && firstBehaviorSpecific !== "Other") {
+                    primaryBehaviorDescriptionForMock = `${firstBehaviorSpecific} (Described as 'Other' type)`;
+                 } else {
+                    primaryBehaviorDescriptionForMock = "Other Behavior Pattern (refer to anecdotal notes for specifics)";
+                 }
+            }
+
+
+            const dynamicMockHypothesis = generateMockHypothesis(firstAntecedent, primaryBehaviorDescriptionForMock, firstConsequence);
+            
+            const placeholderPlanText = `
 Function Hypothesis Statement:
-When asked to do non-preferred tasks, the student will engage in task refusal to escape the demand. Therefore, the function is escape.
+${dynamicMockHypothesis}
 
 Antecedent Strategies:
-- Use a visual schedule.
-- Offer choices.
+- For ${primaryBehaviorDescriptionForMock}: Use a visual schedule to clarify expectations (Mock strategy).
+- Offer frequent, small choices throughout the day (e.g., "Blue pen or black pen?") (Mock strategy).
 
 Short-term Replacement Behaviors:
-- Request a break using a card.
+- For ${primaryBehaviorDescriptionForMock}: Teach student to use a break card to request a 2-minute break from a task.
 
 Teaching Strategies for Short-Term Replacement Behaviors:
-- Model and practice requesting a break.
+- Model and role-play how to appropriately use the break card.
+- Practice during calm times, 1-2 times daily.
 
 Reinforcement Strategies for Short-Term Replacement Behaviors:
-- Provide a short break immediately when requested appropriately.
+- Immediately honor appropriate requests for a break made with the card.
+- Provide verbal praise: "Great job using your break card!"
 
 Long-term Replacement Behaviors:
-- Complete tasks with fewer prompts.
+- Student will complete assigned tasks within the given time with no more than 1 prompt.
+- Student will engage in positive peer interactions during group work.
 
 Response Strategies for Problem Behavior:
-For Task Refusal / Noncompliance:
-  a. Ensure safety.
-  b. calmly redirect.
-  c. Use minimal verbal interaction.
-  d. Re-present demand after a short cool-down.
-  e. Avoid lengthy discussions during refusal.
+(This section will be more generic in the mock. A real AI would tailor it to '${primaryBehaviorDescriptionForMock}' and its hypothesized function from '${dynamicMockHypothesis}')
+General Response for Problem Behavior:
+  a. Ensure safety of student and others. Block aggression or self-injury if necessary.
+  b. Minimize attention to the problem behavior (e.g., neutral facial expression, limited verbal interaction related to the behavior).
+  c. If the behavior is to escape a task, calmly and briefly redirect back to the task after a short cool-down period (e.g., 1-2 minutes), possibly with a modified version of the task.
+  d. If attention-seeking, ignore minor behaviors and provide attention for the first sign of appropriate behavior.
+  e. Follow through with any planned consequences consistently.
+  f. After the student is calm, briefly review the expected behavior and the replacement behavior.
 `;
+
+            try {
+                await new Promise(resolve => setTimeout(resolve, 1500)); 
 
                 const mockData = {
                     candidates: [{
-                        content: {
-                            parts: [{ text: placeholderPlanText }]
-                        },
+                        content: { parts: [{ text: placeholderPlanText }] },
                         finishReason: "STOP",
-                        safetyRatings: [] // Assuming safe for this mock
+                        safetyRatings: [] 
                     }]
                 };
-                 // console.log("[FRONTEND] Mock API successful response received.");
-
-                if (mockData.error) { // Simulating backend successfully forwarding an API error
+                
+                if (mockData.error) { 
                     let errorMsg = mockData.error.message || JSON.stringify(mockData.error, null, 2);
                     showErrorOutput("Failed to generate a plan (API error from backend).\n" + errorMsg);
-                    console.error("[FRONTEND] Mock Gemini API Error (via backend):", mockData.error);
                 } else if (mockData.candidates && mockData.candidates.length > 0 && mockData.candidates[0].content && mockData.candidates[0].content.parts && mockData.candidates[0].content.parts.length > 0 && mockData.candidates[0].content.parts[0].text) {
                     const planText = mockData.candidates[0].content.parts[0].text;
                     const sections = parsePlanSections(planText);
-                    showPlanSections(sections, activePhrases);
+                    showPlanSections(sections, activePhrases); 
                 } else {
-                    // Handle other cases like MAX_TOKENS, SAFETY, etc., based on real Gemini response structure
                     let specificError = "Received an unexpected response structure from the mock API or no plan was generated.";
                     if (mockData.candidates && mockData.candidates.length > 0 && mockData.candidates[0].finishReason) {
                         specificError = `The response generation finished with reason: ${mockData.candidates[0].finishReason}. (Mocked)`;
-                         // Add more specific messages for SAFETY, MAX_TOKENS if you want to test those paths in mock
                     } else if (mockData.promptFeedback && mockData.promptFeedback.blockReason) {
                          specificError = `The prompt was blocked by the API. Reason: ${mockData.promptFeedback.blockReason}. (Mocked)`;
                     }
                     showErrorOutput(specificError);
-                    console.error("[FRONTEND] Mock API - Unexpected successful response structure:", mockData);
                 }
             } catch (err) {
-                console.error("[FRONTEND] Error in mock API call simulation (e.g., if you had network issues with a real API):", err);
                 showErrorOutput("An error occurred during the mock API call: " + err.message);
             } finally {
                 generateBIPSpinner.classList.add('hidden');
                 generateBIPButton.disabled = false;
                 sessionStatusDisplay.textContent = "Active (Mock Response)";
-                // console.log("[FRONTEND] generatePlanWithGemini (mock) finished.");
             }
-            // --- END MOCK API CALL ---
         }
-        // MODIFICATION END
 
         generateBIPButton.addEventListener('click', (e) => {
             e.preventDefault();
@@ -1149,17 +1176,12 @@ For Task Refusal / Noncompliance:
 
         copyBIPButton.addEventListener('click', () => {
             const monitoringStatementText = monitoringStatementContentElement ? monitoringStatementContentElement.textContent.trim() : "";
-            // For copying, we want the plain text without the <strong> tags.
-            // We can get this by temporarily rendering to a hidden div or by stripping HTML.
-            // Simpler approach: copy from elements' textContent, which doesn't include HTML tags.
-
+            
             const tempDiv = document.createElement('div');
             function getCleanText(elementId) {
                 const element = document.getElementById(elementId);
                 if (!element) return "";
-                // Clone the element to avoid altering the live display for textContent extraction
                 const clone = element.cloneNode(true);
-                // If we used innerHTML to set it, textContent should give us the de-HTML'd version
                 return clone.textContent || "";
             }
 
@@ -1233,7 +1255,6 @@ ${monitoringStatementText}
             referralInfoContainer.classList.add('hidden');
             hidePlanOutput();
             sessionStatusDisplay.textContent = "Active";
-            // console.log("[FRONTEND] New plan started, fields cleared.");
         });
     </script>
 </body>
