@@ -1145,7 +1145,7 @@
 
             const evidenceBasedStrategies = `
 ADDITIONAL GUIDANCE FOR REPLACEMENT BEHAVIORS:
-When developing the 'Short-term Replacement Behaviors', 'Teaching Strategies for Short-Term Replacement Behaviors', 'Reinforcement Strategies for Short-Term Replacement Behaviors', and 'Long-term Replacement Behaviors' sections, please consider the following evidence-based approaches, categorized by common behavioral functions. First, hypothesize the function based on the provided ABC data and student information. Then, select and adapt strategies relevant to that hypothesized function. These strategies are based on principles from evidence-based practices like Applied Behavior Analysis (ABA), Positive Behavioral Interventions and Supports (PBIS), and Functional Behavior Assessments (FBA). Implementation should be individualized and aligned with student needs, context, and data.
+When developing the 'Short-term Replacement Behaviors', 'Teaching Strategies for Short-term Replacement Behaviors', 'Reinforcement Strategies for Short-term Replacement Behaviors', and 'Long-term Replacement Behaviors' sections, please consider the following evidence-based approaches, categorized by common behavioral functions. First, hypothesize the function based on the provided ABC data and student information. Then, select and adapt strategies relevant to that hypothesized function. These strategies are based on principles from evidence-based practices like Applied Behavior Analysis (ABA), Positive Behavioral Interventions and Supports (PBIS), and Functional Behavior Assessments (FBA). Implementation should be individualized and aligned with student needs, context, and data.
 
 FOR STUDENTS SEEKING ATTENTION:
 1. Teach Positive Communication for Attention: Help students learn respectful ways to gain attention such as using a help card, raising their hand, or saying “Excuse me.” Ensure these efforts are consistently acknowledged right away.
@@ -1211,7 +1211,7 @@ Do not just list these factors; demonstrate their application in the strategies 
 
             const multiBehaviorInstruction = `
 GUIDANCE FOR HANDLING MULTIPLE BEHAVIOR PATTERNS (APPLIES TO ALL STRATEGY SECTIONS):
-If more than one 'Observed Recurring Behavior Pattern' is detailed in the input, it is crucial that the generated Behavior Intervention Plan addresses each pattern systematically. For each of the following sections – 'Antecedent Strategies', 'Short-term Replacement Behaviors', 'Teaching Strategies for Short-Term Replacement Behaviors', 'Reinforcement Strategies for Short-Term Replacement Behaviors', 'Long-term Replacement Behaviors' – you MUST:
+If more than one 'Observed Recurring Behavior Pattern' is detailed in the input, it is crucial that the generated Behavior Intervention Plan addresses each pattern systematically. For each of the following sections – 'Antecedent Strategies', 'Short-term Replacement Behaviors', 'Teaching Strategies for Short-term Replacement Behaviors', 'Reinforcement Strategies for Short-term Replacement Behaviors', 'Long-term Replacement Behaviors' – you MUST:
 1.  Consider each behavior pattern individually, especially if their hypothesized functions or topographies differ.
 2.  Clearly delineate or preface which strategies apply to which behavior pattern. For example, you might use subheadings like "For [Pattern Title from input, e.g., Physical Aggression]:" followed by relevant strategies, then "For [Second Pattern Title from input, e.g., Task Refusal]:" followed by its strategies. Use the pattern titles derived from the 'Observed Recurring Behavior Patterns' input for these subheadings.
 3.  If a strategy is applicable to multiple or all identified behavior patterns, you may consolidate, but explicitly state which patterns it covers.
@@ -1265,8 +1265,8 @@ Required BIP Sections:
 Function Hypothesis Statement:
 Antecedent Strategies:
 Short-term Replacement Behaviors:
-Teaching Strategies for Short-Term Replacement Behaviors:
-Reinforcement Strategies for Short-Term Replacement Behaviors:
+Teaching Strategies for Short-term Replacement Behaviors:
+Reinforcement Strategies for Short-term Replacement Behaviors:
 Long-term Replacement Behaviors:
 Response Strategies for Problem Behavior:
             `.trim();
@@ -1276,7 +1276,7 @@ Response Strategies for Problem Behavior:
         function parsePlanSections(planText) {
             const sectionKeys = [
                 "Function Hypothesis Statement", "Antecedent Strategies", "Short-term Replacement Behaviors",
-                "Teaching Strategies for Short-Term Replacement Behaviors", "Reinforcement Strategies for Short-Term Replacement Behaviors",
+                "Teaching Strategies for Short-term Replacement Behaviors", "Reinforcement Strategies for Short-term Replacement Behaviors",
                 "Long-term Replacement Behaviors", "Response Strategies for Problem Behavior"
             ];
             const sections = {};
@@ -1377,8 +1377,8 @@ Response Strategies for Problem Behavior:
 
             bipAntecedentStrategies.innerHTML = cleanAndBoldContent(sections["Antecedent Strategies"] || fallbackMsg, problemBehaviorPhrases);
             bipShortTermBehaviors.innerHTML = cleanAndBoldContent(sections["Short-term Replacement Behaviors"] || fallbackMsg, problemBehaviorPhrases);
-            bipTeachingStrategies.innerHTML = cleanAndBoldContent(sections["Teaching Strategies for Short-Term Replacement Behaviors"] || fallbackMsg, problemBehaviorPhrases);
-            bipReinforcementShortTerm.innerHTML = cleanAndBoldContent(sections["Reinforcement Strategies for Short-Term Replacement Behaviors"] || fallbackMsg, problemBehaviorPhrases);
+            bipTeachingStrategies.innerHTML = cleanAndBoldContent(sections["Teaching Strategies for Short-term Replacement Behaviors"] || fallbackMsg, problemBehaviorPhrases);
+            bipReinforcementShortTerm.innerHTML = cleanAndBoldContent(sections["Reinforcement Strategies for Short-term Replacement Behaviors"] || fallbackC, problemBehaviorPhrases);
             bipLongTermBehaviors.innerHTML = cleanAndBoldContent(sections["Long-term Replacement Behaviors"] || fallbackMsg, problemBehaviorPhrases);
             bipResponseStrategies.innerHTML = cleanAndBoldContent(sections["Response Strategies for Problem Behavior"] || fallbackMsg, problemBehaviorPhrases);
 
@@ -1426,7 +1426,7 @@ Response Strategies for Problem Behavior:
 
             if (consequence) {
                 const consLower = consequence.toLowerCase();
-                if (consLower.includes("escape") || consLower.includes("removal from activity") || consLower.includes("task postponed") || consLower.includes("break given") || consLower.includes("task simplification")) {
+                if (consLower.includes("escape") || consLower.includes("avoid") || consLower.includes("removal from activity") || consLower.includes("task postponed") || consLower.includes("break given") || consLower.includes("task simplification")) {
                     inferredReason = `they appear to escape or avoid the task/situation (based on the consequence: '${consequence}')`;
                     mockFunction = "Escape/Avoidance";
                 }
@@ -1456,8 +1456,8 @@ Response Strategies for Problem Behavior:
             sessionStatusDisplay.textContent = "Generating...";
             hidePlanOutput();
 
-            // Retrieve contextualTrigger value at the beginning of the function
-            const contextualTrigger = document.getElementById('contextualTrigger').value.trim(); // FIX APPLIED HERE
+            // Removed the problematic 'contextualTrigger' line.
+            // If you wish to add a contextual trigger input later, you'll need to add an HTML element with that ID.
 
             const activePhrases = getActiveProblemBehaviorPhrases(); 
             
@@ -1538,7 +1538,8 @@ Response Strategies for Problem Behavior:
                 mockAntecedentStrategies.push(`For ${problemBehaviorTitle}:`);
                 if (func === "Escape/Avoidance") {
                     mockAntecedentStrategies.push(`- Provide task modifications or chunking for challenging assignments. `);
-                    mockAntecedentStrategies.push(`- Use visual schedules and pre-correct for transitions, especially around ${contextualTrigger || 'challenging activities'}.`);
+                    // Adjusted this line as 'contextualTrigger' is no longer available directly.
+                    mockAntecedentStrategies.push(`- Use visual schedules and pre-correct for transitions, especially around challenging activities.`); 
                     mockAntecedentStrategies.push(`- Offer frequent, small choices throughout the day to increase engagement.`);
                 } else if (func === "Attention") {
                     mockAntecedentStrategies.push(`- Proactively provide frequent, positive adult attention, linking it to appropriate behavior.`);
@@ -1602,12 +1603,12 @@ ${mockAntecedentStrategies.join('\n')}
 Short-term Replacement Behaviors:
 - ${replacementBehaviorContent}
 
-Teaching Strategies for Short-Term Replacement Behaviors:
+Teaching Strategies for Short-term Replacement Behaviors:
 - ${teachingStrategiesContent}
-- Utilize behavioral rehearsal (role-playing) to practice the new skill, particularly when facing ${contextualTrigger || 'typical triggers'}.
+- Utilize behavioral rehearsal (role-playing) to practice the new skill, particularly when facing typical triggers.
 - Provide clear, specific feedback immediately after practice.
 
-Reinforcement Strategies for Short-Term Replacement Behaviors:
+Reinforcement Strategies for Short-term Replacement Behaviors:
 - ${reinforcementStrategiesContent}
 - Ensure the replacement behavior is consistently and immediately rewarded, as it replaces the problematic behavior's "payoff".
 - Incorporate student's preferred reinforcers (e.g., ${reinforcerPreferencesInput.value || 'specific praise, computer time'}) when the replacement behavior is used.
@@ -1705,11 +1706,11 @@ ${mockResponseStrategies.join('\n')}
                     ${bipShortTermBehaviors.innerHTML}
                 </div>
                 <div class="plan-section">
-                    <h3>Teaching Strategies for Short-Term Replacement Behaviors:</h3>
+                    <h3>Teaching Strategies for Short-term Replacement Behaviors:</h3>
                     ${bipTeachingStrategies.innerHTML}
                 </div>
                 <div class="plan-section">
-                    <h3>Reinforcement Strategies for Short-Term Replacement Behaviors:</h3>
+                    <h3>Reinforcement Strategies for Short-term Replacement Behaviors:</h3>
                     ${bipReinforcementShortTerm.innerHTML}
                 </div>
                 <div class="plan-section">
@@ -1783,8 +1784,8 @@ ${mockResponseStrategies.join('\n')}
                 { id: 'bipFunctionHypothesis', title: 'Function Hypothesis Statement' },
                 { id: 'bipAntecedentStrategies', title: 'Antecedent Strategies' },
                 { id: 'bipShortTermBehaviors', title: 'Short-term Replacement Behaviors' },
-                { id: 'bipTeachingStrategies', title: 'Teaching Strategies for Short-Term Replacement Behaviors' },
-                { id: 'bipReinforcementShortTerm', title: 'Reinforcement Strategies for Short-Term Replacement Behaviors' },
+                { id: 'bipTeachingStrategies', title: 'Teaching Strategies for Short-term Replacement Behaviors' },
+                { id: 'bipReinforcementShortTerm', title: 'Reinforcement Strategies for Short-term Replacement Behaviors' },
                 { id: 'bipLongTermBehaviors', title: 'Long-term Replacement Behaviors' },
                 { id: 'bipResponseStrategies', title: 'Response Strategies for Problem Behavior' },
                 { id: 'monitoringStatementContent', title: 'Monitoring and Plan Review' }
