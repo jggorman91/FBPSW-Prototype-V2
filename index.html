@@ -231,7 +231,7 @@
                                     <tbody class="text-gray-700">
                                     </tbody>
                                 </table>
-                            </div>
+                                </div>
                 </div>
 
                 <div class="md:col-span-2">
@@ -396,7 +396,7 @@
                 { level: "Social Navigator", description: "Develops friendships and adapts to group dynamics." },
                 { level: "Empathetic Ally", description: "Demonstrates empathy and resolves social issues constructively." },
                 { level: "Relational Strategist", description: "Balances personal identity with social inclusion." },
-                { level: "Social Integrator", description: "Manages complex peer relationships and social contexts." },
+                { level: "Social Integrator", description: "Manges complex peer relationships and social contexts." },
                 { level: "Leadership Model", description: "Demonstrates leadership and models inclusive practices." }
             ],
             pragmatic: [
@@ -995,10 +995,10 @@
                     }
                 }
             } else {
-                 // If no saved data, ensure at least one empty block is present
-                if (document.querySelectorAll('.behavior-block').length === 0) {
-                    createBehaviorBlock();
-                }
+                    // If no saved data, ensure at least one empty block is present
+                    if (document.querySelectorAll('.behavior-block').length === 0) {
+                        createBehaviorBlock();
+                    }
             }
         }
 
@@ -1378,7 +1378,7 @@ Response Strategies for Problem Behavior:
             bipAntecedentStrategies.innerHTML = cleanAndBoldContent(sections["Antecedent Strategies"] || fallbackMsg, problemBehaviorPhrases);
             bipShortTermBehaviors.innerHTML = cleanAndBoldContent(sections["Short-term Replacement Behaviors"] || fallbackMsg, problemBehaviorPhrases);
             bipTeachingStrategies.innerHTML = cleanAndBoldContent(sections["Teaching Strategies for Short-term Replacement Behaviors"] || fallbackMsg, problemBehaviorPhrases);
-            bipReinforcementShortTerm.innerHTML = cleanAndBoldContent(sections["Reinforcement Strategies for Short-term Replacement Behaviors"] || fallbackC, problemBehaviorPhrases);
+            bipReinforcementShortTerm.innerHTML = cleanAndBoldContent(sections["Reinforcement Strategies for Short-term Replacement Behaviors"] || fallbackMsg, problemBehaviorPhrases);
             bipLongTermBehaviors.innerHTML = cleanAndBoldContent(sections["Long-term Replacement Behaviors"] || fallbackMsg, problemBehaviorPhrases);
             bipResponseStrategies.innerHTML = cleanAndBoldContent(sections["Response Strategies for Problem Behavior"] || fallbackMsg, problemBehaviorPhrases);
 
@@ -1417,7 +1417,7 @@ Response Strategies for Problem Behavior:
             if (b && (b.toLowerCase().includes("other (specify in notes)") || b.toLowerCase().includes("other behavior pattern"))) {
                 b = "the behavior detailed in anecdotal notes";
             } else if (b && b.toLowerCase().includes("(described as 'other' type)")) {
-                 b = `the behavior '${b.replace("(Described as 'Other' type)", "").trim()}' (which was categorized as 'Other')`;
+                b = `the behavior '${b.replace("(Described as 'Other' type)", "").trim()}' (which was categorized as 'Other')`;
             }
 
             const c = consequence || "an outcome happens";
