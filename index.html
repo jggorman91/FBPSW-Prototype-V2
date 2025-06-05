@@ -748,10 +748,14 @@
             const behaviorSpecificSelect = document.getElementById(`behaviorSelect_${blockIndex}`);
             const consequenceSelect = document.getElementById(`consequenceSelect_${blockIndex}`);
 
+            // Populate Behavior Type select
             populateSelectWithOptions(behaviorTypeSelect, Object.keys(bipData), "Select Behavior Type");
-            populateSelectWithOptions(antecedentSelect, [], "Select Antecedent (after choosing type)");
-            populateSelectWithOptions(behaviorSpecificSelect, [], "Select Specific Behavior (after choosing type)");
-            populateSelectWithOptions(consequenceSelect, [], "Select Consequence (after choosing type)");
+            // Populate Antecedent with ALL general antecedents, and keep them constant
+            populateSelectWithOptions(antecedentSelect, bipData["General / Other"].antecedents, "Select Antecedent");
+            // Populate Behavior and Consequence based on initial "General / Other" or empty
+            populateSelectWithOptions(behaviorSpecificSelect, bipData["General / Other"].behaviors, "Select Specific Behavior");
+            populateSelectWithOptions(consequenceSelect, bipData["General / Other"].consequences, "Select Consequence");
+
 
             // Add event listeners for "Other" selections
             [behaviorTypeSelect, antecedentSelect, behaviorSpecificSelect, consequenceSelect].forEach(selectEl => {
@@ -783,16 +787,16 @@
                     currentBlockHeader.textContent = `Behavior Pattern ${blockIndex + 1}${blockIndex > 0 ? ' (Optional)' : '' }`;
                 }
 
+                // Only update Behavior and Consequence based on selected type
+                // Antecedents remain fixed to "General / Other" list
                 if (selectedBehaviorType && bipData[selectedBehaviorType]) {
-                    populateSelectWithOptions(antecedentSelect, bipData[selectedBehaviorType].antecedents, "Select Antecedent");
+                    // Do NOT touch antecedentSelect here
                     populateSelectWithOptions(behaviorSpecificSelect, bipData[selectedBehaviorType].behaviors, "Select Specific Behavior");
                     populateSelectWithOptions(consequenceSelect, bipData[selectedBehaviorType].consequences, "Select Consequence");
-                } else {
-                    const sourceKey = (selectedBehaviorType === "Other" || selectedBehaviorType === "") ? "General / Other" : null;
-                    const defaultSource = sourceKey && bipData[sourceKey] ? bipData[sourceKey] : { antecedents: [], behaviors: [], consequences: [] };
-                    populateSelectWithOptions(antecedentSelect, defaultSource.antecedents, "Select Antecedent");
-                    populateSelectWithOptions(behaviorSpecificSelect, defaultSource.behaviors, "Select Specific Behavior");
-                    populateSelectWithOptions(consequenceSelect, defaultSource.consequences, "Select Consequence");
+                } else { // Fallback for "Other" or empty selection
+                    // Do NOT touch antecedentSelect here
+                    populateSelectWithOptions(behaviorSpecificSelect, bipData["General / Other"].behaviors, "Select Specific Behavior");
+                    populateSelectWithOptions(consequenceSelect, bipData["General / Other"].consequences, "Select Consequence");
                 }
                 updateFormProgress();
             });
@@ -958,7 +962,8 @@
                         // Set values for dropdowns and trigger change to populate dependent dropdowns
                         if (behaviorTypeSelect && blockData.behaviorType !== undefined) {
                             behaviorTypeSelect.value = blockData.behaviorType;
-                            behaviorTypeSelect.dispatchEvent(new Event('change')); // Trigger change to populate next dropdowns
+                            // Do not dispatch change for antecedentSelect here, as it's now constant
+                            behaviorTypeSelect.dispatchEvent(new Event('change')); // Still needed for behaviorSpecific and consequence
                         }
                         if (antecedentSelect && blockData.antecedent !== undefined) {
                             antecedentSelect.value = blockData.antecedent;
@@ -983,7 +988,7 @@
 
                         // Re-trigger change to show "Other" fields correctly
                         if (behaviorTypeSelect) behaviorTypeSelect.dispatchEvent(new Event('change'));
-                        if (antecedentSelect) antecedentSelect.dispatchEvent(new Event('change'));
+                        // No need to dispatch change for antecedentSelect as its options are static
                         if (behaviorSpecificSelect) behaviorSpecificSelect.dispatchEvent(new Event('change'));
                         if (consequenceSelect) consequenceSelect.dispatchEvent(new Event('change'));
                     });
@@ -1567,7 +1572,7 @@ Response Strategies for Problem Behavior:
                 } else if (func === "Attention") {
                     mockResponseStrategies.push(`  a. Immediate actions: Ensure safety. Redirect to task or replacement behavior. `);
                     mockResponseStrategies.push(`  b. De-escalation: Use minimal verbal interaction. Maintain neutral facial expression. Avoid lecturing. `);
-                    mockResponseStrategies.push(`  c. Responses: Briefly acknowledge problem behavior (e.g., "Voice level") then ignore. Provide positive attention for replacement behavior. `);
+                    mockResponseStrategies.s(`.  c. Responses: Briefly acknowledge problem behavior (e.g., "Voice level") then ignore. Provide positive attention for replacement behavior. `);
                     mockResponseStrategies.push(`  d. Follow-up: Provide positive attention for appropriate behavior only. `);
                     mockResponseStrategies.push(`  e. Avoid reinforcement: Do NOT provide extended verbal attention or argue during attention-seeking behaviors. `);
                 } else if (func === "Tangible") {
