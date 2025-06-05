@@ -174,7 +174,7 @@
                         <option value="Social Initiator">Social Initiator</option>
                         <option value="Emerging Peer">Emerging Peer</option>
                         <option value="Collaborative Partner">Collaborative Partner</option>
-                        <option value="Connected Participant">Connected Participant</option>
+                        <option value="Connected Participant">Connected Partner</option>
                         <option value="Social Navigator">Social Navigator</option>
                         <option value="Empathetic Ally">Empathetic Ally</option>
                         <option value="Relational Strategist">Relational Strategist</option>
@@ -899,15 +899,20 @@
             
             const behaviorBlocksData = [];
             document.querySelectorAll('.behavior-block').forEach((block, index) => {
+                const typeSelect = document.getElementById(`behaviorTypeSelect_${index}`);
+                const antecedentSelect = document.getElementById(`antecedentSelect_${index}`);
+                const behaviorSpecificSelect = document.getElementById(`behaviorSelect_${index}`);
+                const consequenceSelect = document.getElementById(`consequenceSelect_${index}`);
+
                 const blockData = {
-                    behaviorType: document.getElementById(`behaviorTypeSelect_${index}`).value,
-                    antecedent: document.getElementById(`antecedentSelect_${index}`).value,
-                    behaviorSpecific: document.getElementById(`behaviorSelect_${index}`).value,
-                    consequence: document.getElementById(`consequenceSelect_${index}`).value,
-                    behaviorTypeOther: document.getElementById(`behaviorTypeOther_${index}`).value,
-                    antecedentOther: document.getElementById(`antecedentOther_${index}`).value,
-                    behaviorSpecificOther: document.getElementById(`behaviorSpecificOther_${index}`).value,
-                    consequenceOther: document.getElementById(`consequenceOther_${index}`).value,
+                    behaviorType: typeSelect ? typeSelect.value : '',
+                    antecedent: antecedentSelect ? antecedentSelect.value : '',
+                    behaviorSpecific: behaviorSpecificSelect ? behaviorSpecificSelect.value : '',
+                    consequence: consequenceSelect ? consequenceSelect.value : '',
+                    behaviorTypeOther: document.getElementById(`behaviorTypeOther_${index}`) ? document.getElementById(`behaviorTypeOther_${index}`).value : '',
+                    antecedentOther: document.getElementById(`antecedentOther_${index}`) ? document.getElementById(`antecedentOther_${index}`).value : '',
+                    behaviorSpecificOther: document.getElementById(`behaviorSpecificOther_${index}`) ? document.getElementById(`behaviorSpecificOther_${index}`).value : '',
+                    consequenceOther: document.getElementById(`consequenceOther_${index}`) ? document.getElementById(`consequenceOther_${index}`).value : '',
                 };
                 behaviorBlocksData.push(blockData);
             });
@@ -999,52 +1004,8 @@
 
         // Calculate form completion percentage
         function updateFormProgress() {
-            const totalFields = 11; // studentAge, studentGrade, strengths, anecdotal, reinforcers, behavioral, social, pragmatic, referral (yes/no choice counts as 1), plus 3 fields per behavior block (type, antecedent, specific, consequence) - let's simplify for now to main fields + at least 1 behavior block
-            let completedFields = 0;
-
-            if (studentAgeInput.value) completedFields++;
-            if (studentGradeSelect.value) completedFields++;
-            if (strengthsInterestsResiliencyInput.value) completedFields++;
-            if (anecdotalInput.value) completedFields++;
-            if (reinforcerPreferencesInput.value) completedFields++;
-            if (behavioralSkillsSelect.value) completedFields++;
-            if (socialSkillsSelect.value) completedFields++;
-            if (pragmaticLanguageSkillsSelect.value) completedFields++;
-            if (document.querySelector('input[name="addReferralInfo"]:checked').value === 'yes' && referralInput.value) completedFields++;
-            else if (document.querySelector('input[name="addReferralInfo"]:checked').value === 'no') completedFields++;
-            
-            let behaviorBlocksFilled = 0;
-            document.querySelectorAll('.behavior-block').forEach((block, index) => {
-                const typeSelect = document.getElementById(`behaviorTypeSelect_${index}`);
-                const antecedentSelect = document.getElementById(`antecedentSelect_${index}`);
-                const behaviorSpecificSelect = document.getElementById(`behaviorSelect_${index}`);
-                const consequenceSelect = document.getElementById(`consequenceSelect_${index}`);
-
-                let blockComplete = false;
-                if (typeSelect.value && antecedentSelect.value && behaviorSpecificSelect.value && consequenceSelect.value) {
-                    // Check 'Other' fields if applicable
-                    const otherBehaviorTypeInput = document.getElementById(`behaviorTypeOther_${index}`);
-                    const otherAntecedentInput = document.getElementById(`antecedentOther_${index}`);
-                    const otherBehaviorSpecificInput = document.getElementById(`behaviorSpecificOther_${index}`);
-                    const otherConsequenceInput = document.getElementById(`consequenceOther_${index}`);
-
-                    let otherFieldsComplete = true;
-                    if ((typeSelect.value === 'Other' || typeSelect.value === 'General / Other') && !otherBehaviorTypeInput.value) otherFieldsComplete = false;
-                    if (antecedentSelect.value === 'Other' && !otherAntecedentInput.value) otherFieldsComplete = false;
-                    if (behaviorSpecificSelect.value === 'Other' && !otherBehaviorSpecificInput.value) otherFieldsComplete = false;
-                    if (consequenceSelect.value === 'Other' && !otherConsequenceInput.value) otherFieldsComplete = false;
-
-                    if (otherFieldsComplete) {
-                        behaviorBlocksFilled++;
-                    }
-                }
-            });
-
-            // Consider first behavior block mandatory for base completion
-            let baseRequiredFields = 9; // studentAge, grade, strengths, anecdotal, reinforcers, behavioral, social, pragmatic, referral choice
-            let totalPossibleFields = baseRequiredFields + (document.querySelectorAll('.behavior-block').length * 4); // 4 fields per block
-
             let currentFilledCount = 0;
+
             if (studentAgeInput.value) currentFilledCount++;
             if (studentGradeSelect.value) currentFilledCount++;
             if (strengthsInterestsResiliencyInput.value) currentFilledCount++;
@@ -1053,29 +1014,63 @@
             if (behavioralSkillsSelect.value) currentFilledCount++;
             if (socialSkillsSelect.value) currentFilledCount++;
             if (pragmaticLanguageSkillsSelect.value) currentFilledCount++;
-            if (document.querySelector('input[name="addReferralInfo"]:checked').value === 'yes' && referralInput.value) currentFilledCount++;
-            else if (document.querySelector('input[name="addReferralInfo"]:checked').value === 'no') currentFilledCount++;
-
+            
+            // Check referral info
+            if (document.getElementById('addReferralYes').checked) {
+                if (referralInput.value) currentFilledCount++;
+            } else if (document.getElementById('addReferralNo').checked) {
+                currentFilledCount++;
+            }
+            
+            // Iterate through all behavior blocks
             document.querySelectorAll('.behavior-block').forEach((block, index) => {
                 const typeSelect = document.getElementById(`behaviorTypeSelect_${index}`);
                 const antecedentSelect = document.getElementById(`antecedentSelect_${index}`);
                 const behaviorSpecificSelect = document.getElementById(`behaviorSelect_${index}`);
                 const consequenceSelect = document.getElementById(`consequenceSelect_${index}`);
 
-                if (typeSelect && typeSelect.value && typeSelect.value !== "Other") currentFilledCount++;
-                if (typeSelect && (typeSelect.value === "Other" || typeSelect.value === "General / Other") && document.getElementById(`behaviorTypeOther_${index}`).value) currentFilledCount++;
+                // Check Behavior Type
+                if (typeSelect && typeSelect.value) {
+                    if (typeSelect.value === 'Other' || typeSelect.value === 'General / Other') {
+                        const otherInput = document.getElementById(`behaviorTypeOther_${index}`);
+                        if (otherInput && otherInput.value) currentFilledCount++;
+                    } else {
+                        currentFilledCount++;
+                    }
+                }
 
-                if (antecedentSelect && antecedentSelect.value && antecedentSelect.value !== "Other") currentFilledCount++;
-                if (antecedentSelect && antecedentSelect.value === "Other" && document.getElementById(`antecedentOther_${index}`).value) currentFilledCount++;
+                // Check Antecedent
+                if (antecedentSelect && antecedentSelect.value) {
+                    if (antecedentSelect.value === 'Other') {
+                        const otherInput = document.getElementById(`antecedentOther_${index}`);
+                        if (otherInput && otherInput.value) currentFilledCount++;
+                    } else {
+                        currentFilledCount++;
+                    }
+                }
 
-                if (behaviorSpecificSelect && behaviorSpecificSelect.value && behaviorSpecificSelect.value !== "Other") currentFilledCount++;
-                if (behaviorSpecificSelect && behaviorSpecificSelect.value === "Other" && document.getElementById(`behaviorSpecificOther_${index}`).value) currentFilledCount++;
+                // Check Specific Behavior
+                if (behaviorSpecificSelect && behaviorSpecificSelect.value) {
+                    if (behaviorSpecificSelect.value === 'Other') {
+                        const otherInput = document.getElementById(`behaviorSpecificOther_${index}`);
+                        if (otherInput && otherInput.value) currentFilledCount++;
+                    } else {
+                        currentFilledCount++;
+                    }
+                }
 
-                if (consequenceSelect && consequenceSelect.value && consequenceSelect.value !== "Other") currentFilledCount++;
-                if (consequenceSelect && consequenceSelect.value === "Other" && document.getElementById(`consequenceOther_${index}`).value) currentFilledCount++;
+                // Check Consequence
+                if (consequenceSelect && consequenceSelect.value) {
+                    if (consequenceSelect.value === 'Other') {
+                        const otherInput = document.getElementById(`consequenceOther_${index}`);
+                        if (otherInput && otherInput.value) currentFilledCount++;
+                    } else {
+                        currentFilledCount++;
+                    }
+                }
             });
 
-            const totalPossible = 9 + (document.querySelectorAll('.behavior-block').length * 4); // 9 initial fields + 4 per block
+            const totalPossible = 9 + (document.querySelectorAll('.behavior-block').length * 4); // 9 initial fields + 4 fields per block
             const percentage = Math.round((currentFilledCount / totalPossible) * 100);
             formProgressSpan.textContent = `${percentage}%`;
             saveFormData(); // Auto-save on every progress update
@@ -1116,17 +1111,17 @@
                 const consequenceSelect = document.getElementById(`consequenceSelect_${index}`);
 
                 // Get values, preferring 'Other' text input if 'Other' is selected in dropdown
-                const behaviorType = (typeSelect.value === "Other" || typeSelect.value === "General / Other") ? document.getElementById(`behaviorTypeOther_${index}`).value : typeSelect.value;
-                const antecedent = (antecedentSelect.value === "Other") ? document.getElementById(`antecedentOther_${index}`).value : antecedentSelect.value;
-                const specificBehavior = (behaviorSpecificSelect.value === "Other") ? document.getElementById(`behaviorSpecificOther_${index}`).value : behaviorSpecificSelect.value;
-                const consequence = (consequenceSelect.value === "Other") ? document.getElementById(`consequenceOther_${index}`).value : consequenceSelect.value;
+                const behaviorType = (typeSelect.value === "Other" || typeSelect.value === "General / Other") ? (document.getElementById(`behaviorTypeOther_${index}`) ? document.getElementById(`behaviorTypeOther_${index}`).value : '') : typeSelect.value;
+                const antecedent = (antecedentSelect.value === "Other") ? (document.getElementById(`antecedentOther_${index}`) ? document.getElementById(`antecedentOther_${index}`).value : '') : antecedentSelect.value;
+                const specificBehavior = (behaviorSpecificSelect.value === "Other") ? (document.getElementById(`behaviorSpecificOther_${index}`) ? document.getElementById(`behaviorSpecificOther_${index}`).value : '') : behaviorSpecificSelect.value;
+                const consequence = (consequenceSelect.value === "Other") ? (document.getElementById(`consequenceOther_${index}`) ? document.getElementById(`consequenceOther_${index}`).value : '') : consequenceSelect.value;
                 
                 // Only include if at least one field in the block has content (prevents empty optional blocks)
                 if (behaviorType || antecedent || specificBehavior || consequence) {
                     allBehaviorBlocksData.push({
                         type: behaviorType,
                         antecedent: antecedent,
-                        behaviorSpecific: specificBehavior,
+                        specificBehavior: specificBehavior,
                         consequence: consequence
                     });
                 }
@@ -1137,12 +1132,12 @@
                 behaviorsForPrompt = allBehaviorBlocksData.map((block, i) => {
                     let title = block.type;
                     if (!title || title === "Other" || title === "General / Other") {
-                        title = block.behaviorSpecific || `Pattern ${i + 1}`;
+                        title = block.specificBehavior || `Pattern ${i + 1}`;
                         if (title.toLowerCase().includes("other")) { // Further refinement if 'Other' specified in specific behavior
                             title = `Custom Behavior: ${title}`;
                         }
                     }
-                    return `Observed Recurring Pattern - ${title}:\n  Antecedent: ${block.antecedent || 'Not specified'}\n  Specific Behavior: ${block.behaviorSpecific || 'Not specified'}\n  Typical Consequence: ${block.consequence || 'Not specified'}`;
+                    return `Observed Recurring Pattern - ${title}:\n  Antecedent: ${block.antecedent || 'Not specified'}\n  Specific Behavior: ${block.specificBehavior || 'Not specified'}\n  Typical Consequence: ${block.consequence || 'Not specified'}`;
                 }).join('\n\n');
             } else {
                 behaviorsForPrompt = 'No specific recurring behavior patterns selected. If none are detailed, use the anecdotal notes to infer patterns and hypothesize the most likely ABC sequence.';
@@ -1439,7 +1434,7 @@ Response Strategies for Problem Behavior:
                     inferredReason = `they appear to gain attention (based on the consequence: '${consequence}')`;
                     mockFunction = "Attention";
                 }
-                else if (consLower.includes("obtain") || consLower.includes("access") || consLower.includes("given item") || consLower.includes("item/activity obtained")) {
+                else if (consLower.includes("item obtained") || consLower.includes("access to") || consLower.includes("given item") || consLower.includes("item/activity obtained")) {
                     inferredReason = `they appear to obtain a desired item/activity (based on the consequence: '${consequence}')`;
                     mockFunction = "Tangible";
                 }
@@ -1461,6 +1456,9 @@ Response Strategies for Problem Behavior:
             sessionStatusDisplay.textContent = "Generating...";
             hidePlanOutput();
 
+            // Retrieve contextualTrigger value at the beginning of the function
+            const contextualTrigger = document.getElementById('contextualTrigger').value.trim(); // FIX APPLIED HERE
+
             const activePhrases = getActiveProblemBehaviorPhrases(); 
             
             // Collect data from all active behavior blocks
@@ -1472,17 +1470,17 @@ Response Strategies for Problem Behavior:
                 const consequenceSelect = document.getElementById(`consequenceSelect_${index}`);
 
                 // Get values, preferring 'Other' text input if 'Other' is selected in dropdown
-                const behaviorType = (typeSelect.value === "Other" || typeSelect.value === "General / Other") ? document.getElementById(`behaviorTypeOther_${index}`).value : typeSelect.value;
-                const antecedent = (antecedentSelect.value === "Other") ? document.getElementById(`antecedentOther_${index}`).value : antecedentSelect.value;
-                const specificBehavior = (behaviorSpecificSelect.value === "Other") ? document.getElementById(`behaviorSpecificOther_${index}`).value : behaviorSpecificSelect.value;
-                const consequence = (consequenceSelect.value === "Other") ? document.getElementById(`consequenceOther_${index}`).value : consequenceSelect.value;
+                const behaviorType = (typeSelect.value === "Other" || typeSelect.value === "General / Other") ? (document.getElementById(`behaviorTypeOther_${index}`) ? document.getElementById(`behaviorTypeOther_${index}`).value : '') : typeSelect.value;
+                const antecedent = (antecedentSelect.value === "Other") ? (document.getElementById(`antecedentOther_${index}`) ? document.getElementById(`antecedentOther_${index}`).value : '') : antecedentSelect.value;
+                const specificBehavior = (behaviorSpecificSelect.value === "Other") ? (document.getElementById(`behaviorSpecificOther_${index}`) ? document.getElementById(`behaviorSpecificOther_${index}`).value : '') : behaviorSpecificSelect.value;
+                const consequence = (consequenceSelect.value === "Other") ? (document.getElementById(`consequenceOther_${index}`) ? document.getElementById(`consequenceOther_${index}`).value : '') : consequenceSelect.value;
                 
                 // Only include if at least one field in the block has content (prevents empty optional blocks)
                 if (behaviorType || antecedent || specificBehavior || consequence) {
                     allBehaviorPatternsData.push({
                         type: behaviorType,
                         antecedent: antecedent,
-                        behaviorSpecific: specificBehavior,
+                        specificBehavior: specificBehavior,
                         consequence: consequence
                     });
                 }
@@ -1540,43 +1538,47 @@ Response Strategies for Problem Behavior:
                 mockAntecedentStrategies.push(`For ${problemBehaviorTitle}:`);
                 if (func === "Escape/Avoidance") {
                     mockAntecedentStrategies.push(`- Provide task modifications or chunking for challenging assignments. `);
-                    mockAntecedentStrategies.push(`- Use visual timers and pre-correct for transitions. `);
+                    mockAntecedentStrategies.push(`- Use visual schedules and pre-correct for transitions, especially around ${contextualTrigger || 'challenging activities'}.`);
+                    mockAntecedentStrategies.push(`- Offer frequent, small choices throughout the day to increase engagement.`);
                 } else if (func === "Attention") {
-                    mockAntecedentStrategies.push(`- Proactively provide frequent, positive adult attention. `);
-                    mockAntecedentStrategies.push(`- Create opportunities for positive peer interaction. `);
+                    mockAntecedentStrategies.push(`- Proactively provide frequent, positive adult attention, linking it to appropriate behavior.`);
+                    mockAntecedentStrategies.push(`- Create opportunities for positive peer interaction, perhaps through structured group activities.`);
+                    mockAntecedentStrategies.push(`- Use a check-in/check-out system to provide scheduled attention from adults.`);
                 } else if (func === "Tangible") {
-                    mockAntecedentStrategies.push(`- Ensure predictable access to desired items/activities. `);
+                    mockAntecedentStrategies.push(`- Ensure predictable access to desired items/activities after appropriate behavior. `);
                     mockAntecedentStrategies.push(`- Offer choices of preferred activities. `);
+                    mockAntecedentStrategies.push(`- Utilize visual timers to indicate when preferred items/activities will be available.`);
                 } else if (func === "Sensory/Automatic") {
-                    mockAntecedentStrategies.push(`- Adjust environmental stimuli (e.g., lower noise, offer quiet space). `);
-                    mockAntecedentStrategies.push(`- Provide appropriate sensory tools proactively. `);
+                    mockAntecedentStrategies.push(`- Adjust environmental stimuli (e.g., lower noise, offer quiet space) if sensory overload is a trigger.`);
+                    mockAntecedentStrategies.push(`- Provide appropriate sensory tools proactively, especially during times student seeks sensory input.`);
+                    mockAntecedentStrategies.push(`- Implement scheduled movement breaks to address sensory needs.`);
                 }
                 mockAntecedentStrategies.push(''); // Add a blank line for spacing
 
                 // Response Strategies
                 mockResponseStrategies.push(`For ${problemBehaviorTitle}:`);
                 if (func === "Escape/Avoidance") {
-                    mockResponseStrategies.push(`  a. Immediate actions: State expectation calmly. Block elopement if necessary for safety.`);
-                    mockResponseStrategies.push(`  b. De-escalation: Avoid engaging in power struggles. Offer a brief cool-down period or simplified task.`);
-                    mockResponseStrategies.push(`  c. Responses: Firmly but neutrally redirect back to task after brief cool-down. `);
-                    mockResponseStrategies.push(`  d. Follow-up: Re-teach break/help-seeking skills. Ensure task completion with support.`);
-                    mockResponseStrategies.push(`  e. Avoid reinforcement: Do NOT allow escape from demands. `);
+                    mockResponseStrategies.push(`  a. Immediate actions: Ensure physical safety of all students and staff. State expectation calmly and clearly. Block elopement if necessary for safety.`);
+                    mockResponseStrategies.push(`  b. De-escalation: Maintain a neutral demeanor; avoid engaging in power struggles. Offer a brief cool-down period or a simplified task option.`);
+                    mockResponseStrategies.push(`  c. Responses: Firmly but neutrally redirect back to task after brief cool-down. Verbally prompt the replacement behavior. `);
+                    mockResponseStrategies.push(`  d. Follow-up: Re-teach break/help-seeking skills. Ensure task completion with support, and provide praise for compliance. `);
+                    mockResponseStrategies.push(`  e. Avoid reinforcement: Do NOT allow escape from demands or remove tasks when problem behavior occurs. Ensure problem behavior does not lead to desired outcome. `);
                 } else if (func === "Attention") {
-                    mockResponseStrategies.push(`  a. Immediate actions: Ensure safety. Redirect to task or replacement behavior.`);
-                    mockResponseStrategies.push(`  b. De-escalation: Use minimal verbal interaction. Maintain neutral facial expression. `);
-                    mockResponseStrategies.push(`  c. Responses: Briefly acknowledge problem behavior (e.g., "Voice level") then ignore. Provide positive attention for replacement behavior.`);
-                    mockResponseStrategies.push(`  d. Follow-up: Provide attention for appropriate behavior only. `);
-                    mockResponseStrategies.push(`  e. Avoid reinforcement: Do NOT provide extended verbal attention or argue. `);
+                    mockResponseStrategies.push(`  a. Immediate actions: Ensure safety. Redirect to task or replacement behavior. `);
+                    mockResponseStrategies.push(`  b. De-escalation: Use minimal verbal interaction. Maintain neutral facial expression. Avoid lecturing. `);
+                    mockResponseStrategies.push(`  c. Responses: Briefly acknowledge problem behavior (e.g., "Voice level") then ignore. Provide positive attention for replacement behavior. `);
+                    mockResponseStrategies.push(`  d. Follow-up: Provide positive attention for appropriate behavior only. `);
+                    mockResponseStrategies.push(`  e. Avoid reinforcement: Do NOT provide extended verbal attention or argue during attention-seeking behaviors. `);
                 } else if (func === "Tangible") {
-                    mockResponseStrategies.push(`  a. Immediate actions: Prevent property destruction. Secure items.`);
-                    mockResponseStrategies.push(`  b. De-escalation: Calmly state expectation. Offer choice of appropriate activity. `);
-                    mockResponseStrategies.push(`  c. Responses: Do NOT give access to item/activity if behavior occurred. Redirect to appropriate requesting.`);
+                    mockResponseStrategies.push(`  a. Immediate actions: Prevent property destruction. Secure items. `);
+                    mockResponseStrategies.push(`  b. De-escalation: Calmly state expectation. Offer choice of appropriate activity or remind of requesting procedures. `);
+                    mockResponseStrategies.push(`  c. Responses: Do NOT give access to item/activity if problem behavior occurred. Redirect to appropriate requesting. `);
                     mockResponseStrategies.push(`  d. Follow-up: Prompt requesting. Reward appropriate waiting. `);
                     mockResponseStrategies.push(`  e. Avoid reinforcement: Do NOT give items/activities when problematic behavior occurs. `);
                 } else if (func === "Sensory/Automatic") {
-                    mockResponseStrategies.push(`  a. Immediate actions: Ensure safety (e.g., if self-injurious). Reduce overstimulating factors if possible.`);
-                    mockResponseStrategies.push(`  b. De-escalation: Offer pre-taught sensory tools. Guide to calm-down space. `);
-                    mockResponseStrategies.push(`  c. Responses: Guide to appropriate sensory alternative. Avoid reinforcing disruptive sensory input with attention.`);
+                    mockResponseStrategies.push(`  a. Immediate actions: Ensure safety (e.g., if self-injurious). Reduce overstimulating factors if possible. `);
+                    mockResponseStrategies.push(`  b. De-escalation: Offer pre-taught sensory tools. Guide to calm-down space if overwhelmed. `);
+                    mockResponseStrategies.push(`  c. Responses: Guide to appropriate sensory alternative. Avoid reinforcing disruptive sensory input with attention. `);
                     mockResponseStrategies.push(`  d. Follow-up: Continue access to sensory tools. Re-teach self-regulation. `);
                     mockResponseStrategies.push(`  e. Avoid reinforcement: Do NOT provide undue attention to disruptive sensory behavior. `);
                 }
@@ -1608,7 +1610,7 @@ Teaching Strategies for Short-Term Replacement Behaviors:
 Reinforcement Strategies for Short-Term Replacement Behaviors:
 - ${reinforcementStrategiesContent}
 - Ensure the replacement behavior is consistently and immediately rewarded, as it replaces the problematic behavior's "payoff".
-- Incorporate student's preferred reinforcers like ${reinforcerPreferencesInput.value || 'specific praise, computer time'} when the replacement behavior is used effectively.
+- Incorporate student's preferred reinforcers (e.g., ${reinforcerPreferencesInput.value || 'specific praise, computer time'}) when the replacement behavior is used.
 
 Long-term Replacement Behaviors:
 ${mockLongTermBehaviors.filter((value, index, self) => self.indexOf(value) === index).join('\n')}
@@ -1828,14 +1830,9 @@ ${mockResponseStrategies.join('\n')}
             pragmaticLanguageSkillsSelect.value = '';
 
             // Remove all existing behavior blocks except for the first one
-            document.querySelectorAll('.behavior-block:not([data-behavior-index="0"])').forEach(block => block.remove());
+            document.querySelectorAll('.behavior-block').forEach(block => block.remove()); // Remove all
             behaviorPatternIndex = 0; // Reset index
-            // Re-initialize the first block
-            const firstBlock = document.querySelector('.behavior-block[data-behavior-index="0"]');
-            if(firstBlock) {
-                firstBlock.remove(); // Remove and recreate to ensure clean state
-            }
-            createBehaviorBlock();
+            createBehaviorBlock(); // Create a fresh first block
 
 
             addReferralNo.checked = true;
