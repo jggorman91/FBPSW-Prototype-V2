@@ -312,6 +312,35 @@
     </div>
 
 <script type="module">
+    // Define the askGemini function directly within this module script
+    async function askGemini(prompt) {
+        try {
+            const res = await fetch('https://us-central1-teacherbehaviorhubapp.cloudfunctions.net/askGemini', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt })
+            });
+
+            if (!res.ok) {
+                const errorText = await res.text(); // Get raw text to see if it's JSON or something else
+                console.error("Cloud Function Error Response:", errorText);
+                try {
+                    const errorJson = JSON.parse(errorText);
+                    throw new Error(`Cloud Function responded with an error: ${errorJson.error || res.statusText}`);
+                } catch (e) {
+                    throw new Error(`Cloud Function responded with status ${res.status}: ${res.statusText}. Raw body: ${errorText}`);
+                }
+            }
+
+            const data = await res.json();
+            return data; // Return the full data object from the Cloud Function
+        } catch (error) {
+            console.error('Error in askGemini:', error);
+            throw error; // Re-throw to be caught by generatePlanWithGemini's try/catch
+        }
+    }
+
+
     // --- Data for ABC dropdowns from "ABC_Framework_Behavior_Plan (Chat GPT Orginal)" & User Expansion ---
     const bipData = {
         "Physical Aggression": {
@@ -1286,10 +1315,11 @@ Response Strategies for Problem Behavior:
         }
     }
 
-    // Make sure the global askGemini function is defined BEFORE it's called
-    // by generatePlanWithGemini. If script.js is loaded after this module, it will be fine.
-    // If not, you might need to move askGemini inside this script block or ensure loading order.
-    // For now, assuming script.js is loaded later or askGemini is made globally available.
+    // Event listener for the main "Generate Plan" button
+    generateBIPButton.addEventListener('click', (e) => {
+        e.preventDefault(); // Prevent default form submission
+        generatePlanWithGemini();
+    });
 
     // Export to PDF (Print)
     exportPdfButton.addEventListener('click', () => {
@@ -1473,13 +1503,5 @@ Response Strategies for Problem Behavior:
         updateFormProgress(); // Recalculate progress after reset
     });
 </script>
-<input id="userPrompt" placeholder="Ask about a behavior..." />
-<button onclick="askGemini()">Ask Gemini</button>
-<pre id="responseOutput"></pre>
-<script src="script.js"></script>
-    <input id="userPrompt" placeholder="Ask about a behavior..." />
-<button onclick="askGemini()">Ask Gemini</button>
-<pre id="responseOutput"></pre>
-<script src="script.js"></script>
 </body>
 </html>
