@@ -1290,7 +1290,16 @@ Response Strategies for Problem Behavior:
             // Call your existing askGemini function directly
             const responseData = await askGemini(userGeneratedPrompt);
 
-            if (responseData && responseData.candidates && responseData.candidates.length > 0 && responseData.candidates[0].content && responseData.candidates[0].content.parts && responseData.candidates[0].content.parts[0].text) {
+if (responseData && responseData.plan) {
+    const planText = responseData.plan;
+    const sections = parsePlanSections(planText);
+    const activePhrases = getActiveProblemBehaviorPhrases();
+    showPlanSections(sections, activePhrases);
+    sessionStatusDisplay.textContent = "Active (AI Generated)";
+} else {
+    showErrorOutput("Received an unexpected response structure from Gemini or no plan was generated.");
+    sessionStatusDisplay.textContent = "Generation Failed";
+}
                 const planText = responseData.candidates[0].content.parts[0].text;
                 const sections = parsePlanSections(planText);
                 const activePhrases = getActiveProblemBehaviorPhrases();
