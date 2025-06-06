@@ -1848,5 +1848,9 @@ ${mockResponseStrategies.join('\n')}
             updateFormProgress(); // Recalculate progress after reset
         });
     </script>
+    <input id="userPrompt" placeholder="Ask about a behavior..." />
+<button onclick="askGemini()">Ask Gemini</button>
+<pre id="responseOutput"></pre>
+<script src="script.js"></script>
 </body>
 </html>
