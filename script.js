@@ -126,8 +126,10 @@ async function getBehaviorPlan(studentDataObject) {
     sessionStatusDisplay.textContent = "Generating...";
     hidePlanOutput();
 
-    // IMPORTANT: Replace this URL with your actual Google Cloud Run service URL.
-    const apiUrl = 'https://your-cloud-run-service-url.a.run.app/askGemini';
+    // ================== IMPORTANT ==================
+    // Replace this URL with your actual Google Cloud Run service URL.
+    const apiUrl = 'https://askgemini-00026-rm4-dws4wdaaua-uc.a.run.app/askGemini'; // <--- UPDATE THIS
+    // ===============================================
 
     try {
         const response = await fetch(apiUrl, {
@@ -141,19 +143,18 @@ async function getBehaviorPlan(studentDataObject) {
             throw new Error(`Server error: ${response.status}. ${errorText}`);
         }
 
+        // === THIS IS THE CORRECTED PART ===
+        // Our backend sends a simple JSON object: { "text": "..." }
         const geminiResponse = await response.json();
-        const planText = geminiResponse?.candidates?.[0]?.content?.parts?.[0]?.text;
+        const planText = geminiResponse.text; // Directly access the 'text' property
 
         if (planText) {
             const sections = parsePlanSections(planText);
             showPlanSections(sections);
             sessionStatusDisplay.textContent = "Active (AI Generated)";
         } else {
-            let errorDetail = "The AI responded, but no valid plan text was found in the response.";
-            if (geminiResponse?.promptFeedback?.blockReason) {
-                errorDetail += ` Reason: ${geminiResponse.promptFeedback.blockReason}. This often happens if the input contains sensitive content.`;
-            }
-            throw new Error(errorDetail);
+            // This handles cases where the 'text' property is missing or empty
+            throw new Error("The AI responded, but no valid plan text was found.");
         }
     } catch (error) {
         console.error("Failed to get behavior plan:", error);
