@@ -82,6 +82,15 @@ const addReferralNo = document.getElementById('addReferralNo');
 const referralInfoContainer = document.getElementById('referralInfoContainer');
 const behaviorsContainer = document.getElementById('behaviorsContainer');
 const addBehaviorPatternBtn = document.getElementById('addBehaviorPatternBtn');
+const tptProductTypeSelect = document.getElementById('tptProductType');
+const tptThemeInput = document.getElementById('tptTheme');
+const tptGoalInput = document.getElementById('tptGoal');
+const tptExecutiveSkillsContainer = document.getElementById('tptExecutiveSkills');
+const tptBehaviorSkillsContainer = document.getElementById('tptBehaviorSkills');
+const generateTptButton = document.getElementById('generateTptButton');
+const tptOutputDiv = document.getElementById('tptOutput');
+const tptOutlineContent = document.getElementById('tptOutlineContent');
+const copyTptButton = document.getElementById('copyTptButton');
 
 let behaviorPatternIndex = 0;
 
@@ -219,6 +228,68 @@ function populateSelectWithOptions(selectElement, optionsArray, defaultOptionTex
     selectElement.insertAdjacentHTML('beforeend', '<option value="Other">Other (Specify)</option>');
 }
 
+function getCheckedValues(containerElement) {
+    if (!containerElement) return [];
+    return Array.from(containerElement.querySelectorAll('input[type="checkbox"]:checked')).map((input) => input.value);
+}
+
+function buildTptOutline(studentData) {
+    const productType = tptProductTypeSelect.value || 'Resource Pack';
+    const goal = tptGoalInput.value || 'Support executive functioning and behavior skills with structured, classroom-ready materials.';
+    const theme = tptThemeInput.value ? `Theme: ${tptThemeInput.value}` : 'Theme: Neutral / classroom-friendly';
+    const execSkills = getCheckedValues(tptExecutiveSkillsContainer);
+    const behaviorSkills = getCheckedValues(tptBehaviorSkillsContainer);
+    const skillFocus = [...execSkills, ...behaviorSkills].length ? [...execSkills, ...behaviorSkills] : ['Executive functioning', 'Behavior skills'];
+    const gradeLevel = studentData.grade || 'Any grade';
+    const age = studentData.age || 'Varied ages';
+    const behaviorExamples = studentData.behaviorPatterns.length
+        ? studentData.behaviorPatterns.map((pattern) => pattern.specificBehavior || pattern.type).filter(Boolean)
+        : ['task avoidance', 'off-task behavior', 'transition challenges'];
+
+    return `TITLE IDEAS
+1) ${productType}: ${skillFocus.slice(0, 2).join(' & ')} for ${gradeLevel}
+2) ${theme} ${productType} for ${skillFocus[0]}
+
+PRODUCT OVERVIEW
+- Goal: ${goal}
+- Best for: ${gradeLevel} (ages ${age})
+- Skill focus: ${skillFocus.join(', ')}
+
+WHAT'S INCLUDED
+- Teacher directions + quick-start guide
+- Student-facing activities (${productType.toLowerCase()})
+- Visual supports or checklists tied to ${skillFocus[0]}
+- Progress monitoring tool (daily or weekly)
+- Behavior examples: ${behaviorExamples.slice(0, 3).join(', ')}
+
+SUGGESTED IMPLEMENTATION
+- Use during small group, centers, or SEL block
+- Model 1-2 strategies, then practice with the worksheet/activity
+- Track progress weekly and adjust supports
+
+DIFFERENTIATION & SUPPORTS
+- Provide sentence starters, visual cues, and choice boards
+- Offer “support” and “challenge” versions of tasks
+- Add home connection notes for families
+
+DATA & PROGRESS MONITORING
+- Include a simple checklist or rubric for ${skillFocus[0]}
+- Optional student self-reflection page
+
+TPT TAGS (EDIT AS NEEDED)
+${skillFocus.slice(0, 8).join(', ')}, executive functioning, behavior management, SEL, classroom routines
+
+SELLER NOTES
+- Add licensing terms, printing guidance, and editable options
+- Highlight how the resource complements behavior plans or RTI supports`;
+}
+
+function showTptOutline(studentData) {
+    tptOutlineContent.textContent = buildTptOutline(studentData);
+    tptOutputDiv.classList.remove('hidden');
+    tptOutputDiv.scrollIntoView({ behavior: 'smooth' });
+}
+
 function createBehaviorBlock() {
     const blockIndex = behaviorPatternIndex++;
     const behaviorBlockDiv = document.createElement('div');
@@ -261,6 +332,24 @@ generateBIPButton.addEventListener('click', () => {
     const studentData = createStudentDataPayload();
     console.log("Sending this data payload to the Cloud Function service:", studentData);
     getBehaviorPlan(studentData);
+});
+
+generateTptButton.addEventListener('click', () => {
+    const studentData = createStudentDataPayload();
+    showTptOutline(studentData);
+});
+
+copyTptButton.addEventListener('click', async () => {
+    try {
+        await navigator.clipboard.writeText(tptOutlineContent.textContent);
+        copyTptButton.innerHTML = '<i class="fas fa-check mr-2"></i> Copied!';
+        setTimeout(() => {
+            copyTptButton.innerHTML = '<i class="fas fa-copy mr-2"></i> Copy Outline';
+        }, 1500);
+    } catch (error) {
+        console.error('Failed to copy TPT outline:', error);
+        copyTptButton.innerHTML = '<i class="fas fa-exclamation-triangle mr-2"></i> Copy failed';
+    }
 });
 
 addBehaviorPatternBtn.addEventListener('click', createBehaviorBlock);
