@@ -228,6 +228,79 @@
             </div>
         </div>
 
+        <div class="card">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">TPT Resource Builder</h2>
+            <p class="text-sm text-gray-600 mb-6">Use this section to outline a classroom-ready product you can list on Teachers Pay Teachers. The outline is generated locally based on your selections.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="tptProductType" class="block text-gray-700 text-sm font-semibold mb-2">Product Type</label>
+                    <select id="tptProductType" aria-label="TPT Product Type">
+                        <option value="">Select product type</option>
+                        <option value="Worksheet Pack">Worksheet Pack</option>
+                        <option value="Mini-Lesson">Mini-Lesson</option>
+                        <option value="Behavior Tracking Toolkit">Behavior Tracking Toolkit</option>
+                        <option value="Visual Supports Pack">Visual Supports Pack</option>
+                        <option value="Task Cards">Task Cards</option>
+                        <option value="Parent Communication Pack">Parent Communication Pack</option>
+                        <option value="Small Group Intervention Kit">Small Group Intervention Kit</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="tptTheme" class="block text-gray-700 text-sm font-semibold mb-2">Theme (Optional)</label>
+                    <input type="text" id="tptTheme" placeholder="e.g., Space adventure, Calm ocean, Superheroes" aria-label="Theme for the TPT Resource">
+                </div>
+                <div class="md:col-span-2">
+                    <label for="tptGoal" class="block text-gray-700 text-sm font-semibold mb-2">Resource Goal or Outcome</label>
+                    <textarea id="tptGoal" rows="3" placeholder="e.g., Help students identify triggers, practice calm-down strategies, and track progress weekly." aria-label="Resource Goal or Outcome"></textarea>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-gray-700 text-sm font-semibold mb-2">Executive Functioning Skills Focus</label>
+                    <div id="tptExecutiveSkills" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm text-gray-700">
+                        <label class="inline-flex items-center"><input type="checkbox" value="Planning & Organization" class="mr-2">Planning & Organization</label>
+                        <label class="inline-flex items-center"><input type="checkbox" value="Time Management" class="mr-2">Time Management</label>
+                        <label class="inline-flex items-center"><input type="checkbox" value="Working Memory" class="mr-2">Working Memory</label>
+                        <label class="inline-flex items-center"><input type="checkbox" value="Task Initiation" class="mr-2">Task Initiation</label>
+                        <label class="inline-flex items-center"><input type="checkbox" value="Self-Monitoring" class="mr-2">Self-Monitoring</label>
+                        <label class="inline-flex items-center"><input type="checkbox" value="Emotional Regulation" class="mr-2">Emotional Regulation</label>
+                        <label class="inline-flex items-center"><input type="checkbox" value="Inhibition & Self-Control" class="mr-2">Inhibition & Self-Control</label>
+                        <label class="inline-flex items-center"><input type="checkbox" value="Cognitive Flexibility" class="mr-2">Cognitive Flexibility</label>
+                        <label class="inline-flex items-center"><input type="checkbox" value="Goal Setting" class="mr-2">Goal Setting</label>
+                    </div>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-gray-700 text-sm font-semibold mb-2">Behavior Skills Focus</label>
+                    <div id="tptBehaviorSkills" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm text-gray-700">
+                        <label class="inline-flex items-center"><input type="checkbox" value="Following Directions" class="mr-2">Following Directions</label>
+                        <label class="inline-flex items-center"><input type="checkbox" value="Requesting Help Appropriately" class="mr-2">Requesting Help Appropriately</label>
+                        <label class="inline-flex items-center"><input type="checkbox" value="Coping Strategies" class="mr-2">Coping Strategies</label>
+                        <label class="inline-flex items-center"><input type="checkbox" value="Transitions & Routines" class="mr-2">Transitions & Routines</label>
+                        <label class="inline-flex items-center"><input type="checkbox" value="Peer Interaction" class="mr-2">Peer Interaction</label>
+                        <label class="inline-flex items-center"><input type="checkbox" value="Conflict Resolution" class="mr-2">Conflict Resolution</label>
+                        <label class="inline-flex items-center"><input type="checkbox" value="On-Task Behavior" class="mr-2">On-Task Behavior</label>
+                        <label class="inline-flex items-center"><input type="checkbox" value="Classroom Participation" class="mr-2">Classroom Participation</label>
+                        <label class="inline-flex items-center"><input type="checkbox" value="Self-Advocacy" class="mr-2">Self-Advocacy</label>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button id="generateTptButton" class="btn-primary">
+                    <i class="fas fa-lightbulb mr-2"></i> Generate TPT Outline
+                </button>
+            </div>
+        </div>
+
+        <div id="tptOutput" class="card hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">TPT Product Outline</h2>
+            <div class="prose max-w-none text-gray-800 ai-output-content">
+                <pre id="tptOutlineContent" class="whitespace-pre-wrap text-sm bg-blue-50 border border-blue-200 rounded-lg p-4"></pre>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button id="copyTptButton" class="btn-secondary" aria-label="Copy TPT Outline to Clipboard">
+                    <i class="fas fa-copy mr-2"></i> Copy Outline
+                </button>
+            </div>
+        </div>
+
         <div id="bipOutput" class="card hidden">
             <h2 class="text-2xl font-bold text-gray-800 mb-4">Generated Function Based Problem Solving Worksheet</h2>
             <div class="mb-4">
